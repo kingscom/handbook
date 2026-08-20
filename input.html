@@ -183,6 +183,7 @@
   .col-team { width: 130px; }
   .col-date { width: 100px; }
   .col-link { width: 160px; }
+  .col-docname { width: 160px; }
   .col-action { width: 54px; }
 
   .row-num {
@@ -310,6 +311,7 @@
         <th class="col-date">개정일자</th>
         <th class="col-link">문서 링크/위치</th>
         <th>문서 내용</th>
+        <th class="col-docname">문서명</th>
         <th class="col-action"></th>
       </tr>
     </thead>
@@ -406,6 +408,7 @@ function renderTable() {
       '<td><input class="cell-input narrow" value="' + esc(row.개정일자) + '" oninput="updateCell(' + i + ',\'개정일자\',this.value)" placeholder="YYYY.MM.DD"></td>' +
       '<td><input class="cell-input medium" value="' + esc(row.문서링크) + '" oninput="updateCell(' + i + ',\'문서링크\',this.value)"></td>' +
       '<td><textarea class="cell-textarea" oninput="updateCell(' + i + ',\'문서내용\',this.value)">' + esc(row.문서내용) + '</textarea></td>' +
+      '<td><input class="cell-input medium" value="' + esc(row.문서명) + '" oninput="updateCell(' + i + ',\'문서명\',this.value)"></td>' +
       '<td><button class="btn btn-danger" onclick="deleteRow(' + i + ')">✕</button></td>' +
       '</tr>';
   }).join('');
@@ -424,7 +427,7 @@ function updateCell(idx, key, val) {
 }
 
 function blankRow() {
-  return { 분류: "", 항목명: "", 주관팀: "", 개정일자: "", 문서링크: "", 문서내용: "" };
+  return { 분류: "", 항목명: "", 주관팀: "", 개정일자: "", 문서링크: "", 문서내용: "", 문서명: "" };
 }
 
 let saveTimer;
@@ -530,7 +533,7 @@ function bindTablePaste() {
     const rowIdx = Number(trId.replace('row-', ''));
     const cell = target.closest('td');
     const cellIdx = Array.from(cell.parentNode.children).indexOf(cell) - 1;
-    const fields = ['분류', '항목명', '주관팀', '개정일자', '문서링크', '문서내용'];
+    const fields = ['분류', '항목명', '주관팀', '개정일자', '문서링크', '문서내용', '문서명'];
 
     if (Number.isNaN(rowIdx) || cellIdx < 0 || cellIdx > fields.length - 1) return;
 
@@ -567,7 +570,7 @@ function bindTablePaste() {
     if (mergedRows.length === 0) return;
 
     // pasted data may include a header row (e.g. 분류, 항목명 ...)
-    const headerTokens = ['분류', '분류(category)', '항목명', '주관팀', '개정일자', '문서링크', '문서 링크', '문서위치', '문서 위치', '문서내용', '문서 내용'];
+    const headerTokens = ['분류', '분류(category)', '항목명', '주관팀', '개정일자', '문서링크', '문서 링크', '문서위치', '문서 위치', '문서내용', '문서 내용', '문서명', '문서 명'];
     const firstRowNorm = mergedRows[0].map(v => (v || '').trim().toLowerCase());
     const headerMatchCount = firstRowNorm.reduce((acc, cell) => acc + (headerTokens.map(t => t.toLowerCase()).includes(cell) ? 1 : 0), 0);
     if (headerMatchCount >= Math.min(2, firstRowNorm.length)) mergedRows.shift();
