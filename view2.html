@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT 프로세스 문서 - 흐름 보기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+  :root {
+    --color-bg: #f8fafc;
+    --color-surface: #ffffff;
+    --color-border: #e2e8f0;
+    --color-text: #1e293b;
+    --color-text-muted: #64748b;
+    --color-text-faint: #94a3b8;
+    --color-primary: #2563eb;
+    --color-primary-hover: #1d4ed8;
+    --color-warning: #b45309;
+    --color-warning-bg: #fffbeb;
+    --color-warning-border: #fbbf24;
+    --radius: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: static;
+    z-index: 1;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  header h1 {
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+  header .subtitle {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-top: 3px;
+  }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .btn:hover { background: #f1f5f9; }
+  .btn-primary {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--color-primary-hover); }
+
+  .board-wrapper {
+    padding: 16px 24px 48px;
+  }
+
+  .flow-board {
+    position: relative;
+    min-width: fit-content;
+  }
+
+  .flow-header {
+    display: grid;
+    gap: 24px;
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    padding-bottom: 14px;
+    background: var(--color-bg);
+  }
+
+  .flow-header-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--cat-color, var(--color-primary));
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.15s, background 0.15s;
+  }
+  .flow-header-cell:hover {
+    background: #f8fafc;
+  }
+  .flow-header-cell.inactive {
+    opacity: 0.4;
+  }
+  .flow-header-cell.active {
+    background: var(--cat-color, var(--color-primary));
+    border-color: var(--cat-color, var(--color-primary));
+    color: #fff;
+  }
+  .flow-header-cell.active .cat-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+  }
+  .flow-header-cell .cat-count {
+    margin-left: auto;
+    padding: 1px 9px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: #eff6ff;
+    color: var(--cat-color, var(--color-primary));
+  }
+
+  .flow-grid {
+    display: grid;
+    gap: 24px;
+    row-gap: 24px;
+    position: relative;
+  }
+
+  .flow-connectors {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .flow-cell {
+    position: relative;
+    z-index: 2;
+  }
+  .flow-cell.hidden {
+    display: none;
+  }
+
+  .node-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--cat-color, var(--color-primary));
+    border-radius: 8px;
+    padding: 10px 12px;
+    transition: box-shadow 0.15s, transform 0.12s;
+  }
+  .node-card:hover {
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+    transform: translateY(-1px);
+  }
+
+  .node-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+
+  .node-toggle {
+    font-size: 0.65rem;
+    color: var(--color-text-faint);
+    flex-shrink: 0;
+    width: 10px;
+  }
+
+  .node-index {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--color-text-faint);
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+
+  .node-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.3;
+  }
+
+  .node-details {
+    display: none;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border);
+  }
+  .node-card.expanded .node-details {
+    display: flex;
+  }
+
+  .node-field {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+
+  .field-label {
+    flex-shrink: 0;
+    width: 60px;
+    padding-top: 2px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--color-text-faint);
+  }
+
+  .field-value {
+    flex: 1;
+    min-width: 0;
+    color: var(--color-text);
+  }
+
+  .field-value.is-empty {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    width: fit-content;
+    padding: 1px 9px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--color-warning);
+    background: var(--color-warning-bg);
+    border: 1px dashed var(--color-warning-border);
+    border-radius: 6px;
+  }
+
+  .node-content {
+    white-space: pre-wrap;
+    cursor: pointer;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .node-content.expanded {
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    overflow: visible;
+  }
+
+  .node-link {
+    text-decoration: underline;
+    text-decoration-color: var(--color-text-faint);
+    text-underline-offset: 2px;
+    word-break: break-all;
+    cursor: pointer;
+  }
+  .node-link:hover { color: var(--color-primary); }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--color-text-faint);
+  }
+  .empty-state h2 { font-size: 1rem; margin-bottom: 8px; color: var(--color-text); }
+  .empty-state p { font-size: 0.85rem; }
+  .empty-state a { color: var(--color-primary); }
+
+  .help-fab {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .help-fab:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-2px);
+  }
+
+  /* 구형 VDI 브라우저 등 CSS Grid 지원이 불안정한 환경을 위한 폴백: flex로 줄바꿈해 데이터는 항상 보이도록 한다. */
+  @supports not (display: grid) {
+    .flow-header, .flow-grid {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .flow-header-cell {
+      flex: 0 0 240px;
+      margin: 0 12px 12px 0;
+    }
+    .flow-cell {
+      flex: 0 0 240px;
+      margin: 0 12px 24px 0;
+    }
+    .flow-connectors {
+      display: none;
+    }
+  }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>↔ IT 프로세스 문서 흐름 보기</h1>
+    <div class="subtitle">분류를 열로, 입력 순서를 위→아래 흐름으로 표시합니다</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn" onclick="expandAll()">펼치기</button>
+    <button class="btn" onclick="collapseAll()">접기</button>
+    <button class="btn btn-primary" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드">💾 저장</button>
+  </div>
+</header>
+
+
+<div class="board-wrapper">
+  <div class="flow-board" id="flowBoard">
+    <div class="flow-header" id="flowHeader"></div>
+    <div class="flow-grid" id="flowGrid"></div>
+  </div>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <h2>표시할 데이터가 없습니다</h2>
+    <p><a href="input.html">입력 화면</a>에서 항목을 먼저 추가하세요.</p>
+  </div>
+</div>
+
+<button class="help-fab" onclick="window.open('https://forms.cloud.microsoft/r/CcsSg1CJcD', '_blank', 'noopener,noreferrer')" title="문의하기">
+  <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="7" fill="#fff"/>
+    <path d="M8 17 L8 21.5 L12.5 17 Z" fill="#fff"/>
+    <text x="12" y="14" text-anchor="middle" font-size="10" font-weight="800" fill="var(--color-primary)" font-family="'Segoe UI', Arial, sans-serif">?</text>
+  </svg>
+</button>
+
+<script>
+const STORAGE_KEY = 'it_portal_data_v1';
+
+const CAT_CONFIG = {
+  '분석': { icon: '🔍', color: '#2563eb' },
+  '설계': { icon: '📐', color: '#7c3aed' },
+  '개발': { icon: '🛠', color: '#059669' },
+  '검증': { icon: '✅', color: '#dc2626' },
+  '운영': { icon: '🚀', color: '#d97706' }
+};
+const FALLBACK_PALETTE = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#f97316', '#6366f1'];
+
+function colorForCategory(cat) {
+  if (CAT_CONFIG[cat]) return CAT_CONFIG[cat].color;
+  let hash = 0;
+  for (let i = 0; i < cat.length; i++) hash = ((hash << 5) - hash) + cat.charCodeAt(i);
+  return FALLBACK_PALETTE[Math.abs(hash) % FALLBACK_PALETTE.length];
+}
+
+function iconForCategory(cat) {
+  return CAT_CONFIG[cat] ? CAT_CONFIG[cat].icon : '⚪';
+}
+
+// ── EMBEDDED DATA (시크릿 모드용) ──
+// __EMBEDDED_DATA_START__
+const EMBEDDED_DATA = [];
+// __EMBEDDED_DATA_END__
+
+// 저장소 접근 자체가 예외를 던질 수 있어(보안 정책으로 차단된 VDI 등) 항상 try/catch로 감싸 사용한다.
+function safeGetSession(key) {
+  try { return sessionStorage.getItem(key); } catch (e) { return null; }
+}
+
+// localStorage는 오래된 데이터가 남아있을 수 있어 신뢰하지 않는다.
+// input.html에서 방금 넘겨준 sessionStorage 값이거나, 저장(다운로드)된 파일에 내장된 데이터만 사용한다.
+function loadData() {
+  const sessionData = safeGetSession(STORAGE_KEY);
+  if (sessionData) {
+    try { return JSON.parse(sessionData); } catch (e) {}
+  }
+  return EMBEDDED_DATA.length > 0 ? EMBEDDED_DATA : null;
+}
+
+function saveAndReturn() {
+  const data = loadData();
+  if (!data || data.length === 0) {
+    alert('저장할 데이터가 없습니다.');
+    window.location.href = 'input.html';
+    return;
+  }
+
+  let scriptEl = null;
+  const scripts = document.querySelectorAll('script');
+  for (let i = 0; i < scripts.length; i++) {
+    if (scripts[i].textContent.indexOf('__EMBEDDED_DATA_START__') !== -1) {
+      scriptEl = scripts[i];
+      break;
+    }
+  }
+  if (!scriptEl) {
+    alert('소스를 찾을 수 없습니다.');
+    window.location.href = 'input.html';
+    return;
+  }
+
+  const newBlock = '// __EMBEDDED_DATA_START__\nconst EMBEDDED_DATA = ' + JSON.stringify(data, null, 2) + ';\n// __EMBEDDED_DATA_END__';
+  const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const updatedHtml = fullHtml.replace(
+    /\/\/ __EMBEDDED_DATA_START__[\s\S]*?\/\/ __EMBEDDED_DATA_END__/,
+    newBlock
+  );
+
+  const blob = new Blob([updatedHtml], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'view2.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  alert('✓ 저장 완료! (' + data.length + '개 항목)');
+}
+
+function esc(str) {
+  return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function escAttr(str) {
+  return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+function isUrl(str) {
+  return /^https?:\/\//i.test((str || '').trim());
+}
+function openLink(link) {
+  if (isUrl(link)) {
+    window.open(link, '_blank', 'noopener,noreferrer');
+  } else {
+    alert('문서 위치: ' + link);
+  }
+}
+function toggleContent(el) {
+  el.classList.toggle('expanded');
+}
+function toggleCard(headEl) {
+  const card = headEl.closest('.node-card');
+  if (!card) return;
+  card.classList.toggle('expanded');
+  const t = headEl.querySelector('.node-toggle');
+  if (t) t.textContent = card.classList.contains('expanded') ? '▾' : '▸';
+  requestAnimationFrame(drawConnectors);
+}
+
+// 카테고리 헤더를 클릭하면 해당 분류만 모아보기(솔로) 한다. 다시 클릭하면 모두 보기로 돌아간다. 기본은 모두 보이는 상태.
+let activeCategory = null;
+
+function toggleCategory(cat) {
+  activeCategory = (activeCategory === cat) ? null : cat;
+  applyCategoryFilter();
+}
+
+function applyCategoryFilter() {
+  document.querySelectorAll('.flow-header-cell').forEach(function(el) {
+    const cat = el.dataset.cat;
+    el.classList.toggle('inactive', !!activeCategory && cat !== activeCategory);
+    el.classList.toggle('active', !!activeCategory && cat === activeCategory);
+  });
+
+  let visibleRow = 0;
+  document.querySelectorAll('.flow-cell').forEach(function(el) {
+    const cat = el.dataset.cat;
+    const isVisible = !activeCategory || cat === activeCategory;
+    el.classList.toggle('hidden', !isVisible);
+    if (!isVisible) return;
+
+    visibleRow++;
+    if (activeCategory) {
+      // 모아보기: 빈 자리 없이 순서대로 따다닥 붙여 배치하고 전체 폭을 사용한다.
+      el.style.gridRow = visibleRow;
+      el.style.gridColumn = '1 / -1';
+    } else {
+      // 원래 위치로 복원
+      el.style.gridRow = Number(el.dataset.idx) + 1;
+      el.style.gridColumn = el.dataset.col;
+    }
+  });
+
+  requestAnimationFrame(drawConnectors);
+}
+function expandAll() {
+  document.querySelectorAll('.node-card').forEach(function(card) {
+    card.classList.add('expanded');
+    const t = card.querySelector('.node-toggle');
+    if (t) t.textContent = '▾';
+  });
+  requestAnimationFrame(drawConnectors);
+}
+function collapseAll() {
+  document.querySelectorAll('.node-card').forEach(function(card) {
+    card.classList.remove('expanded');
+    const t = card.querySelector('.node-toggle');
+    if (t) t.textContent = '▸';
+  });
+  requestAnimationFrame(drawConnectors);
+}
+function updateHeaderOffset() {
+  document.documentElement.style.setProperty('--flow-header-top', '0px');
+  document.documentElement.style.setProperty('--header-h', '0px');
+}
+
+function getColumns(rows) {
+  // 알려진 5개 분류를 앞으로 강제 정렬하면 실제 입력 순서와 어긋나 열이 뒤로 밀려 보이지 않는 것처럼 보일 수 있다.
+  // 대신 데이터에 처음 등장한 순서 그대로 열을 만들어 입력 흐름과 항상 일치시킨다.
+  const seen = [];
+  rows.forEach(function(r) {
+    const cat = (r.분류 || '').trim() || '미분류';
+    if (seen.indexOf(cat) === -1) seen.push(cat);
+  });
+  return seen;
+}
+
+function headerCellHtml(cat, count) {
+  const color = colorForCategory(cat);
+  return '<div class="flow-header-cell" data-cat="' + esc(cat) + '" onclick="toggleCategory(\'' + escAttr(cat) + '\')" style="--cat-color:' + color + '">' +
+    '<span>' + iconForCategory(cat) + '</span>' +
+    '<span>' + esc(cat) + '</span>' +
+    '<span class="cat-count">' + count + '개</span>' +
+  '</div>';
+}
+
+function cellHtml(row, idx, col) {
+  const cat = (row.분류 || '').trim() || '미분류';
+  const color = colorForCategory(cat);
+  let html = '<div class="flow-cell" data-cat="' + esc(cat) + '" data-col="' + col + '" style="grid-column:' + col + ';grid-row:' + (idx + 1) + ';" data-idx="' + idx + '">';
+  html += '<div class="node-card" style="--cat-color:' + color + '">';
+  html += '<div class="node-head" onclick="toggleCard(this)">';
+  html += '<span class="node-toggle">▸</span>';
+  html += '<span class="node-index">#' + (idx + 1) + '</span>';
+  html += '<span class="node-name">' + esc(row.항목명 || '(항목명 없음)') + '</span>';
+  html += '</div>';
+  html += '<div class="node-details">';
+  html += fieldRow('주관팀', row.주관팀);
+  html += fieldRow('개정일자', row.개정일자);
+  html += fieldRow('문서내용', row.문서내용, 'content');
+  html += fieldRow('문서링크', row.문서링크, 'link');
+  html += '</div>';
+  html += '</div></div>';
+  return html;
+}
+
+function fieldRow(label, value, kind) {
+  const has = value && value.trim();
+  let valueHtml;
+  if (!has) {
+    valueHtml = '<span class="field-value is-empty">⚠ 미입력</span>';
+  } else if (kind === 'content') {
+    valueHtml = '<span class="field-value node-content" onclick="toggleContent(this)">' + esc(value) + '</span>';
+  } else if (kind === 'link') {
+    valueHtml = '<span class="field-value node-link" onclick="openLink(\'' + escAttr(value) + '\')">🔗 ' + esc(value) + '</span>';
+  } else {
+    valueHtml = '<span class="field-value">' + esc(value) + '</span>';
+  }
+  return '<div class="node-field"><span class="field-label">' + esc(label) + '</span>' + valueHtml + '</div>';
+}
+
+function drawConnectors() {
+  try {
+    drawConnectorsInner();
+  } catch (e) {
+    // 연결선 그리기가 실패해도 카드 데이터는 그대로 보이도록 조용히 무시한다.
+  }
+}
+
+function drawConnectorsInner() {
+  const grid = document.getElementById('flowGrid');
+  if (!grid) return;
+  const gridRect = grid.getBoundingClientRect();
+  const width = grid.scrollWidth;
+  const height = grid.scrollHeight;
+
+  const visibleCells = Array.from(grid.querySelectorAll('.flow-cell'))
+    .filter(function(c) { return !c.classList.contains('hidden'); })
+    .sort(function(a, b) { return Number(a.dataset.idx) - Number(b.dataset.idx); });
+
+  let paths = '';
+  for (let i = 0; i < visibleCells.length - 1; i++) {
+    const a = visibleCells[i];
+    const b = visibleCells[i + 1];
+    if (!a || !b) continue;
+    const ar = a.getBoundingClientRect();
+    const br = b.getBoundingClientRect();
+    const x1 = ar.left + ar.width / 2 - gridRect.left;
+    const y1 = ar.bottom - gridRect.top;
+    const x2 = br.left + br.width / 2 - gridRect.left;
+    const y2 = br.top - gridRect.top;
+    const midY = (y1 + y2) / 2;
+    const d = Math.abs(x1 - x2) < 4
+      ? 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2
+      : 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + midY + ' ' + x2 + ',' + midY + ' ' + x2 + ',' + y2;
+    paths += '<path d="' + d + '" fill="none" stroke="#cbd5e1" stroke-width="2" marker-end="url(#flowArrow)" />';
+  }
+
+  let svg = document.getElementById('flowSvg');
+  if (!svg) {
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('id', 'flowSvg');
+    svg.setAttribute('class', 'flow-connectors');
+    grid.appendChild(svg);
+  }
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+  svg.innerHTML = '<defs><marker id="flowArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#94a3b8" /></marker></defs>' + paths;
+}
+
+function render() {
+  try {
+    renderInner();
+  } catch (e) {
+    showRenderError(e);
+  }
+}
+
+function showRenderError(e) {
+  const board = document.getElementById('flowBoard');
+  const emptyState = document.getElementById('emptyState');
+  if (board) board.style.display = 'none';
+  if (emptyState) {
+    emptyState.style.display = 'block';
+    const msg = e && e.message ? e.message : String(e);
+    emptyState.innerHTML = '<h2>화면을 표시하는 중 문제가 발생했습니다</h2>' +
+      '<p>' + esc(msg) + '</p>' +
+      '<p><a href="input.html">입력 화면</a>으로 돌아가서 다시 시도해주세요.</p>';
+  }
+}
+
+function renderInner() {
+  const rows = loadData() || [];
+  const emptyState = document.getElementById('emptyState');
+  const board = document.getElementById('flowBoard');
+
+  updateHeaderOffset();
+
+  if (rows.length === 0) {
+    board.style.display = 'none';
+    emptyState.style.display = 'block';
+    return;
+  }
+  board.style.display = 'block';
+  emptyState.style.display = 'none';
+
+  const columns = getColumns(rows);
+  const colIndex = {};
+  columns.forEach(function(c, i) { colIndex[c] = i + 1; });
+
+  const flowHeader = document.getElementById('flowHeader');
+  const flowGrid = document.getElementById('flowGrid');
+
+  const templateColumns = 'repeat(' + columns.length + ', minmax(240px, 1fr))';
+  flowHeader.style.gridTemplateColumns = templateColumns;
+  flowGrid.style.gridTemplateColumns = templateColumns;
+  flowGrid.style.gridTemplateRows = 'repeat(' + rows.length + ', auto)';
+
+  flowHeader.innerHTML = columns.map(function(cat) {
+    const count = rows.filter(function(r) { return ((r.분류 || '').trim() || '미분류') === cat; }).length;
+    return headerCellHtml(cat, count);
+  }).join('');
+
+  let cellsHtml = '';
+  rows.forEach(function(row, idx) {
+    const cat = (row.분류 || '').trim() || '미분류';
+    cellsHtml += cellHtml(row, idx, colIndex[cat]);
+  });
+  flowGrid.innerHTML = cellsHtml;
+
+  requestAnimationFrame(drawConnectors);
+}
+
+let resizeTimer;
+window.addEventListener('resize', function() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function() {
+    updateHeaderOffset();
+    drawConnectors();
+  }, 150);
+});
+
+// 웹폰트가 늦게 로드되어 헤더 높이가 바뀌면 sticky 오프셋을 다시 계산
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(function() {
+    updateHeaderOffset();
+    drawConnectors();
+  });
+}
+window.addEventListener('load', function() {
+  updateHeaderOffset();
+  drawConnectors();
+});
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT 프로세스 문서 - 데이터 입력</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+  :root {
+    --color-bg: #f8fafc;
+    --color-surface: #ffffff;
+    --color-border: #e2e8f0;
+    --color-text: #1e293b;
+    --color-text-muted: #64748b;
+    --color-text-faint: #94a3b8;
+    --color-primary: #2563eb;
+    --color-primary-hover: #1d4ed8;
+    --color-success: #16a34a;
+    --color-success-hover: #15803d;
+    --color-danger: #ef4444;
+    --radius: 8px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    margin-top: 4px;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px 0;
+    flex-wrap: wrap;
+  }
+
+  .hint-box {
+    margin: 16px 24px 0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.8rem;
+    color: #475569;
+    line-height: 1.5;
+  }
+
+  .hint-muted {
+    color: var(--color-text-muted);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .btn:hover { background: #f1f5f9; }
+
+  .btn-sm {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  .btn-primary {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--color-primary-hover); }
+
+  .btn-success {
+    background: var(--color-success);
+    border-color: var(--color-success);
+    color: #fff;
+  }
+  .btn-success:hover { background: var(--color-success-hover); }
+
+  .btn-secondary {
+    background: #f1f5f9;
+    border-color: var(--color-border);
+  }
+
+  .btn-clear {
+    color: var(--color-danger);
+  }
+
+  .btn-danger {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--color-danger);
+    padding: 4px 8px;
+  }
+  .btn-danger:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+  }
+
+  .save-status {
+    font-size: 0.8rem;
+    color: var(--color-text-faint);
+    margin-left: 4px;
+  }
+
+  .table-wrapper {
+    margin: 16px 24px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    overflow: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  thead th {
+    background: #f8fafc;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .required {
+    color: var(--color-danger);
+  }
+
+  .col-num { width: 36px; }
+  .col-category { width: 90px; }
+  .col-itemname { width: 200px; }
+  .col-team { width: 130px; }
+  .col-date { width: 100px; }
+  .col-link { width: 160px; }
+  .col-action { width: 54px; }
+
+  .row-num {
+    color: var(--color-text-faint);
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
+  .cell-input, .cell-textarea {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    color: var(--color-text);
+    background: transparent;
+  }
+
+  .cell-input:hover, .cell-textarea:hover {
+    border-color: var(--color-border);
+  }
+
+  .cell-input:focus, .cell-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: var(--color-surface);
+  }
+
+  .cell-textarea {
+    min-height: 40px;
+    resize: vertical;
+    line-height: 1.4;
+  }
+
+  .narrow { min-width: 70px; }
+  .medium { min-width: 110px; }
+  .wide { min-width: 160px; }
+
+  .empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--color-text-faint);
+    font-size: 0.9rem;
+  }
+
+  .footer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px 24px;
+  }
+
+  .footer-info {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+
+  .footer-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--color-text);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .toast.success {
+    background: var(--color-success);
+  }
+
+  .toast.error {
+    background: var(--color-danger);
+  }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📋 IT 프로세스 문서 데이터 입력</h1>
+    <div class="subtitle">항목을 입력하고 트리 뷰로 시각화하세요</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-primary" onclick="viewTree()">🌳 트리 보기</button>
+    <a class="btn" href="view2.html" onclick="viewFlow(); return false;">↔ 흐름 보기</a>
+  </div>
+</header>
+
+<div class="toolbar">
+  <button class="btn btn-sm btn-clear" onclick="clearAll()">🗑 전체 삭제</button>
+  <button class="btn btn-sm" onclick="saveData()">💾 저장</button>
+  <span class="save-status" id="saveStatus"></span>
+</div>
+
+<div class="hint-box">
+  표의 붙여넣기 시작 셀을 클릭한 뒤 <strong>Ctrl+V</strong> 하세요.
+  <span class="hint-muted">Excel/스프레드시트의 다중 행·열 데이터(탭/개행 구분)를 자동 반영합니다.</span>
+</div>
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th class="col-num">#</th>
+        <th class="col-category">분류 <span class="required">*</span></th>
+        <th class="col-itemname">항목명 <span class="required">*</span></th>
+        <th class="col-team">주관팀</th>
+        <th class="col-date">개정일자</th>
+        <th class="col-link">문서 링크/위치</th>
+        <th>문서 내용</th>
+        <th class="col-action"></th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+    </tbody>
+  </table>
+  <div id="emptyState" class="empty-state" style="display:none;">
+    데이터가 없습니다. 행을 추가하거나 샘플 데이터를 불러오세요.
+  </div>
+</div>
+
+<div class="footer-bar">
+  <div class="footer-info">총 <strong id="rowCount">0</strong>개 항목</div>
+  <div class="footer-actions">
+    <button class="btn btn-secondary" onclick="saveData()">💾 저장</button>
+    <button class="btn btn-success" onclick="viewTree()">🌳 트리 보기 →</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'it_portal_data_v1';
+
+// VDI/보안 정책 등으로 localStorage/sessionStorage 접근 자체가 예외를 던질 수 있어 항상 try/catch로 감싸 사용한다.
+function safeGetLocal(key) {
+  try { return localStorage.getItem(key); } catch (e) { return null; }
+}
+function safeSetLocal(key, value) {
+  try { localStorage.setItem(key, value); return true; } catch (e) { return false; }
+}
+function safeSetSession(key, value) {
+  try { sessionStorage.setItem(key, value); return true; } catch (e) { return false; }
+}
+
+let rows = [];
+
+function init() {
+  const saved = safeGetLocal(STORAGE_KEY);
+  if (saved) {
+    try { rows = JSON.parse(saved); } catch { rows = []; }
+  }
+  if (rows.length === 0) {
+    rows = [blankRow()];
+  }
+  renderTable();
+  bindTablePaste();
+}
+
+function viewTree() {
+  saveData(true);
+  const data = loadData();
+  if (data) {
+    safeSetSession('it_portal_data_v1', JSON.stringify(data));
+  }
+  window.location.href = 'view.html';
+}
+
+function viewFlow() {
+  saveData(true);
+  const data = loadData();
+  if (data) {
+    safeSetSession('it_portal_data_v1', JSON.stringify(data));
+  }
+  window.location.href = 'view2.html';
+}
+
+function loadData() {
+  const saved = safeGetLocal(STORAGE_KEY);
+  if (saved) {
+    try { return JSON.parse(saved); } catch { return []; }
+  }
+  return [];
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+  document.getElementById('rowCount').textContent = rows.length;
+
+  if (rows.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = rows.map(function(row, i) {
+    return '<tr id="row-' + i + '">' +
+      '<td class="row-num">' + (i + 1) + '</td>' +
+      '<td><input class="cell-input narrow" value="' + esc(row.분류) + '" oninput="updateCell(' + i + ',\'분류\',this.value)" list="list-분류"></td>' +
+      '<td><input class="cell-input wide" value="' + esc(row.항목명) + '" oninput="updateCell(' + i + ',\'항목명\',this.value)"></td>' +
+      '<td><input class="cell-input medium" value="' + esc(row.주관팀) + '" oninput="updateCell(' + i + ',\'주관팀\',this.value)"></td>' +
+      '<td><input class="cell-input narrow" value="' + esc(row.개정일자) + '" oninput="updateCell(' + i + ',\'개정일자\',this.value)" placeholder="YYYY.MM.DD"></td>' +
+      '<td><input class="cell-input medium" value="' + esc(row.문서링크) + '" oninput="updateCell(' + i + ',\'문서링크\',this.value)"></td>' +
+      '<td><textarea class="cell-textarea" oninput="updateCell(' + i + ',\'문서내용\',this.value)">' + esc(row.문서내용) + '</textarea></td>' +
+      '<td><button class="btn btn-danger" onclick="deleteRow(' + i + ')">✕</button></td>' +
+      '</tr>';
+  }).join('');
+
+  updateDataLists();
+}
+
+function esc(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+}
+
+function updateCell(idx, key, val) {
+  rows[idx][key] = val;
+  scheduleSave();
+  if (key === '분류' || key === '항목명') updateDataLists();
+}
+
+function blankRow() {
+  return { 분류: "", 항목명: "", 주관팀: "", 개정일자: "", 문서링크: "", 문서내용: "" };
+}
+
+let saveTimer;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function() {
+    saveData(true);
+  }, 800);
+}
+
+function saveData(silent) {
+  const ok = safeSetLocal(STORAGE_KEY, JSON.stringify(rows));
+  if (!silent) showToast(ok ? '저장되었습니다' : '브라우저 저장소를 사용할 수 없습니다. 상단 "저장" 다운로드를 이용해주세요.', ok ? 'success' : 'error');
+  const status = document.getElementById('saveStatus');
+  status.textContent = ok ? ('저장됨 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'})) : '저장소 사용 불가';
+}
+
+function deleteRow(idx) {
+  rows.splice(idx, 1);
+  if (rows.length === 0) rows.push(blankRow());
+  renderTable();
+  scheduleSave();
+}
+
+function clearAll() {
+  if (!confirm('모든 데이터를 삭제하시겠습니까?')) return;
+  rows = [blankRow()];
+  renderTable();
+  saveData(true);
+}
+
+
+
+function parseTSV(text) {
+  // 탭/개행 구분 데이터에서 따옴표로 감싸진 여러 줄 필드를 올바르게 파싱
+  const rows = [];
+  let currentRow = [];
+  let currentField = '';
+  let inQuotes = false;
+  
+  text = text.replace(/\r/g, ''); // CR 제거
+  
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const nextChar = text[i + 1];
+    
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        // 이스케이프된 따옴표 ("")
+        currentField += '"';
+        i++; // 다음 따옴표 건너뛰기
+      } else if (inQuotes) {
+        // 따옴표 종료 (따옴표 안에 있을 때만)
+        inQuotes = false;
+      } else if (currentField === '') {
+        // 따옴표 시작: 필드의 첫 글자일 때만 CSV 따옴표로 인식
+        inQuotes = true;
+      } else {
+        // 필드 중간의 따옴표는 일반 문자로 처리
+        currentField += char;
+      }
+    } else if (char === '\t' && !inQuotes) {
+      // 탭: 필드 구분자 (따옴표 밖에서만)
+      currentRow.push(currentField);
+      currentField = '';
+    } else if (char === '\n' && !inQuotes) {
+      // 개행: 행 구분자 (따옴표 밖에서만)
+      currentRow.push(currentField);
+      if (currentRow.some(f => f.trim() !== '')) {
+        rows.push(currentRow);
+      }
+      currentRow = [];
+      currentField = '';
+    } else {
+      // 일반 문자 (따옴표 안의 개행 포함)
+      currentField += char;
+    }
+  }
+  
+  // 마지막 필드/행 처리
+  if (currentField || currentRow.length > 0) {
+    currentRow.push(currentField);
+    if (currentRow.some(f => f.trim() !== '')) {
+      rows.push(currentRow);
+    }
+  }
+  
+  return rows;
+}
+
+function bindTablePaste() {
+  const tbody = document.getElementById('tableBody');
+  tbody.addEventListener('paste', function(e) {
+    const target = e.target;
+    if (!target || !(target.matches('input.cell-input') || target.matches('textarea.cell-textarea'))) return;
+
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    if (!text || (!text.includes('\t') && !text.includes('\n'))) return;
+
+    e.preventDefault();
+
+    const trId = target.closest('tr') ? target.closest('tr').id : '';
+    const rowIdx = Number(trId.replace('row-', ''));
+    const cell = target.closest('td');
+    const cellIdx = Array.from(cell.parentNode.children).indexOf(cell) - 1;
+    const fields = ['분류', '항목명', '주관팀', '개정일자', '문서링크', '문서내용'];
+
+    if (Number.isNaN(rowIdx) || cellIdx < 0 || cellIdx > fields.length - 1) return;
+
+    // CSV/TSV 파싱: 따옴표로 감싸진 여러 줄 필드 처리
+    const lineRows = parseTSV(text);
+
+    if (lineRows.length === 0) return;
+
+    // 후처리: 불완전한 행(분류와 항목명이 없는 행)을 이전 행의 마지막 필드에 병합
+    // (Excel에서 따옴표 없이 여러 줄이 복사된 경우)
+    const mergedRows = [];
+    for (let i = 0; i < lineRows.length; i++) {
+      const row = lineRows[i];
+      // 완전한 데이터 행: 분류(1번째)와 항목명(2번째) 컴럼이 모두 채워져 있어야 함
+      const hasCategory = row[0] && row[0].trim() !== '';
+      const hasItemName = row[1] && row[1].trim() !== '';
+      const isCompleteRow = hasCategory && hasItemName;
+      
+      if (mergedRows.length === 0 || isCompleteRow) {
+        // 첫 행이거나 완전한 행이면 새 행으로 추가
+        mergedRows.push(row);
+      } else {
+        // 불완전한 행이면 이전 행의 마지막 필드에 병합
+        const prevRow = mergedRows[mergedRows.length - 1];
+        const lastIdx = prevRow.length - 1;
+        // 단일 필드로 합치기 (탭 없이 개행만 추가)
+        const contentToAppend = row.filter(f => f && f.trim() !== '').join(' ');
+        if (contentToAppend) {
+          prevRow[lastIdx] = (prevRow[lastIdx] || '') + '\n' + contentToAppend;
+        }
+      }
+    }
+
+    if (mergedRows.length === 0) return;
+
+    // pasted data may include a header row (e.g. 분류, 항목명 ...)
+    const headerTokens = ['분류', '분류(category)', '항목명', '주관팀', '개정일자', '문서링크', '문서 링크', '문서위치', '문서 위치', '문서내용', '문서 내용'];
+    const firstRowNorm = mergedRows[0].map(v => (v || '').trim().toLowerCase());
+    const headerMatchCount = firstRowNorm.reduce((acc, cell) => acc + (headerTokens.map(t => t.toLowerCase()).includes(cell) ? 1 : 0), 0);
+    if (headerMatchCount >= Math.min(2, firstRowNorm.length)) mergedRows.shift();
+    if (mergedRows.length === 0) return;
+
+    while (rows.length < rowIdx + mergedRows.length) {
+      rows.push(blankRow());
+    }
+
+    for (let r = 0; r < mergedRows.length; r++) {
+      const srcCols = mergedRows[r];
+      const targetRow = rows[rowIdx + r];
+      for (let c = 0; c < srcCols.length; c++) {
+        const targetFieldIdx = cellIdx + c;
+        if (targetFieldIdx > fields.length - 1) break;
+        // 문서내용(인덱스 5)은 여러 줄을 유지하기 위해 trim하지 않음
+        const value = srcCols[c] || '';
+        targetRow[fields[targetFieldIdx]] = targetFieldIdx === 5 ? value : value.trim();
+      }
+    }
+
+    renderTable();
+    saveData(true);
+    showToast(mergedRows.length + '개 행을 붙여넣었습니다', 'success');
+  });
+}
+
+function updateDataLists() {
+  // 분류 list
+  const cats = [];
+  for (let i = 0; i < rows.length; i++) {
+    const cat = rows[i].분류;
+    if (cat && cats.indexOf(cat) === -1) cats.push(cat);
+  }
+  let dl1 = document.getElementById('list-분류');
+  if (!dl1) { dl1 = document.createElement('datalist'); dl1.id = 'list-분류'; document.body.appendChild(dl1); }
+  dl1.innerHTML = cats.map(function(c) { return '<option value="' + esc(c) + '">'; }).join('');
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(function() { t.className = 'toast'; }, 2500);
+}
+
+// keyboard shortcut
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveData(); }
+});
+
+init();
+</script>
+</body>
+</html>

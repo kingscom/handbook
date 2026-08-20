@@ -1,0 +1,9 @@
+{
+  "name": "handbook",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "lint:design": "npx @google/design.md lint DESIGN.md",
+    "serve": "npx serve ."
+  }
+}
