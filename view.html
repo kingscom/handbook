@@ -172,7 +172,7 @@
     border-radius: var(--radius-sm);
     background: var(--accent-soft);
     color: var(--accent);
-    font-size: 0.82rem;
+    font-size: 0.86rem;
     font-weight: 700;
   }
 
@@ -185,7 +185,7 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 22px;
+    padding: 40px 22px;
   }
 
   .flow-board {
@@ -270,7 +270,7 @@
   .flow-grid {
     display: grid;
     gap: 12px;
-    row-gap: 12px;
+    row-gap: 16px;
     position: relative;
     width: 100%;
   }
@@ -321,48 +321,24 @@
 
   .node-head {
     display: grid;
-    grid-template-columns: 16px 28px minmax(0, 1fr);
-    align-items: start;
-    gap: 5px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
     cursor: pointer;
   }
 
-  .node-toggle { border: 0; cursor: pointer; }
-
-  .node-toggle {
-    width: 16px;
-    height: 16px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    background: rgba(15, 23, 42, 0.04);
-    color: var(--text-tertiary);
-    font-size: 0.58rem;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
   .node-index {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 16px;
-    padding: 1px 4px;
-    border-radius: 4px;
-    background: rgba(15, 23, 42, 0.04);
+    display: block;
     color: var(--text-tertiary);
-    font-size: 0.56rem;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    flex-shrink: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
     line-height: 1.1;
-    margin-top: 1px;
   }
 
   .node-name {
     min-width: 0;
-    font-size: 0.75rem;
+    font-size: 0.82rem;
     font-weight: 700;
     line-height: 1.32;
     letter-spacing: -0.005em;
@@ -372,16 +348,10 @@
   }
 
   .node-details {
-    display: none;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(15, 23, 42, 0.08);
-  }
-
-  .node-card.expanded .node-details {
     display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
   }
 
   .node-field {
@@ -406,6 +376,7 @@
     min-width: 0;
     color: var(--text-secondary);
     word-break: break-word;
+    font-size: 0.72rem;
   }
 
   .field-value.is-empty {
@@ -601,13 +572,9 @@
       <header class="topbar" id="topbar">
         <div class="topbar-row">
           <div class="brand-copy">
-            <div class="eyebrow">Flow Review</div>
-            <h1>IT 프로세스 흐름을 더 명확한 Apple식 정보 계층으로 정리했습니다.</h1>
-            <div class="subtitle">분류는 가로 축에, 입력 순서는 세로 흐름에 배치해 전체 문맥을 빠르게 읽을 수 있습니다.</div>
+            <h1>IT Governance Handbook</h1>
           </div>
           <div class="topbar-actions">
-            <button class="btn" onclick="expandAll()">전체 펼치기</button>
-            <button class="btn" onclick="collapseAll()">전체 접기</button>
             <button class="btn btn-primary" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드">저장</button>
           </div>
         </div>
@@ -739,19 +706,6 @@ function openLink(link) {
   }
 }
 
-function toggleContent(el) {
-  el.classList.toggle('expanded');
-}
-
-function toggleCard(headEl) {
-  const card = headEl.closest('.node-card');
-  if (!card) return;
-  card.classList.toggle('expanded');
-  const t = headEl.querySelector('.node-toggle');
-  if (t) t.textContent = card.classList.contains('expanded') ? '▾' : '▸';
-  requestAnimationFrame(drawConnectors);
-}
-
 let activeCategory = null;
 let lastRows = [];
 let currentDetailIndex = -1;
@@ -791,24 +745,6 @@ function applyCategoryFilter() {
   requestAnimationFrame(drawConnectors);
 }
 
-function expandAll() {
-  document.querySelectorAll('.node-card').forEach(function(card) {
-    card.classList.add('expanded');
-    const t = card.querySelector('.node-toggle');
-    if (t) t.textContent = '▾';
-  });
-  requestAnimationFrame(drawConnectors);
-}
-
-function collapseAll() {
-  document.querySelectorAll('.node-card').forEach(function(card) {
-    card.classList.remove('expanded');
-    const t = card.querySelector('.node-toggle');
-    if (t) t.textContent = '▸';
-  });
-  requestAnimationFrame(drawConnectors);
-}
-
 function updateHeaderOffset() {
   const topbar = document.getElementById('topbar');
   const height = topbar ? Math.ceil(topbar.getBoundingClientRect().height) : 84;
@@ -841,34 +777,12 @@ function cellHtml(row, idx, col) {
   let html = '<div class="flow-cell" data-cat="' + esc(cat) + '" data-col="' + col + '" style="grid-column:' + col + ';grid-row:' + (idx + 1) + ';" data-idx="' + idx + '">';
   html += '<div class="node-card" style="--cat-color:' + color + '" onclick="openDetail(' + idx + ')">';
   html += '<div class="node-head">';
-  html += '<button class="node-toggle" onclick="event.stopPropagation();toggleCard(this.closest(\'.node-head\'))" aria-label="세부 정보 펼치기">▸</button>';
   html += '<span class="node-index">#' + (idx + 1) + '</span>';
   html += '<span class="node-name">' + esc(row.항목명 || '(항목명 없음)') + '</span>';
   html += '</div>';
-  html += '<div class="node-details">';
-  html += fieldRow('주관팀', row.주관팀);
-  html += fieldRow('개정일자', row.개정일자);
-  html += fieldRow('문서명', row.문서명);
-  html += fieldRow('문서내용', row.문서내용, 'content');
-  html += fieldRow('문서링크', row.문서링크, 'link');
-  html += '</div>';
+  html += row.주관팀 ? '<div class="node-details"><span class="field-value">' + esc(row.주관팀) + '</span></div>' : '';
   html += '</div></div>';
   return html;
-}
-
-function fieldRow(label, value, kind) {
-  const has = value && value.trim();
-  let valueHtml;
-  if (!has) {
-    valueHtml = '<span class="field-value is-empty">미입력</span>';
-  } else if (kind === 'content') {
-    valueHtml = '<span class="field-value node-content" onclick="toggleContent(this)">' + esc(value) + '</span>';
-  } else if (kind === 'link') {
-    valueHtml = '<span class="field-value node-link" onclick="openLink(\'' + escAttr(value) + '\')">' + esc(value) + '</span>';
-  } else {
-    valueHtml = '<span class="field-value">' + esc(value) + '</span>';
-  }
-  return '<div class="node-field"><span class="field-label">' + esc(label) + '</span>' + valueHtml + '</div>';
 }
 
 function detailField(label, value, isLink) {
@@ -897,6 +811,7 @@ function openDetail(index) {
   if (index < 0 || index >= lastRows.length) return;
   currentDetailIndex = index;
   renderDetail();
+  document.getElementById('flowHeader').style.display = 'none';
   document.getElementById('flowBoard').style.display = 'none';
   document.getElementById('detailScreen').classList.add('visible');
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -905,6 +820,7 @@ function openDetail(index) {
 function closeDetail() {
   currentDetailIndex = -1;
   document.getElementById('detailScreen').classList.remove('visible');
+  document.getElementById('flowHeader').style.display = '';
   document.getElementById('flowBoard').style.display = 'block';
   requestAnimationFrame(drawConnectors);
 }
