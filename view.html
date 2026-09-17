@@ -327,6 +327,8 @@
     cursor: pointer;
   }
 
+  .node-toggle { border: 0; cursor: pointer; }
+
   .node-toggle {
     width: 16px;
     height: 16px;
@@ -449,6 +451,24 @@
     color: var(--accent-hover);
   }
 
+  .detail-screen { display: none; max-width: 840px; margin: 0 auto; }
+  .detail-screen.visible { display: block; }
+  .detail-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 36px; }
+  .detail-number { color: var(--text-quaternary); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; }
+  .detail-name { margin-top: 10px; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.18; letter-spacing: -0.035em; }
+  .detail-grid { border-top: 1px solid var(--page-border); }
+  .detail-row { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 24px; padding: 18px 0; border-bottom: 1px solid var(--page-border); font-size: 0.9rem; line-height: 1.7; }
+  .detail-label { color: var(--text-quaternary); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; }
+  .detail-value { white-space: pre-wrap; word-break: break-word; }
+  .detail-value.empty { color: var(--text-tertiary); }
+  .detail-value a { color: var(--accent); text-underline-offset: 3px; }
+  .detail-navigation { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 32px; }
+  .detail-nav-button { min-width: 0; padding: 14px 16px; border: 1px solid var(--page-border); border-radius: var(--radius-md); background: var(--page-surface-strong); color: var(--text-primary); cursor: pointer; text-align: left; }
+  .detail-nav-button.next { text-align: right; }
+  .detail-nav-button:disabled { visibility: hidden; }
+  .detail-nav-number { display: block; margin-bottom: 5px; color: var(--text-quaternary); font-size: 0.68rem; font-weight: 700; }
+  .detail-nav-name { display: block; overflow: hidden; font-size: 0.82rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+
   .empty-state {
     text-align: center;
     padding: 96px 24px;
@@ -537,6 +557,10 @@
       grid-template-columns: 1fr;
       gap: 4px;
     }
+
+    .detail-top { flex-direction: column; }
+    .detail-navigation { grid-template-columns: 1fr; }
+    .detail-row { grid-template-columns: 1fr; gap: 6px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -593,6 +617,7 @@
         <div class="flow-board" id="flowBoard">
           <div class="flow-grid" id="flowGrid"></div>
         </div>
+        <section class="detail-screen" id="detailScreen" aria-label="프로세스 상세정보"></section>
         <div class="empty-state" id="emptyState" style="display:none;">
           <h2>표시할 데이터가 없습니다</h2>
           <p><a href="input.html">입력 화면</a>에서 항목을 먼저 추가하세요.</p>
@@ -685,7 +710,7 @@ function saveAndReturn() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'view2.html';
+  a.download = 'view.html';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -729,6 +754,7 @@ function toggleCard(headEl) {
 
 let activeCategory = null;
 let lastRows = [];
+let currentDetailIndex = -1;
 
 function toggleCategory(cat) {
   activeCategory = (activeCategory === cat) ? null : cat;
@@ -813,9 +839,9 @@ function cellHtml(row, idx, col) {
   const cat = (row.분류 || '').trim() || '미분류';
   const color = colorForCategory(cat);
   let html = '<div class="flow-cell" data-cat="' + esc(cat) + '" data-col="' + col + '" style="grid-column:' + col + ';grid-row:' + (idx + 1) + ';" data-idx="' + idx + '">';
-  html += '<div class="node-card" style="--cat-color:' + color + '">';
-  html += '<div class="node-head" onclick="toggleCard(this)">';
-  html += '<span class="node-toggle">▸</span>';
+  html += '<div class="node-card" style="--cat-color:' + color + '" onclick="openDetail(' + idx + ')">';
+  html += '<div class="node-head">';
+  html += '<button class="node-toggle" onclick="event.stopPropagation();toggleCard(this.closest(\'.node-head\'))" aria-label="세부 정보 펼치기">▸</button>';
   html += '<span class="node-index">#' + (idx + 1) + '</span>';
   html += '<span class="node-name">' + esc(row.항목명 || '(항목명 없음)') + '</span>';
   html += '</div>';
@@ -844,6 +870,59 @@ function fieldRow(label, value, kind) {
   }
   return '<div class="node-field"><span class="field-label">' + esc(label) + '</span>' + valueHtml + '</div>';
 }
+
+function detailField(label, value, isLink) {
+  const hasValue = value && String(value).trim();
+  let content = hasValue ? esc(String(value)) : '미입력';
+  if (hasValue && isLink && isUrl(String(value))) content = '<a href="' + esc(String(value)) + '" target="_blank" rel="noopener noreferrer">' + esc(String(value)) + '</a>';
+  return '<div class="detail-row"><div class="detail-label">' + label + '</div><div class="detail-value' + (hasValue ? '' : ' empty') + '">' + content + '</div></div>';
+}
+
+function detailNavigation(index, direction) {
+  const row = lastRows[index];
+  if (!row) return '<button class="detail-nav-button ' + direction + '" disabled></button>';
+  const number = String(index + 1).padStart(2, '0');
+  const arrow = direction === 'next' ? '&rarr;' : '&larr;';
+  return '<button class="detail-nav-button ' + direction + '" onclick="openDetail(' + index + ')"><span class="detail-nav-number">' + (direction === 'next' ? number + ' ' + arrow : arrow + ' ' + number) + '</span><span class="detail-nav-name">' + esc(row.항목명 || '(항목명 없음)') + '</span></button>';
+}
+
+function renderDetail() {
+  const row = lastRows[currentDetailIndex];
+  const detail = document.getElementById('detailScreen');
+  if (!row || !detail) return;
+  detail.innerHTML = '<div class="detail-top"><div><div class="detail-number">PROCESS ' + String(currentDetailIndex + 1).padStart(2, '0') + ' / ' + lastRows.length + '</div><h2 class="detail-name">' + esc(row.항목명 || '(항목명 없음)') + '</h2></div><button class="btn" onclick="closeDetail()">목록으로</button></div><div class="detail-grid">' + detailField('분류', (row.분류 || '').trim() || '미분류') + detailField('주관팀', row.주관팀) + detailField('개정일자', row.개정일자) + detailField('문서명', row.문서명) + detailField('문서내용', row.문서내용) + detailField('문서링크', row.문서링크, true) + '</div><nav class="detail-navigation" aria-label="인접 항목 이동">' + detailNavigation(currentDetailIndex - 1, 'previous') + detailNavigation(currentDetailIndex + 1, 'next') + '</nav>';
+}
+
+function openDetail(index) {
+  if (index < 0 || index >= lastRows.length) return;
+  currentDetailIndex = index;
+  renderDetail();
+  document.getElementById('flowBoard').style.display = 'none';
+  document.getElementById('detailScreen').classList.add('visible');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function closeDetail() {
+  currentDetailIndex = -1;
+  document.getElementById('detailScreen').classList.remove('visible');
+  document.getElementById('flowBoard').style.display = 'block';
+  requestAnimationFrame(drawConnectors);
+}
+
+window.addEventListener('keydown', function(event) {
+  if (event.target.matches('button, a, input, textarea, select')) return;
+  if (currentDetailIndex < 0) return;
+  if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+    event.preventDefault();
+    openDetail(currentDetailIndex - 1);
+  } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+    event.preventDefault();
+    openDetail(currentDetailIndex + 1);
+  } else if (event.key === 'Escape') {
+    event.preventDefault();
+    closeDetail();
+  }
+});
 
 function drawConnectors() {
   try {

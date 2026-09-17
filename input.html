@@ -285,7 +285,6 @@
   </div>
   <div class="header-actions">
     <button class="btn btn-primary" onclick="viewTree()">🌳 트리 보기</button>
-    <a class="btn" href="view2.html" onclick="viewFlow(); return false;">↔ 흐름 보기</a>
   </div>
 </header>
 
@@ -368,15 +367,6 @@ function viewTree() {
     safeSetSession('it_portal_data_v1', JSON.stringify(data));
   }
   window.location.href = 'view.html';
-}
-
-function viewFlow() {
-  saveData(true);
-  const data = loadData();
-  if (data) {
-    safeSetSession('it_portal_data_v1', JSON.stringify(data));
-  }
-  window.location.href = 'view2.html';
 }
 
 function loadData() {
