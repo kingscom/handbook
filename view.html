@@ -3,333 +3,634 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IT 프로세스 문서 트리 맵</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>IT 프로세스 문서 - 흐름 보기</title>
   <style>
   :root {
-    --color-bg: #f8fafc;
-    --color-surface: #ffffff;
-    --color-border: #e2e8f0;
-    --color-text: #1e293b;
-    --color-text-muted: #64748b;
-    --color-text-faint: #94a3b8;
-    --color-primary: #2563eb;
-    --color-primary-hover: #1d4ed8;
-    --color-danger: #ef4444;
-    --radius: 8px;
+    --page-bg: #f5f5f7;
+    --page-surface: rgba(255, 255, 255, 0.74);
+    --page-surface-strong: rgba(255, 255, 255, 0.92);
+    --page-border: rgba(15, 23, 42, 0.08);
+    --page-border-strong: rgba(15, 23, 42, 0.12);
+    --text-primary: #1d1d1f;
+    --text-secondary: #424245;
+    --text-tertiary: #6e6e73;
+    --text-quaternary: #8e8e93;
+    --accent: #0071e3;
+    --accent-hover: #0077ed;
+    --accent-soft: rgba(0, 113, 227, 0.1);
+    --warning: #b05c00;
+    --warning-bg: rgba(255, 159, 10, 0.12);
+    --warning-border: rgba(255, 159, 10, 0.28);
+    --shadow-soft: 0 14px 40px rgba(15, 23, 42, 0.08);
+    --shadow-card: 0 10px 30px rgba(15, 23, 42, 0.06);
+    --radius-xl: 20px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 10px;
+    --topbar-h: 84px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--color-bg);
-    color: var(--color-text);
-    min-height: 100vh;
+  html {
+    scroll-behavior: smooth;
   }
 
-  /* ── HEADER ── */
-  header {
-    background: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
-    padding: 16px 24px;
+  body {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro KR', 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
+    color: var(--text-primary);
+    background:
+      radial-gradient(circle at top left, rgba(0, 113, 227, 0.16), transparent 30%),
+      radial-gradient(circle at top right, rgba(52, 199, 89, 0.12), transparent 24%),
+      linear-gradient(180deg, #fbfbfd 0%, var(--page-bg) 34%, #eef2f7 100%);
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .page-shell {
+    width: 100%;
+    max-width: 1520px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 18px 16px 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar {
+    flex-shrink: 0;
+    z-index: 220;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px 22px 20px;
+    border-bottom: 1px solid var(--page-border);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+  }
+
+  .topbar-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 200;
+    gap: 16px;
   }
-  header h1 {
-    font-size: 1.15rem;
+
+  .brand-copy h1 {
+    font-size: clamp(1.2rem, 1rem + 0.6vw, 1.65rem);
     font-weight: 700;
-    color: var(--color-text);
-    line-height: 1.3;
-  }
-  header .subtitle {
-    font-size: 0.8rem;
-    color: var(--color-text-muted);
-    margin-top: 3px;
-  }
-  .header-center {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 50vw;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    pointer-events: none;
-  }
-  .header-center .flow-item {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 999px;
-    border: 1px solid currentColor;
-    background: #f8fafc;
-    font-size: 0.8rem;
-    font-weight: 600;
-    vertical-align: middle;
-  }
-  .header-center .flow-sep {
-    color: var(--color-text-faint);
-    margin: 0 8px;
-    font-size: 0.85rem;
-    vertical-align: middle;
-  }
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+    letter-spacing: -0.03em;
   }
 
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 8px 14px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    border-radius: var(--radius);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface);
-    color: var(--color-text);
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
-  }
-  .btn:hover { background: #f1f5f9; }
-  .btn-primary {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: #fff;
-  }
-  .btn-primary:hover { background: var(--color-primary-hover); }
-
-  /* ── MAIN ── */
-  .main-content {
-    padding: 24px 24px 48px;
-    max-width: 1400px;
-    margin: 0 auto;
+  .brand-copy .subtitle {
+    margin-top: 6px;
+    font-size: 0.9rem;
+    color: var(--text-tertiary);
+    letter-spacing: -0.01em;
   }
 
-  /* ── CATEGORY BLOCK ── */
-  .category-block {
-    margin-bottom: 20px;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid var(--color-border);
-    border-left: 4px solid var(--cat-color, var(--color-primary));
-    background: var(--color-surface);
-  }
-  .category-header {
+  .topbar-actions {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 16px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--color-text);
-    border-bottom: 1px solid var(--color-border);
-    background: #f8fafc;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
-  .category-header .icon { font-size: 0.9rem; }
-  .category-header .cat-count {
-    margin-left: auto;
-    padding: 2px 10px;
-    border-radius: 999px;
-    font-size: 0.72rem;
+
+  .btn {
+    appearance: none;
+    border: 1px solid var(--page-border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-primary);
+    padding: 11px 16px;
+    font-size: 0.88rem;
     font-weight: 600;
-    background: #eff6ff;
-    color: var(--cat-color, var(--color-primary));
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
-  /* ── TREE AREA ── */
-  .tree-area {
-    padding: 16px 18px 18px 16px;
-  }
-
-  ul.tree-list {
-    list-style: none;
-  }
-
-  .tree-item {
-    position: relative;
-    padding: 6px 0;
-  }
-
-  /* ── NODE CARD ── */
-  .node-card {
-    display: inline-flex;
-    flex-direction: column;
-    gap: 4px;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 8px 14px;
-    cursor: default;
-    transition: box-shadow 0.15s, transform 0.12s, border-color 0.15s;
-    max-width: 600px;
-    vertical-align: top;
-    background: var(--color-surface);
-    position: relative;
-    z-index: 10;
-  }
-  .node-card:hover {
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+  .btn:hover {
     transform: translateY(-1px);
-    border-color: var(--cat-color, var(--color-primary));
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--page-border-strong);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
   }
-  .node-card.has-docs.has-link { cursor: pointer; }
 
-  .node-name {
+  .btn-primary {
+    background: linear-gradient(180deg, #1d8cff 0%, var(--accent) 100%);
+    border-color: rgba(0, 113, 227, 0.34);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(180deg, #2892ff 0%, var(--accent-hover) 100%);
+  }
+
+  .page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .glass-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid var(--page-border);
+    border-radius: var(--radius-xl);
+    background: var(--page-surface);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .filter-pill.is-neutral {
+    background: rgba(15, 23, 42, 0.05);
+    color: var(--text-secondary);
+  }
+
+  .board-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 22px;
+  }
+
+  .flow-board {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .flow-header {
+    display: grid;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--page-border);
+  }
+
+  .flow-header-cell {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    min-height: 64px;
+    padding: 12px 14px;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.74);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .flow-header-cell:hover {
+    transform: translateY(-2px);
+    border-color: rgba(15, 23, 42, 0.16);
+  }
+
+  .flow-header-cell.inactive {
+    opacity: 0.42;
+  }
+
+  .flow-header-cell.active {
+    min-height: 48px;
+    padding: 6px 14px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 249, 255, 0.98));
+    border-color: rgba(0, 113, 227, 0.2);
+  }
+
+  .cat-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.8);
+    font-size: 0.92rem;
+  }
+
+  .cat-text {
+    min-width: 0;
+  }
+
+  .cat-name {
+    display: block;
     font-size: 0.88rem;
     font-weight: 700;
-    color: var(--color-text);
-    line-height: 1.3;
+    letter-spacing: -0.02em;
   }
-  .node-date {
+
+  .cat-count {
+    padding: 6px 9px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.88);
+    color: var(--cat-color, var(--accent));
     font-size: 0.72rem;
-    color: var(--color-text-muted);
-    font-weight: 400;
+    font-weight: 700;
+    white-space: nowrap;
   }
 
-  .doc-team {
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 1px 7px;
-    margin-left: 4px;
-    border-radius: 999px;
-    background: #eff6ff;
-    color: var(--cat-color, var(--color-primary));
+  .flow-grid {
+    display: grid;
+    gap: 12px;
+    row-gap: 12px;
+    position: relative;
+    width: 100%;
   }
 
-  .doc-content-tip {
-    font-size: 0.78rem;
-    color: var(--color-text);
-    max-width: 100%;
-    line-height: 1.5;
-    margin-top: 2px;
-    white-space: pre-wrap;
+  .flow-connectors {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 1;
   }
-  .doc-link-text {
-    margin-top: 4px;
+
+  .flow-cell {
+    position: relative;
+    z-index: 2;
+  }
+
+  .flow-cell.hidden {
+    display: none;
+  }
+
+  .node-card {
+    position: relative;
+    overflow: hidden;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: var(--page-surface-strong);
+    box-shadow: var(--shadow-card);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    animation: float-up 0.5s ease both;
+  }
+
+  .node-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--cat-color, var(--accent)), rgba(29, 29, 31, 0.3));
+  }
+
+  .node-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 32px rgba(15, 23, 42, 0.1);
+    border-color: rgba(15, 23, 42, 0.14);
+  }
+
+  .node-head {
+    display: grid;
+    grid-template-columns: 16px 28px minmax(0, 1fr);
+    align-items: start;
+    gap: 5px;
+    cursor: pointer;
+  }
+
+  .node-toggle {
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    background: rgba(15, 23, 42, 0.04);
+    color: var(--text-tertiary);
+    font-size: 0.58rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .node-index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 16px;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: rgba(15, 23, 42, 0.04);
+    color: var(--text-tertiary);
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    flex-shrink: 0;
+    line-height: 1.1;
+    margin-top: 1px;
+  }
+
+  .node-name {
+    min-width: 0;
     font-size: 0.75rem;
-    color: var(--color-text-muted);
-    line-height: 1.35;
+    font-weight: 700;
+    line-height: 1.32;
+    letter-spacing: -0.005em;
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  .node-details {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+  }
+
+  .node-card.expanded .node-details {
+    display: flex;
+  }
+
+  .node-field {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+    font-size: 0.76rem;
+    line-height: 1.55;
+  }
+
+  .field-label {
+    padding-top: 1px;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.015em;
+    color: var(--text-quaternary);
+    text-transform: uppercase;
+  }
+
+  .field-value {
+    min-width: 0;
+    color: var(--text-secondary);
+    word-break: break-word;
+  }
+
+  .field-value.is-empty {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    padding: 2px 8px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--warning);
+    background: var(--warning-bg);
+    border: 1px solid var(--warning-border);
+    border-radius: 8px;
+  }
+
+  .node-content {
+    white-space: pre-wrap;
+    cursor: pointer;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .node-content.expanded {
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    overflow: visible;
+  }
+
+  .node-link {
+    text-decoration: underline;
+    text-decoration-color: rgba(15, 23, 42, 0.24);
+    text-underline-offset: 2px;
     word-break: break-all;
     cursor: pointer;
-    text-decoration: underline;
-    text-decoration-color: var(--color-text-faint);
-    text-underline-offset: 2px;
-  }
-  .doc-link-text:hover {
-    color: var(--color-primary);
+    color: var(--accent);
   }
 
-  /* ── NO DATA ── */
-  .no-data {
+  .node-link:hover {
+    color: var(--accent-hover);
+  }
+
+  .empty-state {
     text-align: center;
-    padding: 60px 20px;
-    color: var(--color-text-faint);
+    padding: 96px 24px;
+    color: var(--text-tertiary);
   }
-  .no-data h2 { font-size: 1rem; margin-bottom: 8px; color: var(--color-text); }
-  .no-data p { font-size: 0.85rem; }
 
-  /* ── MODAL ── */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45);
-    z-index: 500; display: none; align-items: center; justify-content: center;
+  .empty-state h2 {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
   }
-  .modal-overlay.open { display: flex; }
-  .modal-box {
-    background: var(--color-surface); border-radius: 10px; max-width: 520px; width: 92%;
-    padding: 24px; box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
-    position: relative; border-top: 4px solid var(--color-primary);
-  }
-  .modal-close {
-    position: absolute; top: 12px; right: 14px;
-    font-size: 1.1rem; cursor: pointer; color: var(--color-text-faint); background: none; border: none; font-family: inherit;
-  }
-  .modal-close:hover { color: var(--color-text); }
-  .modal-cat { font-size: 0.75rem; font-weight: 700; margin-bottom: 5px; color: var(--color-primary); }
-  .modal-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 14px; color: var(--color-text); }
-  .modal-docs { display: flex; flex-direction: column; gap: 10px; }
-  .modal-doc-item { background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid var(--color-border); }
-  .modal-doc-item .row { display: flex; gap: 6px; align-items: flex-start; margin-bottom: 5px; }
-  .modal-doc-item .label { font-size: 0.72rem; color: var(--color-text-faint); width: 60px; flex-shrink: 0; }
-  .modal-doc-item .value { font-size: 0.82rem; color: var(--color-text); font-weight: 500; }
-  .modal-doc-item .value-link { cursor: pointer; text-decoration: underline; color: var(--color-primary); }
-  .modal-doc-item .content-text { font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.5; margin-top: 4px; white-space: pre-wrap; }
-  .modal-doc-index { font-size: 0.72rem; font-weight: 700; color: var(--color-text-faint); margin-bottom: 6px; }
-  .modal-empty { color: var(--color-text-faint); font-size: 0.85rem; }
 
-  /* ── SCROLL ── */
-  .scroll-top-btn {
-    position: fixed; bottom: 24px; right: 24px;
-    background: var(--color-primary); color: #fff;
-    border: none; border-radius: 50%; width: 42px; height: 42px;
-    font-size: 1rem; cursor: pointer; box-shadow: 0 3px 12px rgba(15, 23, 42, 0.25);
-    transition: all 0.15s; z-index: 100;
+  .empty-state p {
+    font-size: 0.94rem;
+    line-height: 1.7;
   }
-  .scroll-top-btn:hover { background: var(--color-primary-hover); transform: scale(1.06); }
+
+  .empty-state a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .help-fab {
+    position: fixed;
+    right: 26px;
+    bottom: 26px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #1d8cff 0%, var(--accent) 100%);
+    color: #fff;
+    border: 1px solid rgba(0, 113, 227, 0.36);
+    cursor: pointer;
+    box-shadow: 0 18px 32px rgba(0, 113, 227, 0.22);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .help-fab:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 22px 36px rgba(0, 113, 227, 0.3);
+  }
+
+  @keyframes float-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 860px) {
+    .page-shell {
+      padding: 10px 10px 12px;
+    }
+
+    .topbar-row {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .topbar-actions {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .board-body {
+      padding: 20px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .flow-header-cell,
+    .node-card {
+      border-radius: var(--radius-lg);
+    }
+
+    .node-field {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    * {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+
+  @supports not (display: grid) {
+    .flow-header,
+    .flow-grid {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .flow-header-cell,
+    .flow-cell {
+      flex: 0 0 200px;
+      margin: 0 12px 12px 0;
+    }
+
+    .flow-connectors {
+      display: none;
+    }
+  }
   </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <h1>🌳 IT 프로세스 문서 트리 맵</h1>
-    <div class="subtitle">분류별 항목명 목록</div>
-  </div>
-  <div class="header-center" id="legendArea"></div>
-  <div class="header-right">
-    <button class="btn btn-primary" onclick="saveAndReturn()" title="저장 후 편집으로 돌아가기">💾 저장</button>
-  </div>
-</header>
-
-<div class="main-content" id="mainContent">
-  <div class="no-data" id="noDataMsg" style="display:none;">
-    <h2>표시할 데이터가 없습니다</h2>
-  </div>
+<div class="page-shell">
+  <main class="page">
+    <div class="glass-card board-wrapper">
+      <header class="topbar" id="topbar">
+        <div class="topbar-row">
+          <div class="brand-copy">
+            <div class="eyebrow">Flow Review</div>
+            <h1>IT 프로세스 흐름을 더 명확한 Apple식 정보 계층으로 정리했습니다.</h1>
+            <div class="subtitle">분류는 가로 축에, 입력 순서는 세로 흐름에 배치해 전체 문맥을 빠르게 읽을 수 있습니다.</div>
+          </div>
+          <div class="topbar-actions">
+            <button class="btn" onclick="expandAll()">전체 펼치기</button>
+            <button class="btn" onclick="collapseAll()">전체 접기</button>
+            <button class="btn btn-primary" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드">저장</button>
+          </div>
+        </div>
+        <div class="flow-header" id="flowHeader"></div>
+      </header>
+      <div class="board-body">
+        <div class="flow-board" id="flowBoard">
+          <div class="flow-grid" id="flowGrid"></div>
+        </div>
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <h2>표시할 데이터가 없습니다</h2>
+          <p><a href="input.html">입력 화면</a>에서 항목을 먼저 추가하세요.</p>
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
 
-<!-- Detail Modal -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal-box">
-    <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('open')">✕</button>
-    <div class="modal-cat" id="modalCat"></div>
-    <div class="modal-title" id="modalTitle"></div>
-    <div class="modal-docs" id="modalDocs"></div>
-  </div>
-</div>
-
-<button class="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="맨 위로">↑</button>
+<button class="help-fab" onclick="window.open('https://forms.cloud.microsoft/r/CcsSg1CJcD', '_blank', 'noopener,noreferrer')" title="문의하기" aria-label="문의하기">
+  <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="7" fill="#fff"/>
+    <path d="M8 17 L8 21.5 L12.5 17 Z" fill="#fff"/>
+    <text x="12" y="14" text-anchor="middle" font-size="10" font-weight="800" fill="#0071e3" font-family="'Segoe UI', Arial, sans-serif">?</text>
+  </svg>
+</button>
 
 <script>
 const STORAGE_KEY = 'it_portal_data_v1';
 
 const CAT_CONFIG = {
-  '분석': { icon: '🔍', color: '#2563eb', label: '분석' },
-  '설계': { icon: '📐', color: '#7c3aed', label: '설계' },
-  '개발': { icon: '🛠', color: '#059669', label: '개발' },
-  '검증': { icon: '✅', color: '#dc2626', label: '검증' },
-  '운영': { icon: '🚀', color: '#d97706', label: '운영' }
+  '분석': { icon: '🔍', color: '#0a84ff' },
+  '설계': { icon: '📐', color: '#5e5ce6' },
+  '개발': { icon: '🛠', color: '#30b0c7' },
+  '검증': { icon: '✅', color: '#ff453a' },
+  '운영': { icon: '🚀', color: '#ff9f0a' }
 };
+const FALLBACK_PALETTE = ['#0a84ff', '#30b0c7', '#64d2ff', '#ff9f0a', '#ff453a', '#34c759', '#bf5af2', '#5ac8fa'];
 
-const CAT_ORDER = ['분석', '설계', '개발', '검증', '운영'];
-
-function colorForUnknownCategory(cat) {
-  const palette = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#f97316', '#6366f1'];
+function colorForCategory(cat) {
+  if (CAT_CONFIG[cat]) return CAT_CONFIG[cat].color;
   let hash = 0;
   for (let i = 0; i < cat.length; i++) hash = ((hash << 5) - hash) + cat.charCodeAt(i);
-  return palette[Math.abs(hash) % palette.length];
+  return FALLBACK_PALETTE[Math.abs(hash) % FALLBACK_PALETTE.length];
 }
 
-function getCatCfg(cat) {
-  const base = CAT_CONFIG[cat] || { icon: '⚪', color: colorForUnknownCategory(cat), label: cat };
-  return base;
+function iconForCategory(cat) {
+  return CAT_CONFIG[cat] ? CAT_CONFIG[cat].icon : '◌';
 }
 
 // ── EMBEDDED DATA (시크릿 모드용) ──
@@ -337,277 +638,376 @@ function getCatCfg(cat) {
 const EMBEDDED_DATA = [];
 // __EMBEDDED_DATA_END__
 
-// 저장소 접근 자체가 예외를 던질 수 있어(보안 정책으로 차단된 VDI 등) 항상 try/catch로 감싸 사용한다.
 function safeGetSession(key) {
   try { return sessionStorage.getItem(key); } catch (e) { return null; }
 }
 
-// ── LOAD DATA ──
 // localStorage는 오래된 데이터가 남아있을 수 있어 신뢰하지 않는다.
 // input.html에서 방금 넘겨준 sessionStorage 값이거나, 저장(다운로드)된 파일에 내장된 데이터만 사용한다.
 function loadData() {
-  // 1. sessionStorage 확인 (input.html에서 방금 넘어온 경우)
-  const sessionData = safeGetSession('it_portal_data_v1');
+  const sessionData = safeGetSession(STORAGE_KEY);
   if (sessionData) {
-    try { return JSON.parse(sessionData); } catch { }
+    try { return JSON.parse(sessionData); } catch (e) {}
   }
-
-  // 2. embedded data (저장된 최종 HTML 파일을 다시 연 경우)
   return EMBEDDED_DATA.length > 0 ? EMBEDDED_DATA : null;
 }
 
 function saveAndReturn() {
-  var data = loadData();
+  const data = loadData();
   if (!data || data.length === 0) {
     alert('저장할 데이터가 없습니다.');
     window.location.href = 'input.html';
     return;
   }
 
-  // 현재 스크립트 태그에서 소스 추출
-  var scriptEl = null;
-  var scripts = document.querySelectorAll('script');
-  for (var i = 0; i < scripts.length; i++) {
+  let scriptEl = null;
+  const scripts = document.querySelectorAll('script');
+  for (let i = 0; i < scripts.length; i++) {
     if (scripts[i].textContent.indexOf('__EMBEDDED_DATA_START__') !== -1) {
       scriptEl = scripts[i];
       break;
     }
   }
-
   if (!scriptEl) {
     alert('소스를 찾을 수 없습니다.');
     window.location.href = 'input.html';
     return;
   }
 
-  var newBlock = '// __EMBEDDED_DATA_START__\nconst EMBEDDED_DATA = ' + JSON.stringify(data, null, 2) + ';\n// __EMBEDDED_DATA_END__';
-  var newScriptContent = scriptEl.textContent.replace(
+  const newBlock = '// __EMBEDDED_DATA_START__\nconst EMBEDDED_DATA = ' + JSON.stringify(data, null, 2) + ';\n// __EMBEDDED_DATA_END__';
+  const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const updatedHtml = fullHtml.replace(
     /\/\/ __EMBEDDED_DATA_START__[\s\S]*?\/\/ __EMBEDDED_DATA_END__/,
     newBlock
   );
 
-  // 전체 HTML 재구성: <head>...</head><body>...</body> 교체
-  var fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-  // outerHTML의 script 내용을 교체 (마커 기반)
-  var updatedHtml = fullHtml.replace(
-    /\/\/ __EMBEDDED_DATA_START__[\s\S]*?\/\/ __EMBEDDED_DATA_END__/,
-    newBlock
-  );
-
-  var blob = new Blob([updatedHtml], { type: 'text/html;charset=utf-8' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
+  const blob = new Blob([updatedHtml], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
   a.href = url;
-  a.download = 'view.html';
+  a.download = 'view2.html';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
-  alert('✓ 저장 완료! (' + data.length + '개 항목)\n');
+  alert('저장 완료! (' + data.length + '개 항목)');
 }
 
-// ── BUILD NODE LIST (분류별 평면 목록) ──
-function buildTree(rows) {
-  const catNodeMap = {};
-  const catOrder = [];
-
-  rows.forEach(r => {
-    if (!r.항목명) return;
-    if (!catNodeMap[r.분류]) {
-      catNodeMap[r.분류] = new Map();
-      if (!catOrder.includes(r.분류)) catOrder.push(r.분류);
-    }
-    const map = catNodeMap[r.분류];
-    const key = r.항목명;
-    if (!map.has(key)) {
-      map.set(key, { 항목명: r.항목명, 분류: r.분류, docs: [] });
-    }
-    const node = map.get(key);
-    if (r.주관팀 || r.개정일자 || r.문서링크 || r.문서내용) {
-      node.docs.push({
-        주관팀: r.주관팀 || '',
-        개정일자: r.개정일자 || '',
-        문서링크: r.문서링크 || '',
-        문서내용: r.문서내용 || ''
-      });
-    }
-  });
-
-  const sortedCats = CAT_ORDER.filter(c => catNodeMap[c]).concat(
-    catOrder.filter(c => !CAT_ORDER.includes(c))
-  );
-
-  const catNodes = {};
-  sortedCats.forEach(cat => {
-    catNodes[cat] = Array.from(catNodeMap[cat].values());
-  });
-
-  return { catNodes, sortedCats };
+function esc(str) {
+  return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ── RENDER ──
-function render() {
-  const rows = loadData();
-  const container = document.getElementById('mainContent');
-  const noData = document.getElementById('noDataMsg');
+function escAttr(str) {
+  return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
 
-  if (!rows || rows.length === 0) {
-    noData.style.display = 'block';
-    renderLegend([]);
-    return;
+function isUrl(str) {
+  return /^https?:\/\//i.test((str || '').trim());
+}
+
+function openLink(link) {
+  if (isUrl(link)) {
+    window.open(link, '_blank', 'noopener,noreferrer');
+  } else {
+    alert('문서 위치: ' + link);
   }
-  noData.style.display = 'none';
-
-  const { catNodes, sortedCats } = buildTree(rows);
-  renderLegend(sortedCats);
-
-  let html = '';
-  sortedCats.forEach(cat => {
-    const cfg = getCatCfg(cat);
-    const nodes = catNodes[cat] || [];
-
-    html += `<div class="category-block" style="--cat-color:${cfg.color};">`;
-    html += `<div class="category-header">
-               <span class="icon">${cfg.icon}</span>
-               <span>${escHtml(cat)}</span>
-               <span class="cat-count">${nodes.length}개 항목</span>
-             </div>`;
-    html += `<div class="tree-area">`;
-    html += `<ul class="tree-list">`;
-    nodes.forEach(node => {
-      html += `<li class="tree-item root-item">${renderNodeCard(node, cat, cfg)}</li>`;
-    });
-    html += `</ul>`;
-    html += `</div></div>`;
-  });
-
-  container.innerHTML = noData.outerHTML + html;
-  document.getElementById('noDataMsg').style.display = 'none';
 }
 
-// 노드 카드 렌더링
-function renderNodeCard(node, cat, cfg) {
-  const hasDocs = node.docs && node.docs.length > 0;
-  const firstDoc = hasDocs ? node.docs[0] : null;
-  const hasLink = hasDocs && firstDoc.문서링크;
-  let html = `<div class="node-card${hasDocs ? ' has-docs' : ''}${hasLink ? ' has-link' : ''}"
-    ${hasLink ? `onclick="event.stopPropagation();showDocLink('${escAttr(firstDoc.문서링크)}')"` : ''}>`;
-  html += `<div class="node-name">${escHtml(node.항목명)}`;
-  if (hasDocs && firstDoc.개정일자) html += ` <span class="node-date">(${escHtml(firstDoc.개정일자)})</span>`;
-  if (hasDocs && firstDoc.주관팀) html += ` <span class="doc-team">${escHtml(firstDoc.주관팀)}</span>`;
-  html += `</div>`;
-  if (hasDocs && firstDoc.문서내용) html += `<div class="doc-content-tip">${escHtml(firstDoc.문서내용)}</div>`;
-  if (hasDocs && firstDoc.문서링크) {
-    html += `<div class="doc-link-text" onclick="event.stopPropagation();showDocLink('${escAttr(firstDoc.문서링크)}')">${escHtml(firstDoc.문서링크)}</div>`;
-  }
-  html += `</div>`;
+function toggleContent(el) {
+  el.classList.toggle('expanded');
+}
+
+function toggleCard(headEl) {
+  const card = headEl.closest('.node-card');
+  if (!card) return;
+  card.classList.toggle('expanded');
+  const t = headEl.querySelector('.node-toggle');
+  if (t) t.textContent = card.classList.contains('expanded') ? '▾' : '▸';
+  requestAnimationFrame(drawConnectors);
+}
+
+let activeCategory = null;
+let lastRows = [];
+
+function toggleCategory(cat) {
+  activeCategory = (activeCategory === cat) ? null : cat;
+  applyCategoryFilter();
+}
+
+function applyCategoryFilter() {
+  document.querySelectorAll('.flow-header-cell').forEach(function(el) {
+    const cat = el.dataset.cat;
+    el.classList.toggle('inactive', !!activeCategory && cat !== activeCategory);
+    el.classList.toggle('active', !!activeCategory && cat === activeCategory);
+  });
+
+  let visibleRow = 0;
+  let visibleCount = 0;
+  document.querySelectorAll('.flow-cell').forEach(function(el) {
+    const cat = el.dataset.cat;
+    const isVisible = !activeCategory || cat === activeCategory;
+    el.classList.toggle('hidden', !isVisible);
+    if (!isVisible) return;
+
+    visibleCount++;
+    visibleRow++;
+    if (activeCategory) {
+      el.style.gridRow = visibleRow;
+      el.style.gridColumn = el.dataset.col;
+    } else {
+      el.style.gridRow = Number(el.dataset.idx) + 1;
+      el.style.gridColumn = el.dataset.col;
+    }
+  });
+
+  updateFilterSummary(visibleCount, lastRows.length);
+  requestAnimationFrame(drawConnectors);
+}
+
+function expandAll() {
+  document.querySelectorAll('.node-card').forEach(function(card) {
+    card.classList.add('expanded');
+    const t = card.querySelector('.node-toggle');
+    if (t) t.textContent = '▾';
+  });
+  requestAnimationFrame(drawConnectors);
+}
+
+function collapseAll() {
+  document.querySelectorAll('.node-card').forEach(function(card) {
+    card.classList.remove('expanded');
+    const t = card.querySelector('.node-toggle');
+    if (t) t.textContent = '▸';
+  });
+  requestAnimationFrame(drawConnectors);
+}
+
+function updateHeaderOffset() {
+  const topbar = document.getElementById('topbar');
+  const height = topbar ? Math.ceil(topbar.getBoundingClientRect().height) : 84;
+  document.documentElement.style.setProperty('--topbar-h', height + 'px');
+}
+
+function getColumns(rows) {
+  const seen = [];
+  rows.forEach(function(r) {
+    const cat = (r.분류 || '').trim() || '미분류';
+    if (seen.indexOf(cat) === -1) seen.push(cat);
+  });
+  return seen;
+}
+
+function headerCellHtml(cat, count) {
+  const color = colorForCategory(cat);
+  return '<div class="flow-header-cell" data-cat="' + esc(cat) + '" onclick="toggleCategory(\'' + escAttr(cat) + '\')" style="--cat-color:' + color + '">' +
+    '<span class="cat-icon">' + iconForCategory(cat) + '</span>' +
+    '<span class="cat-text">' +
+      '<span class="cat-name">' + esc(cat) + '</span>' +
+    '</span>' +
+    '<span class="cat-count">' + count + '개</span>' +
+  '</div>';
+}
+
+function cellHtml(row, idx, col) {
+  const cat = (row.분류 || '').trim() || '미분류';
+  const color = colorForCategory(cat);
+  let html = '<div class="flow-cell" data-cat="' + esc(cat) + '" data-col="' + col + '" style="grid-column:' + col + ';grid-row:' + (idx + 1) + ';" data-idx="' + idx + '">';
+  html += '<div class="node-card" style="--cat-color:' + color + '">';
+  html += '<div class="node-head" onclick="toggleCard(this)">';
+  html += '<span class="node-toggle">▸</span>';
+  html += '<span class="node-index">#' + (idx + 1) + '</span>';
+  html += '<span class="node-name">' + esc(row.항목명 || '(항목명 없음)') + '</span>';
+  html += '</div>';
+  html += '<div class="node-details">';
+  html += fieldRow('주관팀', row.주관팀);
+  html += fieldRow('개정일자', row.개정일자);
+  html += fieldRow('문서명', row.문서명);
+  html += fieldRow('문서내용', row.문서내용, 'content');
+  html += fieldRow('문서링크', row.문서링크, 'link');
+  html += '</div>';
+  html += '</div></div>';
   return html;
 }
 
-// ── MODAL ──
-let _modalData = {};
-
-function buildModalData(rows) {
-  const map = {};
-  rows.forEach(r => {
-    if (!r.항목명) return;
-    const k = `${r.분류}||${r.항목명}`;
-    if (!map[k]) map[k] = { 분류: r.분류, 항목명: r.항목명, docs: [] };
-    if (r.주관팀 || r.개정일자 || r.문서링크 || r.문서내용) {
-      map[k].docs.push({ 주관팀: r.주관팀||'', 개정일자: r.개정일자||'', 문서링크: r.문서링크||'', 문서내용: r.문서내용||'' });
-    }
-  });
-  return map;
-}
-
-function showModal(cat, itemName) {
-  const rows = loadData() || [];
-  if (!_modalData || Object.keys(_modalData).length === 0) {
-    _modalData = buildModalData(rows);
-  }
-  const key = `${cat}||${itemName}`;
-  const data = _modalData[key];
-  if (!data) return;
-
-  const cfg = getCatCfg(cat);
-  const catEl = document.getElementById('modalCat');
-  catEl.textContent = cat;
-  catEl.style.color = cfg.color;
-
-  document.getElementById('modalTitle').textContent = itemName;
-
-  const docsEl = document.getElementById('modalDocs');
-  if (data.docs.length === 0) {
-    docsEl.innerHTML = '<p class="modal-empty">문서 정보가 없습니다.</p>';
+function fieldRow(label, value, kind) {
+  const has = value && value.trim();
+  let valueHtml;
+  if (!has) {
+    valueHtml = '<span class="field-value is-empty">미입력</span>';
+  } else if (kind === 'content') {
+    valueHtml = '<span class="field-value node-content" onclick="toggleContent(this)">' + esc(value) + '</span>';
+  } else if (kind === 'link') {
+    valueHtml = '<span class="field-value node-link" onclick="openLink(\'' + escAttr(value) + '\')">' + esc(value) + '</span>';
   } else {
-    docsEl.innerHTML = data.docs.map((doc, i) => `
-      <div class="modal-doc-item">
-        ${data.docs.length > 1 ? `<div class="modal-doc-index">문서 ${i+1}</div>` : ''}
-        ${doc.주관팀 ? `<div class="row"><span class="label">주관팀</span><span class="value">${escHtml(doc.주관팀)}</span></div>` : ''}
-        ${doc.개정일자 ? `<div class="row"><span class="label">개정일자</span><span class="value">${escHtml(doc.개정일자)}</span></div>` : ''}
-        ${doc.문서링크 ? `<div class="row"><span class="label">문서 위치</span><span class="value value-link" onclick="showDocLink('${escAttr(doc.문서링크)}')">${escHtml(doc.문서링크)}</span></div>` : ''}
-        ${doc.문서내용 ? `<div class="content-text">${escHtml(doc.문서내용)}</div>` : ''}
-      </div>
-    `).join('');
+    valueHtml = '<span class="field-value">' + esc(value) + '</span>';
   }
-
-  document.getElementById('modalOverlay').classList.add('open');
+  return '<div class="node-field"><span class="field-label">' + esc(label) + '</span>' + valueHtml + '</div>';
 }
 
-function closeModal(e) {
-  if (e.target === document.getElementById('modalOverlay')) {
-    document.getElementById('modalOverlay').classList.remove('open');
+function drawConnectors() {
+  try {
+    drawConnectorsInner();
+  } catch (e) {
+    // 연결선 그리기가 실패해도 카드 데이터는 그대로 보이도록 조용히 무시한다.
   }
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.getElementById('modalOverlay').classList.remove('open');
+function drawConnectorsInner() {
+  const grid = document.getElementById('flowGrid');
+  if (!grid) return;
+  const gridRect = grid.getBoundingClientRect();
+  const width = grid.scrollWidth;
+  const height = grid.scrollHeight;
+
+  const visibleCells = Array.from(grid.querySelectorAll('.flow-cell'))
+    .filter(function(c) { return !c.classList.contains('hidden'); })
+    .sort(function(a, b) { return Number(a.dataset.idx) - Number(b.dataset.idx); });
+
+  let paths = '';
+  for (let i = 0; i < visibleCells.length - 1; i++) {
+    const a = visibleCells[i];
+    const b = visibleCells[i + 1];
+    if (!a || !b) continue;
+    const ar = a.getBoundingClientRect();
+    const br = b.getBoundingClientRect();
+    const x1 = ar.left + ar.width / 2 - gridRect.left;
+    const y1 = ar.bottom - gridRect.top;
+    const x2 = br.left + br.width / 2 - gridRect.left;
+    const y2 = br.top - gridRect.top;
+    const midY = (y1 + y2) / 2;
+    const d = Math.abs(x1 - x2) < 4
+      ? 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2
+      : 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + midY + ' ' + x2 + ',' + midY + ' ' + x2 + ',' + y2;
+    paths += '<path d="' + d + '" fill="none" stroke="rgba(120, 124, 130, 0.42)" stroke-width="2" marker-end="url(#flowArrow)" />';
+  }
+
+  let svg = document.getElementById('flowSvg');
+  if (!svg) {
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('id', 'flowSvg');
+    svg.setAttribute('class', 'flow-connectors');
+    grid.appendChild(svg);
+  }
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+  svg.innerHTML = '<defs><marker id="flowArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="rgba(120, 124, 130, 0.62)" /></marker></defs>' + paths;
+}
+
+function formatNumber(num) {
+  return String(num || 0);
+}
+
+function updateFilterSummary(visibleCount, totalCount) {
+  const filterStatus = document.getElementById('filterStatus');
+  const boardCopy = document.querySelector('.board-copy p');
+  if (!filterStatus && !boardCopy) return;
+
+  if (!activeCategory) {
+    if (filterStatus) {
+      filterStatus.textContent = '전체 분류를 표시 중';
+      filterStatus.classList.add('is-neutral');
+    }
+    if (boardCopy) boardCopy.textContent = '전체 ' + formatNumber(totalCount) + '개 항목을 입력 순서대로 보여주고 있습니다. 카드를 눌러 세부 내용을 열고, 분류 헤더를 눌러 해당 영역만 집중해서 볼 수 있습니다.';
+    return;
+  }
+
+  if (filterStatus) {
+    filterStatus.textContent = activeCategory + '만 표시 중';
+    filterStatus.classList.remove('is-neutral');
+  }
+  if (boardCopy) boardCopy.textContent = activeCategory + ' 분류의 ' + formatNumber(visibleCount) + '개 항목만 모아 보고 있습니다. 헤더를 다시 누르면 전체 보기로 돌아갑니다.';
+}
+
+function render() {
+  try {
+    renderInner();
+  } catch (e) {
+    showRenderError(e);
+  }
+}
+
+function showRenderError(e) {
+  const board = document.getElementById('flowBoard');
+  const emptyState = document.getElementById('emptyState');
+  if (board) board.style.display = 'none';
+  if (emptyState) {
+    emptyState.style.display = 'block';
+    const msg = e && e.message ? e.message : String(e);
+    emptyState.innerHTML = '<h2>화면을 표시하는 중 문제가 발생했습니다</h2>' +
+      '<p>' + esc(msg) + '</p>' +
+      '<p><a href="input.html">입력 화면</a>으로 돌아가서 다시 시도해주세요.</p>';
+  }
+}
+
+function renderInner() {
+  const rows = loadData() || [];
+  const emptyState = document.getElementById('emptyState');
+  const board = document.getElementById('flowBoard');
+
+  updateHeaderOffset();
+
+  if (rows.length === 0) {
+    board.style.display = 'none';
+    emptyState.style.display = 'block';
+    updateFilterSummary(0, 0);
+    return;
+  }
+  board.style.display = 'block';
+  emptyState.style.display = 'none';
+
+  const columns = getColumns(rows);
+  const colIndex = {};
+  columns.forEach(function(c, i) { colIndex[c] = i + 1; });
+  lastRows = rows;
+
+  const flowHeader = document.getElementById('flowHeader');
+  const flowGrid = document.getElementById('flowGrid');
+
+  const templateColumns = 'repeat(' + columns.length + ', minmax(0, 1fr))';
+  flowHeader.style.gridTemplateColumns = templateColumns;
+  flowGrid.style.gridTemplateColumns = templateColumns;
+  flowGrid.style.gridTemplateRows = 'repeat(' + rows.length + ', auto)';
+
+  flowHeader.innerHTML = columns.map(function(cat) {
+    const count = rows.filter(function(r) { return ((r.분류 || '').trim() || '미분류') === cat; }).length;
+    return headerCellHtml(cat, count);
+  }).join('');
+
+  let cellsHtml = '';
+  rows.forEach(function(row, idx) {
+    const cat = (row.분류 || '').trim() || '미분류';
+    cellsHtml += cellHtml(row, idx, colIndex[cat]);
+  });
+  flowGrid.innerHTML = cellsHtml;
+
+  activeCategory = null;
+  applyCategoryFilter();
+  requestAnimationFrame(drawConnectors);
+}
+
+let resizeTimer;
+window.addEventListener('resize', function() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function() {
+    updateHeaderOffset();
+    drawConnectors();
+  }, 150);
 });
 
-function showDocLink(link) {
-  if (/^https?:\/\//i.test(link)) {
-    window.open(link, '_blank', 'noopener,noreferrer');
-  } else {
-    alert('문서 위치: ' + link + '\n\n(URL인 경우 주소창에 직접 입력하세요)');
-  }
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(function() {
+    updateHeaderOffset();
+    drawConnectors();
+  });
 }
 
-// ── LEGEND ──
-function renderLegend(cats) {
-  const area = document.getElementById('legendArea');
-  const activeCats = CAT_ORDER.filter(c => cats.includes(c)).concat(
-    cats.filter(c => !CAT_ORDER.includes(c))
-  );
-  area.innerHTML = activeCats.map((c, idx) => {
-    const cfg = getCatCfg(c);
-    const sep = idx < activeCats.length - 1 ? '<span class="flow-sep">></span>' : '';
-    return `<span class="flow-item" style="color:${cfg.color}">${escHtml(cfg.label)}</span>${sep}`;
-  }).join('');
-}
+window.addEventListener('load', function() {
+  updateHeaderOffset();
+  drawConnectors();
+});
 
-// ── HELPERS ──
-function escHtml(str) {
-  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function escAttr(str) {
-  return (str || '').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-}
-function truncate(str, max) {
-  return str.length > max ? str.slice(0, max) + '…' : str;
-}
-
-// ── TREE CONNECTOR FIX ──
-// 중첩 ul의 세로 커넥터 선이 모든 자식을 커버하도록 동적 조정 (현재는 고정 값 사용)
-function fixTreeConnectors() {
-  // 현재 CSS에서 고정 값(top:8px, bottom:8px)을 사용하므로 추가 조정 불필요
-  // 필요시 동적 계산 로직 추가 가능
-}
-
-// ── INIT ──
 render();
-requestAnimationFrame(fixTreeConnectors);
-window.addEventListener('resize', fixTreeConnectors);
 </script>
 </body>
 </html>
