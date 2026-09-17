@@ -6,728 +6,141 @@
   <title>IT 프로세스 문서 - 흐름 보기</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-  :root {
-    --color-bg: #f8fafc;
-    --color-surface: #ffffff;
-    --color-border: #e2e8f0;
-    --color-text: #1e293b;
-    --color-text-muted: #64748b;
-    --color-text-faint: #94a3b8;
-    --color-primary: #2563eb;
-    --color-primary-hover: #1d4ed8;
-    --color-warning: #b45309;
-    --color-warning-bg: #fffbeb;
-    --color-warning-border: #fbbf24;
-    --radius: 8px;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--color-bg);
-    color: var(--color-text);
-    min-height: 100vh;
-  }
-
-  header {
-    background: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: static;
-    z-index: 1;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  header h1 {
-    font-size: 1.15rem;
-    font-weight: 700;
-  }
-  header .subtitle {
-    font-size: 0.8rem;
-    color: var(--color-text-muted);
-    margin-top: 3px;
-  }
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 8px 14px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    border-radius: var(--radius);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface);
-    color: var(--color-text);
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.15s ease, border-color 0.15s ease;
-  }
-  .btn:hover { background: #f1f5f9; }
-  .btn-primary {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: #fff;
-  }
-  .btn-primary:hover { background: var(--color-primary-hover); }
-
-  .board-wrapper {
-    padding: 16px 24px 48px;
-  }
-
-  .flow-board {
-    position: relative;
-    min-width: fit-content;
-  }
-
-  .flow-header {
-    display: grid;
-    gap: 24px;
-    position: sticky;
-    top: 0;
-    z-index: 60;
-    padding-bottom: 14px;
-    background: var(--color-bg);
-  }
-
-  .flow-header-cell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-top: 3px solid var(--cat-color, var(--color-primary));
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 0.88rem;
-    font-weight: 700;
-    cursor: pointer;
-    user-select: none;
-    transition: opacity 0.15s, background 0.15s;
-  }
-  .flow-header-cell:hover {
-    background: #f8fafc;
-  }
-  .flow-header-cell.inactive {
-    opacity: 0.4;
-  }
-  .flow-header-cell.active {
-    background: var(--cat-color, var(--color-primary));
-    border-color: var(--cat-color, var(--color-primary));
-    color: #fff;
-  }
-  .flow-header-cell.active .cat-count {
-    background: rgba(255, 255, 255, 0.25);
-    color: #fff;
-  }
-  .flow-header-cell .cat-count {
-    margin-left: auto;
-    padding: 1px 9px;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    background: #eff6ff;
-    color: var(--cat-color, var(--color-primary));
-  }
-
-  .flow-grid {
-    display: grid;
-    gap: 24px;
-    row-gap: 24px;
-    position: relative;
-  }
-
-  .flow-connectors {
-    position: absolute;
-    top: 0;
-    left: 0;
-    overflow: visible;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  .flow-cell {
-    position: relative;
-    z-index: 2;
-  }
-  .flow-cell.hidden {
-    display: none;
-  }
-
-  .node-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-left: 3px solid var(--cat-color, var(--color-primary));
-    border-radius: 8px;
-    padding: 10px 12px;
-    transition: box-shadow 0.15s, transform 0.12s;
-  }
-  .node-card:hover {
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
-    transform: translateY(-1px);
-  }
-
-  .node-head {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-  }
-
-  .node-toggle {
-    font-size: 0.65rem;
-    color: var(--color-text-faint);
-    flex-shrink: 0;
-    width: 10px;
-  }
-
-  .node-index {
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: var(--color-text-faint);
-    letter-spacing: 0.03em;
-    flex-shrink: 0;
-  }
-
-  .node-name {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--color-text);
-    line-height: 1.3;
-  }
-
-  .node-details {
-    display: none;
-    flex-direction: column;
-    gap: 7px;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid var(--color-border);
-  }
-  .node-card.expanded .node-details {
-    display: flex;
-  }
-
-  .node-field {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 0.78rem;
-    line-height: 1.5;
-  }
-
-  .field-label {
-    flex-shrink: 0;
-    width: 60px;
-    padding-top: 2px;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: var(--color-text-faint);
-  }
-
-  .field-value {
-    flex: 1;
-    min-width: 0;
-    color: var(--color-text);
-  }
-
-  .field-value.is-empty {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    width: fit-content;
-    padding: 1px 9px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--color-warning);
-    background: var(--color-warning-bg);
-    border: 1px dashed var(--color-warning-border);
-    border-radius: 6px;
-  }
-
-  .node-content {
-    white-space: pre-wrap;
-    cursor: pointer;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .node-content.expanded {
-    -webkit-line-clamp: unset;
-    line-clamp: unset;
-    overflow: visible;
-  }
-
-  .node-link {
-    text-decoration: underline;
-    text-decoration-color: var(--color-text-faint);
-    text-underline-offset: 2px;
-    word-break: break-all;
-    cursor: pointer;
-  }
-  .node-link:hover { color: var(--color-primary); }
-
-  .empty-state {
-    text-align: center;
-    padding: 80px 20px;
-    color: var(--color-text-faint);
-  }
-  .empty-state h2 { font-size: 1rem; margin-bottom: 8px; color: var(--color-text); }
-  .empty-state p { font-size: 0.85rem; }
-  .empty-state a { color: var(--color-primary); }
-
-  .help-fab {
-    position: fixed;
-    right: 24px;
-    bottom: 24px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    color: #fff;
-    border: none;
-    font-size: 1.5rem;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25);
-    z-index: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.15s, transform 0.15s;
-  }
-  .help-fab:hover {
-    background: var(--color-primary-hover);
-    transform: translateY(-2px);
-  }
-
-  /* 구형 VDI 브라우저 등 CSS Grid 지원이 불안정한 환경을 위한 폴백: flex로 줄바꿈해 데이터는 항상 보이도록 한다. */
-  @supports not (display: grid) {
-    .flow-header, .flow-grid {
-      display: flex;
-      flex-wrap: wrap;
-    }
-    .flow-header-cell {
-      flex: 0 0 240px;
-      margin: 0 12px 12px 0;
-    }
-    .flow-cell {
-      flex: 0 0 240px;
-      margin: 0 12px 24px 0;
-    }
-    .flow-connectors {
-      display: none;
-    }
-  }
+  :root { --bg:#f7f7f5; --ink:#11110f; --muted:#777770; --faint:#c9c9c1; --line:#bdbdb5; --surface:#efefea; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { min-height:100vh; overflow:hidden; background:var(--bg); color:var(--ink); font-family:'DM Sans','Noto Sans KR',sans-serif; }
+  button { font:inherit; color:inherit; }
+  .topbar { height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 32px; border-bottom:1px solid var(--faint); }
+  .identity, .utility, .stage-marker, .eyebrow, .detail-label, .overview-stage { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+  .utility { display:flex; gap:18px; }
+  .utility button, .plain-button { border:0; background:none; cursor:pointer; font:inherit; font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+  .utility button:hover, .plain-button:hover { text-decoration:underline; text-underline-offset:4px; }
+  .save { border-bottom:1px solid var(--ink)!important; padding-bottom:3px; }
+  .process-shell { min-height:calc(100vh - 64px); position:relative; display:grid; place-items:center; padding:56px 8vw 96px; }
+  .stage-marker { position:absolute; top:30px; left:32px; display:flex; align-items:center; gap:9px; color:var(--muted); }
+  .stage-marker i { width:5px; height:5px; border-radius:50%; background:var(--stage-color); display:block; }
+  .mode-toggle { position:absolute; top:30px; right:32px; }
+  .focus-view { width:min(1120px,100%); }
+  .hero { min-height:300px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; cursor:pointer; outline:none; }
+  .eyebrow { color:var(--muted); margin-bottom:12px; }
+  .process-number { font-family:'DM Mono',monospace; font-size:clamp(88px,13vw,156px); line-height:.78; letter-spacing:-.08em; }
+  .process-name { max-width:900px; margin-top:20px; font-size:clamp(31px,4.2vw,56px); font-weight:500; line-height:1.14; }
+  .process-meta { margin-top:18px; font-size:13px; color:var(--muted); }
+  .process-meta .accent { color:var(--stage-color); }
+  .hero.is-changing { animation:change-out 260ms ease both; }
+  @keyframes change-out { to { opacity:0; transform:translateY(-10px); clip-path:inset(0 0 100% 0); } }
+  .line-region { position:relative; margin-top:42px; height:96px; cursor:ew-resize; touch-action:pan-y; user-select:none; }
+  .process-line, .progress-line { position:absolute; top:48px; height:1px; }
+  .process-line { left:0; right:0; background:var(--line); }
+  .progress-line { left:0; width:var(--progress); background:var(--ink); transition:width 300ms ease; }
+  .current-point { position:absolute; top:42px; left:var(--progress); width:13px; height:13px; border:2px solid var(--bg); background:var(--ink); border-radius:50%; transform:translateX(-50%); transition:left 300ms ease; }
+  .lens-node { position:absolute; top:8px; left:calc(var(--progress) + (var(--offset) * 82px)); transform:translateX(-50%); opacity:var(--node-opacity); transition:opacity 180ms ease,transform 180ms ease; pointer-events:none; text-align:center; }
+  .lens-node b { display:block; font:500 12px 'DM Mono',monospace; }
+  .lens-node span { display:block; max-width:145px; margin-top:4px; font-size:11px; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .line-region:not(.is-lensing) .lens-node { opacity:0; }
+  .line-region.is-lensing .lens-node { transform:translateX(-50%) scale(var(--node-scale)); }
+  .line-region:not(.is-lensing) .lens-node span { display:none; }
+  .neighbors { display:grid; grid-template-columns:1fr 1fr; gap:36px; margin-top:46px; }
+  .neighbor { border:0; background:none; cursor:pointer; text-align:left; padding:0; min-width:0; color:var(--muted); }
+  .neighbor.next { text-align:right; }
+  .neighbor:disabled { visibility:hidden; }
+  .neighbor small { display:block; font:11px 'DM Mono',monospace; margin-bottom:6px; }
+  .neighbor strong { font-size:15px; font-weight:400; line-height:1.35; transition:color 180ms ease; }
+  .neighbor:hover strong { color:var(--ink); }
+  .branch-choice { margin:24px auto 0; max-width:520px; display:none; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); }
+  .branch-choice.visible { display:grid; }
+  .branch-choice button { border:0; background:var(--bg); padding:16px; text-align:left; cursor:pointer; font-size:13px; }
+  .branch-choice button:hover { background:var(--surface); }
+  .chapter { position:absolute; inset:0; z-index:5; display:none; place-items:center; background:var(--bg); text-align:center; }
+  .chapter.visible { display:grid; animation:chapter 600ms ease both; }
+  .chapter b { display:block; font:12px 'DM Mono',monospace; color:var(--muted); margin-bottom:12px; }
+  .chapter strong { font-size:clamp(42px,7vw,76px); font-weight:500; }
+  @keyframes chapter { 0%{opacity:0} 30%,70%{opacity:1} 100%{opacity:0} }
+  .overview { display:none; width:100%; height:calc(100vh - 160px); overflow:auto; padding:18px 0; }
+  .overview.visible, .detail.visible { display:block; }
+  .overview-title { margin-bottom:45px; font:10px 'DM Mono',monospace; letter-spacing:.08em; color:var(--muted); }
+  .overview-flow { position:relative; display:grid; min-width:900px; gap:18px; padding:0 0 48px; }
+  .overview-columns { display:grid; gap:18px; position:sticky; top:0; z-index:2; padding-bottom:14px; background:var(--bg); }
+  .overview-column { border-top:2px solid var(--stage-color); padding-top:8px; color:var(--muted); font:10px 'DM Mono',monospace; letter-spacing:.08em; text-transform:uppercase; }
+  .overview-nodes { display:grid; gap:18px; position:relative; }
+  .overview-node { position:relative; z-index:1; width:100%; border:1px solid var(--faint); border-left:3px solid var(--stage-color); border-radius:2px; background:var(--bg); padding:10px 12px; cursor:pointer; text-align:left; }
+  .overview-node:hover, .overview-node.current { background:var(--surface); border-color:var(--ink); }
+  .overview-node small { display:block; margin-bottom:4px; color:var(--muted); font:10px 'DM Mono',monospace; }
+  .overview-node strong { display:block; font-size:13px; font-weight:500; line-height:1.35; }
+  .overview-node-details { display:none; margin-top:10px; padding-top:9px; border-top:1px solid var(--faint); color:var(--muted); font-size:11px; line-height:1.55; }
+  .overview-node.is-expanded .overview-node-details { display:block; }
+  .overview-field { display:grid; grid-template-columns:42px minmax(0,1fr); gap:5px; align-items:baseline; min-width:0; }
+  .overview-node-details b { color:var(--ink); font:500 9px 'DM Mono',monospace; letter-spacing:.04em; }
+  .overview-node-details em { min-width:0; overflow:hidden; font-style:normal; text-overflow:ellipsis; white-space:nowrap; }
+  .overview-connectors { position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; overflow:visible; }
+  .overview-row { display:grid; grid-template-columns:180px 1fr; align-items:center; min-height:50px; border-top:1px solid var(--faint); }
+  .overview-stage { color:var(--muted); }
+  .overview-points { display:flex; align-items:center; flex-wrap:wrap; gap:7px; }
+  .overview-point { position:relative; width:8px; height:8px; padding:0; border:0; border-radius:50%; background:var(--ink); opacity:.32; cursor:pointer; }
+  .overview-point.current { width:13px; height:13px; opacity:1; background:var(--stage-color); }
+  .overview-point:hover::after { content:attr(data-name); position:absolute; left:14px; bottom:12px; z-index:2; width:max-content; max-width:190px; padding:4px 6px; background:var(--ink); color:var(--bg); font:11px 'Noto Sans KR',sans-serif; white-space:normal; text-align:left; }
+  .detail { display:none; width:min(760px,100%); }
+  .detail-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:45px; }
+  .detail-number { font:62px 'DM Mono',monospace; letter-spacing:-.08em; line-height:.8; }
+  .detail-name { margin-top:18px; font-size:clamp(30px,4vw,46px); font-weight:500; line-height:1.16; }
+  .detail-grid { border-top:1px solid var(--ink); }
+  .detail-row { display:grid; grid-template-columns:150px 1fr; gap:24px; padding:21px 0; border-bottom:1px solid var(--faint); font-size:15px; line-height:1.7; }
+  .detail-label { padding-top:5px; color:var(--muted); }
+  .detail-value { white-space:pre-wrap; word-break:break-word; }
+  .detail-value.empty { color:var(--muted); }
+  .detail-value a { color:inherit; text-underline-offset:3px; }
+  .empty-state { display:none; width:100%; text-align:center; color:var(--muted); font-size:14px; }
+  .help-fab { position:fixed; right:22px; bottom:20px; width:30px; height:30px; border:1px solid var(--faint); border-radius:50%; background:var(--bg); cursor:pointer; font:14px 'DM Mono',monospace; }
+  @media(max-width:640px) { body{overflow:auto}.topbar{height:56px;padding:0 18px}.utility{gap:12px}.utility .legacy{display:none}.process-shell{min-height:calc(100vh - 56px);display:block;padding:82px 24px 50px}.stage-marker{top:22px;left:24px}.mode-toggle{top:21px;right:24px}.hero{min-height:280px;align-items:flex-start;text-align:left}.process-number{font-size:92px}.process-name{font-size:34px}.line-region{margin:16px 0 0 14px;width:2px;height:138px;cursor:ns-resize}.process-line{top:0;bottom:0;left:0;right:auto;width:1px;height:auto}.progress-line{top:0;left:0;width:1px;height:var(--progress)}.current-point{top:var(--progress);left:-6px;transform:translateY(-50%)}.lens-node{display:none}.neighbors{grid-template-columns:1fr;gap:25px;margin-top:14px}.neighbor.next{text-align:left}.overview{height:calc(100vh - 120px)}.detail-row{grid-template-columns:1fr;gap:7px}.detail-top{margin-bottom:35px} }
   </style>
 </head>
 <body>
-
-<header>
-  <div>
-    <h1>↔ IT 프로세스 문서 흐름 보기</h1>
-    <div class="subtitle">분류를 열로, 입력 순서를 위→아래 흐름으로 표시합니다</div>
-  </div>
-  <div class="header-actions">
-    <button class="btn" onclick="expandAll()">펼치기</button>
-    <button class="btn" onclick="collapseAll()">접기</button>
-    <button class="btn btn-primary" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드">💾 저장</button>
-  </div>
-</header>
-
-
-<div class="board-wrapper">
-  <div class="flow-board" id="flowBoard">
-    <div class="flow-header" id="flowHeader"></div>
-    <div class="flow-grid" id="flowGrid"></div>
-  </div>
-  <div class="empty-state" id="emptyState" style="display:none;">
-    <h2>표시할 데이터가 없습니다</h2>
-    <p><a href="input.html">입력 화면</a>에서 항목을 먼저 추가하세요.</p>
-  </div>
-</div>
-
-<button class="help-fab" onclick="window.open('https://forms.cloud.microsoft/r/CcsSg1CJcD', '_blank', 'noopener,noreferrer')" title="문의하기">
-  <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
-    <rect x="2" y="3" width="20" height="14" rx="7" fill="#fff"/>
-    <path d="M8 17 L8 21.5 L12.5 17 Z" fill="#fff"/>
-    <text x="12" y="14" text-anchor="middle" font-size="10" font-weight="800" fill="var(--color-primary)" font-family="'Segoe UI', Arial, sans-serif">?</text>
-  </svg>
-</button>
-
+<header class="topbar"><div class="identity">IT PROCESS</div><div class="utility"><button class="legacy" onclick="expandAll()">펼치기</button><button class="legacy" onclick="collapseAll()">접기</button><button class="save" onclick="saveAndReturn()">SAVE</button></div></header>
+<main class="process-shell" id="flowBoard" aria-live="polite"><div class="stage-marker" id="stageMarker"></div><button class="plain-button mode-toggle" id="modeToggle" onclick="toggleOverview()">OVERVIEW</button><section class="focus-view" id="focusView"><div class="hero" id="hero" tabindex="0" role="button" aria-label="현재 프로세스 상세 보기" onclick="openDetail()"><div class="eyebrow" id="heroKicker"></div><div class="process-number" id="processNumber"></div><h1 class="process-name" id="processName"></h1><p class="process-meta" id="processMeta"></p></div><div class="line-region" id="lineRegion"><div class="process-line"></div><div class="progress-line"></div><div class="current-point"></div><div id="lensNodes"></div></div><div class="branch-choice" id="branchChoice"></div><nav class="neighbors"><button class="neighbor" id="previousButton" onclick="goPrevious()"></button><button class="neighbor next" id="nextButton" onclick="goNext()"></button></nav></section><section class="overview" id="overview" aria-label="전체 프로세스 개요"></section><section class="detail" id="detail" aria-label="프로세스 상세정보"></section><div class="chapter" id="chapter"></div><div class="empty-state" id="emptyState"><p>표시할 데이터가 없습니다. <a href="input.html">입력 화면</a>에서 항목을 먼저 추가하세요.</p></div></main>
+<button class="help-fab" onclick="window.open('https://forms.cloud.microsoft/r/CcsSg1CJcD', '_blank', 'noopener,noreferrer')" title="문의하기" aria-label="문의하기">?</button>
 <script>
-const STORAGE_KEY = 'it_portal_data_v1';
-
-const CAT_CONFIG = {
-  '분석': { icon: '🔍', color: '#2563eb' },
-  '설계': { icon: '📐', color: '#7c3aed' },
-  '개발': { icon: '🛠', color: '#059669' },
-  '검증': { icon: '✅', color: '#dc2626' },
-  '운영': { icon: '🚀', color: '#d97706' }
-};
-const FALLBACK_PALETTE = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#f97316', '#6366f1'];
-
-function colorForCategory(cat) {
-  if (CAT_CONFIG[cat]) return CAT_CONFIG[cat].color;
-  let hash = 0;
-  for (let i = 0; i < cat.length; i++) hash = ((hash << 5) - hash) + cat.charCodeAt(i);
-  return FALLBACK_PALETTE[Math.abs(hash) % FALLBACK_PALETTE.length];
-}
-
-function iconForCategory(cat) {
-  return CAT_CONFIG[cat] ? CAT_CONFIG[cat].icon : '⚪';
-}
-
-// ── EMBEDDED DATA (시크릿 모드용) ──
+const STORAGE_KEY='it_portal_data_v1';
+const CAT_CONFIG={'분석':{color:'#2563eb'},'설계':{color:'#7c3aed'},'개발':{color:'#059669'},'검증':{color:'#dc2626'},'운영':{color:'#d97706'}};
+const FALLBACK_PALETTE=['#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#f97316','#6366f1'];
+function colorForCategory(cat){if(CAT_CONFIG[cat])return CAT_CONFIG[cat].color;let hash=0;for(let i=0;i<cat.length;i++)hash=((hash<<5)-hash)+cat.charCodeAt(i);return FALLBACK_PALETTE[Math.abs(hash)%FALLBACK_PALETTE.length];}
 // __EMBEDDED_DATA_START__
-const EMBEDDED_DATA = [];
+const EMBEDDED_DATA=[];
 // __EMBEDDED_DATA_END__
-
-// 저장소 접근 자체가 예외를 던질 수 있어(보안 정책으로 차단된 VDI 등) 항상 try/catch로 감싸 사용한다.
-function safeGetSession(key) {
-  try { return sessionStorage.getItem(key); } catch (e) { return null; }
-}
-
-// localStorage는 오래된 데이터가 남아있을 수 있어 신뢰하지 않는다.
-// input.html에서 방금 넘겨준 sessionStorage 값이거나, 저장(다운로드)된 파일에 내장된 데이터만 사용한다.
-function loadData() {
-  const sessionData = safeGetSession(STORAGE_KEY);
-  if (sessionData) {
-    try { return JSON.parse(sessionData); } catch (e) {}
-  }
-  return EMBEDDED_DATA.length > 0 ? EMBEDDED_DATA : null;
-}
-
-function saveAndReturn() {
-  const data = loadData();
-  if (!data || data.length === 0) {
-    alert('저장할 데이터가 없습니다.');
-    window.location.href = 'input.html';
-    return;
-  }
-
-  let scriptEl = null;
-  const scripts = document.querySelectorAll('script');
-  for (let i = 0; i < scripts.length; i++) {
-    if (scripts[i].textContent.indexOf('__EMBEDDED_DATA_START__') !== -1) {
-      scriptEl = scripts[i];
-      break;
-    }
-  }
-  if (!scriptEl) {
-    alert('소스를 찾을 수 없습니다.');
-    window.location.href = 'input.html';
-    return;
-  }
-
-  const newBlock = '// __EMBEDDED_DATA_START__\nconst EMBEDDED_DATA = ' + JSON.stringify(data, null, 2) + ';\n// __EMBEDDED_DATA_END__';
-  const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-  const updatedHtml = fullHtml.replace(
-    /\/\/ __EMBEDDED_DATA_START__[\s\S]*?\/\/ __EMBEDDED_DATA_END__/,
-    newBlock
-  );
-
-  const blob = new Blob([updatedHtml], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'view2.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  alert('✓ 저장 완료! (' + data.length + '개 항목)');
-}
-
-function esc(str) {
-  return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-function escAttr(str) {
-  return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-}
-function isUrl(str) {
-  return /^https?:\/\//i.test((str || '').trim());
-}
-function openLink(link) {
-  if (isUrl(link)) {
-    window.open(link, '_blank', 'noopener,noreferrer');
-  } else {
-    alert('문서 위치: ' + link);
-  }
-}
-function toggleContent(el) {
-  el.classList.toggle('expanded');
-}
-function toggleCard(headEl) {
-  const card = headEl.closest('.node-card');
-  if (!card) return;
-  card.classList.toggle('expanded');
-  const t = headEl.querySelector('.node-toggle');
-  if (t) t.textContent = card.classList.contains('expanded') ? '▾' : '▸';
-  requestAnimationFrame(drawConnectors);
-}
-
-// 카테고리 헤더를 클릭하면 해당 분류만 모아보기(솔로) 한다. 다시 클릭하면 모두 보기로 돌아간다. 기본은 모두 보이는 상태.
-let activeCategory = null;
-
-function toggleCategory(cat) {
-  activeCategory = (activeCategory === cat) ? null : cat;
-  applyCategoryFilter();
-}
-
-function applyCategoryFilter() {
-  document.querySelectorAll('.flow-header-cell').forEach(function(el) {
-    const cat = el.dataset.cat;
-    el.classList.toggle('inactive', !!activeCategory && cat !== activeCategory);
-    el.classList.toggle('active', !!activeCategory && cat === activeCategory);
-  });
-
-  let visibleRow = 0;
-  document.querySelectorAll('.flow-cell').forEach(function(el) {
-    const cat = el.dataset.cat;
-    const isVisible = !activeCategory || cat === activeCategory;
-    el.classList.toggle('hidden', !isVisible);
-    if (!isVisible) return;
-
-    visibleRow++;
-    if (activeCategory) {
-      // 모아보기: 빈 자리 없이 순서대로 따다닥 붙여 배치하고 전체 폭을 사용한다.
-      el.style.gridRow = visibleRow;
-      el.style.gridColumn = '1 / -1';
-    } else {
-      // 원래 위치로 복원
-      el.style.gridRow = Number(el.dataset.idx) + 1;
-      el.style.gridColumn = el.dataset.col;
-    }
-  });
-
-  requestAnimationFrame(drawConnectors);
-}
-function expandAll() {
-  document.querySelectorAll('.node-card').forEach(function(card) {
-    card.classList.add('expanded');
-    const t = card.querySelector('.node-toggle');
-    if (t) t.textContent = '▾';
-  });
-  requestAnimationFrame(drawConnectors);
-}
-function collapseAll() {
-  document.querySelectorAll('.node-card').forEach(function(card) {
-    card.classList.remove('expanded');
-    const t = card.querySelector('.node-toggle');
-    if (t) t.textContent = '▸';
-  });
-  requestAnimationFrame(drawConnectors);
-}
-function updateHeaderOffset() {
-  document.documentElement.style.setProperty('--flow-header-top', '0px');
-  document.documentElement.style.setProperty('--header-h', '0px');
-}
-
-function getColumns(rows) {
-  // 알려진 5개 분류를 앞으로 강제 정렬하면 실제 입력 순서와 어긋나 열이 뒤로 밀려 보이지 않는 것처럼 보일 수 있다.
-  // 대신 데이터에 처음 등장한 순서 그대로 열을 만들어 입력 흐름과 항상 일치시킨다.
-  const seen = [];
-  rows.forEach(function(r) {
-    const cat = (r.분류 || '').trim() || '미분류';
-    if (seen.indexOf(cat) === -1) seen.push(cat);
-  });
-  return seen;
-}
-
-function headerCellHtml(cat, count) {
-  const color = colorForCategory(cat);
-  return '<div class="flow-header-cell" data-cat="' + esc(cat) + '" onclick="toggleCategory(\'' + escAttr(cat) + '\')" style="--cat-color:' + color + '">' +
-    '<span>' + iconForCategory(cat) + '</span>' +
-    '<span>' + esc(cat) + '</span>' +
-    '<span class="cat-count">' + count + '개</span>' +
-  '</div>';
-}
-
-function cellHtml(row, idx, col) {
-  const cat = (row.분류 || '').trim() || '미분류';
-  const color = colorForCategory(cat);
-  let html = '<div class="flow-cell" data-cat="' + esc(cat) + '" data-col="' + col + '" style="grid-column:' + col + ';grid-row:' + (idx + 1) + ';" data-idx="' + idx + '">';
-  html += '<div class="node-card" style="--cat-color:' + color + '">';
-  html += '<div class="node-head" onclick="toggleCard(this)">';
-  html += '<span class="node-toggle">▸</span>';
-  html += '<span class="node-index">#' + (idx + 1) + '</span>';
-  html += '<span class="node-name">' + esc(row.항목명 || '(항목명 없음)') + '</span>';
-  html += '</div>';
-  html += '<div class="node-details">';
-  html += fieldRow('주관팀', row.주관팀);
-  html += fieldRow('개정일자', row.개정일자);
-  html += fieldRow('문서명', row.문서명);
-  html += fieldRow('문서내용', row.문서내용, 'content');
-  html += fieldRow('문서링크', row.문서링크, 'link');
-  html += '</div>';
-  html += '</div></div>';
-  return html;
-}
-
-function fieldRow(label, value, kind) {
-  const has = value && value.trim();
-  let valueHtml;
-  if (!has) {
-    valueHtml = '<span class="field-value is-empty">⚠ 미입력</span>';
-  } else if (kind === 'content') {
-    valueHtml = '<span class="field-value node-content" onclick="toggleContent(this)">' + esc(value) + '</span>';
-  } else if (kind === 'link') {
-    valueHtml = '<span class="field-value node-link" onclick="openLink(\'' + escAttr(value) + '\')">🔗 ' + esc(value) + '</span>';
-  } else {
-    valueHtml = '<span class="field-value">' + esc(value) + '</span>';
-  }
-  return '<div class="node-field"><span class="field-label">' + esc(label) + '</span>' + valueHtml + '</div>';
-}
-
-function drawConnectors() {
-  try {
-    drawConnectorsInner();
-  } catch (e) {
-    // 연결선 그리기가 실패해도 카드 데이터는 그대로 보이도록 조용히 무시한다.
-  }
-}
-
-function drawConnectorsInner() {
-  const grid = document.getElementById('flowGrid');
-  if (!grid) return;
-  const gridRect = grid.getBoundingClientRect();
-  const width = grid.scrollWidth;
-  const height = grid.scrollHeight;
-
-  const visibleCells = Array.from(grid.querySelectorAll('.flow-cell'))
-    .filter(function(c) { return !c.classList.contains('hidden'); })
-    .sort(function(a, b) { return Number(a.dataset.idx) - Number(b.dataset.idx); });
-
-  let paths = '';
-  for (let i = 0; i < visibleCells.length - 1; i++) {
-    const a = visibleCells[i];
-    const b = visibleCells[i + 1];
-    if (!a || !b) continue;
-    const ar = a.getBoundingClientRect();
-    const br = b.getBoundingClientRect();
-    const x1 = ar.left + ar.width / 2 - gridRect.left;
-    const y1 = ar.bottom - gridRect.top;
-    const x2 = br.left + br.width / 2 - gridRect.left;
-    const y2 = br.top - gridRect.top;
-    const midY = (y1 + y2) / 2;
-    const d = Math.abs(x1 - x2) < 4
-      ? 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2
-      : 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + midY + ' ' + x2 + ',' + midY + ' ' + x2 + ',' + y2;
-    paths += '<path d="' + d + '" fill="none" stroke="#cbd5e1" stroke-width="2" marker-end="url(#flowArrow)" />';
-  }
-
-  let svg = document.getElementById('flowSvg');
-  if (!svg) {
-    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('id', 'flowSvg');
-    svg.setAttribute('class', 'flow-connectors');
-    grid.appendChild(svg);
-  }
-  svg.setAttribute('width', width);
-  svg.setAttribute('height', height);
-  svg.innerHTML = '<defs><marker id="flowArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#94a3b8" /></marker></defs>' + paths;
-}
-
-function render() {
-  try {
-    renderInner();
-  } catch (e) {
-    showRenderError(e);
-  }
-}
-
-function showRenderError(e) {
-  const board = document.getElementById('flowBoard');
-  const emptyState = document.getElementById('emptyState');
-  if (board) board.style.display = 'none';
-  if (emptyState) {
-    emptyState.style.display = 'block';
-    const msg = e && e.message ? e.message : String(e);
-    emptyState.innerHTML = '<h2>화면을 표시하는 중 문제가 발생했습니다</h2>' +
-      '<p>' + esc(msg) + '</p>' +
-      '<p><a href="input.html">입력 화면</a>으로 돌아가서 다시 시도해주세요.</p>';
-  }
-}
-
-function renderInner() {
-  const rows = loadData() || [];
-  const emptyState = document.getElementById('emptyState');
-  const board = document.getElementById('flowBoard');
-
-  updateHeaderOffset();
-
-  if (rows.length === 0) {
-    board.style.display = 'none';
-    emptyState.style.display = 'block';
-    return;
-  }
-  board.style.display = 'block';
-  emptyState.style.display = 'none';
-
-  const columns = getColumns(rows);
-  const colIndex = {};
-  columns.forEach(function(c, i) { colIndex[c] = i + 1; });
-
-  const flowHeader = document.getElementById('flowHeader');
-  const flowGrid = document.getElementById('flowGrid');
-
-  const templateColumns = 'repeat(' + columns.length + ', minmax(240px, 1fr))';
-  flowHeader.style.gridTemplateColumns = templateColumns;
-  flowGrid.style.gridTemplateColumns = templateColumns;
-  flowGrid.style.gridTemplateRows = 'repeat(' + rows.length + ', auto)';
-
-  flowHeader.innerHTML = columns.map(function(cat) {
-    const count = rows.filter(function(r) { return ((r.분류 || '').trim() || '미분류') === cat; }).length;
-    return headerCellHtml(cat, count);
-  }).join('');
-
-  let cellsHtml = '';
-  rows.forEach(function(row, idx) {
-    const cat = (row.분류 || '').trim() || '미분류';
-    cellsHtml += cellHtml(row, idx, colIndex[cat]);
-  });
-  flowGrid.innerHTML = cellsHtml;
-
-  requestAnimationFrame(drawConnectors);
-}
-
-let resizeTimer;
-window.addEventListener('resize', function() {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(function() {
-    updateHeaderOffset();
-    drawConnectors();
-  }, 150);
-});
-
-// 웹폰트가 늦게 로드되어 헤더 높이가 바뀌면 sticky 오프셋을 다시 계산
-if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(function() {
-    updateHeaderOffset();
-    drawConnectors();
-  });
-}
-window.addEventListener('load', function() {
-  updateHeaderOffset();
-  drawConnectors();
-});
-
+function safeGetSession(key){try{return sessionStorage.getItem(key)}catch(e){return null}}
+function loadData(){const data=safeGetSession(STORAGE_KEY);if(data){try{return JSON.parse(data)}catch(e){}}return EMBEDDED_DATA.length?EMBEDDED_DATA:null}
+function saveAndReturn(){const data=loadData();if(!data||!data.length){alert('저장할 데이터가 없습니다.');window.location.href='input.html';return}const block='// __EMBEDDED_DATA_START__\nconst EMBEDDED_DATA = '+JSON.stringify(data,null,2)+';\n// __EMBEDDED_DATA_END__',html=('<!DOCTYPE html>\n'+document.documentElement.outerHTML).replace(/\/\/ __EMBEDDED_DATA_START__[\s\S]*?\/\/ __EMBEDDED_DATA_END__/,block),blob=new Blob([html],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='view2.html';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);alert('저장 완료! ('+data.length+'개 항목)')}
+function esc(value){return String(value||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function isUrl(value){return /^https?:\/\//i.test((value||'').trim())}
+function openLink(link){if(isUrl(link))window.open(link,'_blank','noopener,noreferrer');else alert('문서 위치: '+link)}
+let rows=[],currentIndex=0,mode='overview',overviewExpanded=false,wheelAmount=0,wheelTimer,dragStart,chapterTimer;
+function category(row){return(row.분류||'').trim()||'미분류'}
+function stageIndex(cat){return Array.from(new Set(rows.map(category))).indexOf(cat)+1}
+function setMode(next){mode=next;focusView.style.display=mode==='focus'?'block':'none';overview.classList.toggle('visible',mode==='overview');detail.classList.toggle('visible',mode==='detail');modeToggle.style.visibility=mode==='detail'?'hidden':'visible';modeToggle.textContent=mode==='overview'?'FOCUS':'OVERVIEW';if(mode==='overview')renderOverview();if(mode==='detail')renderDetail()}
+function renderCurrent(animate){const row=rows[currentIndex],cat=category(row),index=currentIndex+1;document.documentElement.style.setProperty('--progress',(currentIndex/Math.max(rows.length-1,1)*100)+'%');document.documentElement.style.setProperty('--stage-color',colorForCategory(cat));stageMarker.innerHTML='<i></i><span>'+String(stageIndex(cat)).padStart(2,'0')+' / '+String(new Set(rows.map(category)).size).padStart(2,'0')+' &nbsp; '+esc(cat)+'</span>';if(animate){hero.classList.remove('is-changing');void hero.offsetWidth;hero.classList.add('is-changing');setTimeout(()=>hero.classList.remove('is-changing'),280)}heroKicker.textContent='PROCESS '+String(index).padStart(2,'0')+' / '+String(rows.length).padStart(2,'0');processNumber.textContent=String(index).padStart(2,'0');processName.textContent=row.항목명||'(항목명 없음)';processMeta.innerHTML='<span class="accent">'+esc(cat)+'</span> &nbsp;·&nbsp; '+esc(row.주관팀||'PROCESS');previousButton.disabled=!currentIndex;nextButton.disabled=currentIndex===rows.length-1;previousButton.innerHTML=currentIndex?'<small>&larr; '+String(currentIndex).padStart(2,'0')+'</small><strong>'+esc(rows[currentIndex-1].항목명||'(항목명 없음)')+'</strong>':'';nextButton.innerHTML=currentIndex<rows.length-1?'<small>'+String(index+1).padStart(2,'0')+' &rarr;</small><strong>'+esc(rows[currentIndex+1].항목명||'(항목명 없음)')+'</strong>':'';renderLens();renderBranches()}
+function renderLens(){lensNodes.innerHTML='';for(let offset=-2;offset<=2;offset++){const index=currentIndex+offset;if(index<0||index>=rows.length)continue;const el=document.createElement('div');el.className='lens-node';el.style.setProperty('--offset',offset);el.style.setProperty('--node-opacity',offset===0?1:Math.max(.28,.72-Math.abs(offset)*.2));el.style.setProperty('--node-scale',offset===0?1.22:1);el.innerHTML='<b>'+String(index+1).padStart(2,'0')+'</b><span>'+esc(rows[index].항목명||'')+'</span>';lensNodes.appendChild(el)}}
+function branchIndexes(){const row=rows[currentIndex],value=row&&(row.다음항목||row.next||row.연결);if(!value)return[];return String(value).split(/[,|]/).map(name=>rows.findIndex(item=>item.항목명===name.trim())).filter(index=>index>=0)}
+function renderBranches(){const targets=branchIndexes();branchChoice.innerHTML='';branchChoice.classList.toggle('visible',targets.length>1);targets.forEach(index=>{const button=document.createElement('button');button.textContent=String(index+1).padStart(2,'0')+'  '+(rows[index].항목명||'');button.onclick=()=>goTo(index);branchChoice.appendChild(button)})}
+function transitionStage(next,done){const after=category(rows[next]);if(category(rows[currentIndex])===after){done();return}chapter.innerHTML='<div><b>'+String(stageIndex(after)).padStart(2,'0')+'</b><strong>'+esc(after).toUpperCase()+'</strong></div>';chapter.classList.add('visible');clearTimeout(chapterTimer);chapterTimer=setTimeout(()=>{chapter.classList.remove('visible');done()},600)}
+function goTo(index){if(index<0||index>=rows.length||index===currentIndex)return;transitionStage(index,()=>{currentIndex=index;renderCurrent(true)})}
+function goNext(){const branches=branchIndexes();if(branches.length>1)return;goTo(branches.length?branches[0]:currentIndex+1)}
+function goPrevious(){goTo(currentIndex-1)}
+function expandAll(){overviewExpanded=true;setMode('overview')}
+function collapseAll(){overviewExpanded=false;setMode('overview')}
+function toggleOverview(){setMode(mode==='overview'?'focus':'overview')}
+function selectOverview(index){currentIndex=index;setMode('focus');renderCurrent(true)}
+function renderOverview(){const groups=[];rows.forEach((row,index)=>{const cat=category(row),group=groups.find(value=>value.cat===cat);if(group)group.items.push({row,index});else groups.push({cat,items:[{row,index}]})});overview.innerHTML='<p class="overview-title">PROCESS OVERVIEW / '+rows.length+' ITEMS</p>'+groups.map((group,groupIndex)=>'<div class="overview-row"><div class="overview-stage">'+String(groupIndex+1).padStart(2,'0')+' '+esc(group.cat).toUpperCase()+'</div><div class="overview-points">'+group.items.map(item=>'<button class="overview-point '+(item.index===currentIndex?'current':'')+'" style="--stage-color:'+colorForCategory(group.cat)+'" data-name="'+esc(item.row.항목명||'')+'" aria-label="'+esc(item.row.항목명||'')+'" onclick="selectOverview('+item.index+')"></button>').join('')+'</div></div>').join('')}
+function overviewField(label,value){return '<span class="overview-field"><b>'+label+'</b><em title="'+esc(value||'미입력')+'">'+esc(value||'미입력')+'</em></span>'}
+function renderOverview(){const columns=Array.from(new Set(rows.map(category))),colIndex={};columns.forEach((cat,index)=>colIndex[cat]=index+1);const template='repeat('+columns.length+', minmax(170px, 1fr))';overview.innerHTML='<p class="overview-title">PROCESS OVERVIEW / '+rows.length+' ITEMS</p><div class="overview-flow" id="overviewFlow"><div class="overview-columns" style="grid-template-columns:'+template+'">'+columns.map(cat=>'<div class="overview-column" style="--stage-color:'+colorForCategory(cat)+'">'+esc(cat)+'</div>').join('')+'</div><div class="overview-nodes" id="overviewNodes" style="grid-template-columns:'+template+';grid-template-rows:repeat('+rows.length+', auto)">'+rows.map((row,index)=>'<button class="overview-node '+(overviewExpanded?'is-expanded ':'')+(index===currentIndex?'current':'')+'" id="overviewNode'+index+'" style="--stage-color:'+colorForCategory(category(row))+';grid-column:'+colIndex[category(row)]+';grid-row:'+(index+1)+'" onclick="selectOverview('+index+')"><small>#'+String(index+1).padStart(2,'0')+'</small><strong>'+esc(row.항목명||'(항목명 없음)')+'</strong><span class="overview-node-details">'+overviewField('주관팀',row.주관팀)+overviewField('개정일',row.개정일자)+overviewField('문서명',row.문서명)+overviewField('내용',row.문서내용)+overviewField('링크',row.문서링크)+'</span></button>').join('')+'<svg class="overview-connectors" id="overviewSvg" aria-hidden="true"></svg></div></div>';requestAnimationFrame(drawOverviewConnectors)}
+function drawOverviewConnectors(){const nodes=document.getElementById('overviewNodes'),svg=document.getElementById('overviewSvg');if(!nodes||!svg)return;const rect=nodes.getBoundingClientRect();svg.setAttribute('viewBox','0 0 '+nodes.clientWidth+' '+nodes.clientHeight);let paths='';for(let index=0;index<rows.length-1;index++){const from=document.getElementById('overviewNode'+index).getBoundingClientRect(),to=document.getElementById('overviewNode'+(index+1)).getBoundingClientRect(),x1=from.left+from.width/2-rect.left,y1=from.bottom-rect.top,x2=to.left+to.width/2-rect.left,y2=to.top-rect.top,mid=(y1+y2)/2;paths+='<path d="M'+x1+' '+y1+' C'+x1+' '+mid+' '+x2+' '+mid+' '+x2+' '+y2+'" fill="none" stroke="#c9c9c1" stroke-width="1.5" marker-end="url(#overviewArrow)"/>'}svg.innerHTML='<defs><marker id="overviewArrow" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#c9c9c1"/></marker></defs>'+paths}
+function detailField(label,value,link){let content=value?esc(value):'미입력';if(value&&link&&isUrl(value))content='<a href="'+esc(value)+'" target="_blank" rel="noopener noreferrer">'+esc(value)+'</a>';return '<div class="detail-row"><div class="detail-label">'+label+'</div><div class="detail-value '+(!value?'empty':'')+'">'+content+'</div></div>'}
+function renderDetail(){const row=rows[currentIndex];detail.innerHTML='<div class="detail-top"><div><div class="detail-number">'+String(currentIndex+1).padStart(2,'0')+'</div><h2 class="detail-name">'+esc(row.항목명||'(항목명 없음)')+'</h2></div><button class="plain-button" onclick="setMode(\'focus\')">BACK</button></div><div class="detail-grid">'+detailField('STAGE',category(row))+detailField('OWNER',row.주관팀)+detailField('REVISED',row.개정일자)+detailField('DOCUMENT',row.문서명)+detailField('CONTENT',row.문서내용)+detailField('LINK',row.문서링크,true)+'</div>'}
+function openDetail(){setMode('detail')}
+function handleWheel(event){if(mode!=='focus')return;event.preventDefault();wheelAmount+=event.deltaY;clearTimeout(wheelTimer);wheelTimer=setTimeout(()=>{if(Math.abs(wheelAmount)>55)wheelAmount>0?goNext():goPrevious();wheelAmount=0},80)}
+function handleKey(event){if(event.target.matches('button,a'))return;if(event.key==='ArrowRight'||event.key==='ArrowDown'){event.preventDefault();goNext()}else if(event.key==='ArrowLeft'||event.key==='ArrowUp'){event.preventDefault();goPrevious()}else if(event.key==='Enter'&&mode==='focus')openDetail();else if(event.key==='Escape'&&mode!=='focus')setMode('focus');else if(event.code==='Space'){event.preventDefault();toggleOverview()}}
+function initInteractions(){lineRegion.addEventListener('pointerdown',event=>{dragStart={x:event.clientX,y:event.clientY,index:currentIndex};lineRegion.setPointerCapture(event.pointerId)});lineRegion.addEventListener('pointermove',event=>{if(!dragStart)return;const vertical=matchMedia('(max-width:640px)').matches,delta=vertical?event.clientY-dragStart.y:event.clientX-dragStart.x,target=Math.max(0,Math.min(rows.length-1,dragStart.index-Math.round(delta/(vertical?55:100))));if(target!==currentIndex){currentIndex=target;renderCurrent(false)}});lineRegion.addEventListener('pointerup',()=>dragStart=null);lineRegion.addEventListener('pointerleave',()=>lineRegion.classList.remove('is-lensing'));lineRegion.addEventListener('pointerenter',()=>lineRegion.classList.add('is-lensing'));window.addEventListener('wheel',handleWheel,{passive:false});window.addEventListener('keydown',handleKey)}
+function render(){rows=loadData()||[];if(!rows.length){flowBoard.style.display='none';emptyState.style.display='block';return}renderCurrent(false);setMode('overview');initInteractions()}
 render();
 </script>
 </body>
