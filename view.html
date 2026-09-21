@@ -63,7 +63,7 @@
     max-width: 1520px;
     height: 100%;
     margin: 0 auto;
-    padding: 18px 16px 20px;
+    padding: 18px 8px 20px;
     display: flex;
     flex-direction: column;
   }
@@ -296,7 +296,7 @@
   .node-card {
     position: relative;
     overflow: hidden;
-    padding: 14px 16px;
+    padding: 10px 10px 10px 14px;
     border-radius: 10px;
     border: 1px solid rgba(15, 23, 42, 0.08);
     background: var(--page-surface-strong);
@@ -429,7 +429,7 @@
   .detail-name { margin-top: 10px; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.18; letter-spacing: -0.035em; }
   .detail-grid { border-top: 1px solid var(--page-border); }
   .detail-row { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 24px; padding: 18px 0; border-bottom: 1px solid var(--page-border); font-size: 0.9rem; line-height: 1.7; }
-  .detail-label { color: var(--text-quaternary); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; }
+  .detail-label { color: var(--text-quaternary); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; }
   .detail-value { white-space: pre-wrap; word-break: break-word; }
   .detail-value.empty { color: var(--text-tertiary); }
   .detail-value a { color: var(--accent); text-underline-offset: 3px; }
@@ -500,7 +500,7 @@
 
   @media (max-width: 860px) {
     .page-shell {
-      padding: 10px 10px 12px;
+      padding: 10px 6px 12px;
     }
 
     .topbar-row {
@@ -575,7 +575,7 @@
             <h1>IT Governance Handbook</h1>
           </div>
           <div class="topbar-actions">
-            <button class="btn btn-primary" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드">저장</button>
+            <button class="btn btn-primary" id="saveButton" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드" hidden>저장</button>
           </div>
         </div>
         <div class="flow-header" id="flowHeader"></div>
@@ -608,17 +608,28 @@ const STORAGE_KEY = 'it_portal_data_v1';
 const CAT_CONFIG = {
   '분석': { icon: '🔍', color: '#0a84ff' },
   '설계': { icon: '📐', color: '#5e5ce6' },
-  '개발': { icon: '🛠', color: '#30b0c7' },
+  '개발': { icon: '💻', color: '#30b0c7' },
   '검증': { icon: '✅', color: '#ff453a' },
-  '운영': { icon: '🚀', color: '#ff9f0a' }
+  '운영': { icon: '🚀', color: '#ff9f0a' },
+  '계약': { icon: '📝', color: '#34c759' },
+  '보안': { icon: '🔐', color: '#bf5af2' }
 };
-const FALLBACK_PALETTE = ['#0a84ff', '#30b0c7', '#64d2ff', '#ff9f0a', '#ff453a', '#34c759', '#bf5af2', '#5ac8fa'];
+const CATEGORY_PALETTE = ['#0a84ff', '#5e5ce6', '#30b0c7', '#ff453a', '#ff9f0a', '#34c759', '#bf5af2'];
+let categoryColors = {};
+
+function assignCategoryColors(categories) {
+  categoryColors = {};
+  categories.forEach(function(cat, index) {
+    categoryColors[cat] = CATEGORY_PALETTE[index % CATEGORY_PALETTE.length];
+  });
+}
 
 function colorForCategory(cat) {
+  if (categoryColors[cat]) return categoryColors[cat];
   if (CAT_CONFIG[cat]) return CAT_CONFIG[cat].color;
   let hash = 0;
   for (let i = 0; i < cat.length; i++) hash = ((hash << 5) - hash) + cat.charCodeAt(i);
-  return FALLBACK_PALETTE[Math.abs(hash) % FALLBACK_PALETTE.length];
+  return CATEGORY_PALETTE[Math.abs(hash) % CATEGORY_PALETTE.length];
 }
 
 function iconForCategory(cat) {
@@ -684,6 +695,11 @@ function saveAndReturn() {
   URL.revokeObjectURL(url);
 
   alert('저장 완료! (' + data.length + '개 항목)');
+}
+
+function updateSaveButtonVisibility() {
+  const saveButton = document.getElementById('saveButton');
+  if (saveButton) saveButton.hidden = !/debug/i.test(window.location.href);
 }
 
 function esc(str) {
@@ -789,7 +805,7 @@ function cellHtml(row, idx, col) {
 
 function detailField(label, value, isLink) {
   const hasValue = value && String(value).trim();
-  let content = hasValue ? esc(String(value)) : '미입력';
+  let content = hasValue ? esc(String(value)) : '-';
   if (hasValue && isLink && isUrl(String(value))) content = '<a href="' + esc(String(value)) + '" target="_blank" rel="noopener noreferrer">' + esc(String(value)) + '</a>';
   return '<div class="detail-row"><div class="detail-label">' + label + '</div><div class="detail-value' + (hasValue ? '' : ' empty') + '">' + content + '</div></div>';
 }
@@ -806,7 +822,8 @@ function renderDetail() {
   const row = lastRows[currentDetailIndex];
   const detail = document.getElementById('detailScreen');
   if (!row || !detail) return;
-  detail.innerHTML = '<div class="detail-top"><div><div class="detail-number">PROCESS ' + String(currentDetailIndex + 1).padStart(2, '0') + ' / ' + lastRows.length + '</div><h2 class="detail-name">' + esc(row.항목명 || '(항목명 없음)') + '</h2></div><button class="btn" onclick="closeDetail()">목록으로</button></div><div class="detail-grid">' + detailField('분류', (row.분류 || '').trim() || '미분류') + detailField('주관팀', row.주관팀) + detailField('개정일자', row.개정일자) + detailField('문서명', row.문서명) + detailField('문서내용', row.문서내용) + detailField('문서링크', row.문서링크, true) + '</div><nav class="detail-navigation" aria-label="인접 항목 이동">' + detailNavigation(currentDetailIndex - 1, 'previous') + detailNavigation(currentDetailIndex + 1, 'next') + '</nav>';
+  const category = (row.분류 || '').trim() || '미분류';
+  detail.innerHTML = '<div class="detail-top"><div><div class="detail-number">PROCESS ' + String(currentDetailIndex + 1).padStart(2, '0') + ' / ' + lastRows.length + '</div><h2 class="detail-name">' + esc(row.항목명 || '(항목명 없음)') + '</h2></div><button class="btn" onclick="closeDetail()">목록으로</button></div><div class="detail-grid">' + detailField('분류', iconForCategory(category) + ' ' + category) + detailField('주관팀', row.주관팀) + detailField('개정일자', row.개정일자) + detailField('문서명', row.문서명) + detailField('문서내용', row.문서내용) + detailField('문서링크', row.문서링크, true) + '</div><nav class="detail-navigation" aria-label="인접 항목 이동">' + detailNavigation(currentDetailIndex - 1, 'previous') + detailNavigation(currentDetailIndex + 1, 'next') + '</nav>';
 }
 
 function openDetail(index) {
@@ -896,7 +913,7 @@ function drawConnectorsInner() {
   }
   svg.setAttribute('width', width);
   svg.setAttribute('height', height);
-  svg.innerHTML = '<defs><marker id="flowArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="rgba(120, 124, 130, 0.62)" /></marker></defs>' + paths;
+  svg.innerHTML = '<defs><marker id="flowArrow" markerWidth="6" markerHeight="6" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L5,2.5 z" fill="rgba(120, 124, 130, 0.62)" /></marker></defs>' + paths;
 }
 
 function formatNumber(num) {
@@ -962,6 +979,7 @@ function renderInner() {
   emptyState.style.display = 'none';
 
   const columns = getColumns(rows);
+  assignCategoryColors(columns);
   const colIndex = {};
   columns.forEach(function(c, i) { colIndex[c] = i + 1; });
   lastRows = rows;
@@ -1012,6 +1030,7 @@ window.addEventListener('load', function() {
   drawConnectors();
 });
 
+updateSaveButtonVisibility();
 render();
 </script>
 </body>
