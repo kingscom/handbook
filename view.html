@@ -580,7 +580,7 @@
         </div>
         <div class="flow-header" id="flowHeader"></div>
       </header>
-      <div class="board-body">
+      <div class="board-body" id="boardBody">
         <div class="flow-board" id="flowBoard">
           <div class="flow-grid" id="flowGrid"></div>
         </div>
@@ -709,6 +709,8 @@ function openLink(link) {
 let activeCategory = null;
 let lastRows = [];
 let currentDetailIndex = -1;
+let overviewScrollTop = 0;
+let overviewBoardScrollTop = 0;
 
 function toggleCategory(cat) {
   activeCategory = (activeCategory === cat) ? null : cat;
@@ -809,6 +811,10 @@ function renderDetail() {
 
 function openDetail(index) {
   if (index < 0 || index >= lastRows.length) return;
+  if (currentDetailIndex < 0) {
+    overviewScrollTop = window.scrollY;
+    overviewBoardScrollTop = document.getElementById('boardBody').scrollTop;
+  }
   currentDetailIndex = index;
   renderDetail();
   document.getElementById('flowHeader').style.display = 'none';
@@ -823,6 +829,10 @@ function closeDetail() {
   document.getElementById('flowHeader').style.display = '';
   document.getElementById('flowBoard').style.display = 'block';
   requestAnimationFrame(drawConnectors);
+  requestAnimationFrame(function() {
+    document.getElementById('boardBody').scrollTop = overviewBoardScrollTop;
+    window.scrollTo({ top: overviewScrollTop, behavior: 'auto' });
+  });
 }
 
 window.addEventListener('keydown', function(event) {
