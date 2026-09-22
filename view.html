@@ -950,7 +950,15 @@ function cellHtml(row, idx, col) {
 function detailField(label, value, isLink) {
   const hasValue = value && String(value).trim();
   let content = hasValue ? esc(String(value)) : '-';
-  if (hasValue && isLink && isUrl(String(value))) content = '<a href="' + esc(String(value)) + '" target="_blank" rel="noopener noreferrer">' + esc(String(value)) + '</a>';
+  if (hasValue && isLink) {
+    content = String(value).split(';').map(function(link) {
+      const trimmedLink = link.trim();
+      if (!trimmedLink) return '';
+      return isUrl(trimmedLink)
+        ? '<a href="' + esc(trimmedLink) + '" target="_blank" rel="noopener noreferrer">' + esc(trimmedLink) + '</a>'
+        : esc(trimmedLink);
+    }).filter(Boolean).join('<br>');
+  }
   return '<div class="detail-row"><div class="detail-label">' + label + '</div><div class="detail-value' + (hasValue ? '' : ' empty') + '">' + content + '</div></div>';
 }
 
