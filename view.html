@@ -375,8 +375,12 @@
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
     opacity: 0;
+  }
+
+  .flow-connector.is-visible {
+    stroke-dashoffset: 0;
+    opacity: 1;
     animation: connector-draw 0.22s ease-out forwards;
-    animation-delay: calc(var(--connector-delay, 0) * 1ms);
   }
 
   .flow-cell {
@@ -985,7 +989,7 @@ function detailField(label, value, isLink) {
   const hasValue = value && String(value).trim();
   let content = hasValue ? esc(String(value)) : '-';
   if (hasValue && isLink) {
-    content = String(value).split(';').map(function(link) {
+    content = String(value).split('\\').map(function(link) {
       const trimmedLink = link.trim();
       if (!trimmedLink) return '';
       return isUrl(trimmedLink)
@@ -1087,8 +1091,7 @@ function drawConnectorsInner() {
     const d = Math.abs(x1 - x2) < 4
       ? 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2
       : 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + midY + ' ' + x2 + ',' + midY + ' ' + x2 + ',' + y2;
-      const connectorDelay = 180;
-    paths += '<path class="flow-connector" pathLength="1" d="' + d + '" fill="none" stroke="rgba(120, 124, 130, 0.42)" stroke-width="2" marker-end="url(#flowArrow)" style="--connector-delay:' + connectorDelay + '" />';
+    paths += '<path class="flow-connector" pathLength="1" d="' + d + '" fill="none" stroke="rgba(120, 124, 130, 0.42)" stroke-width="2" marker-end="url(#flowArrow)" />';
   }
 
   let svg = document.getElementById('flowSvg');
@@ -1101,6 +1104,11 @@ function drawConnectorsInner() {
   svg.setAttribute('width', width);
   svg.setAttribute('height', height);
   svg.innerHTML = '<defs><marker id="flowArrow" markerWidth="6" markerHeight="6" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L5,2.5 z" fill="rgba(120, 124, 130, 0.62)" /></marker></defs>' + paths;
+  setTimeout(function() {
+    Array.prototype.forEach.call(svg.querySelectorAll('.flow-connector'), function(path) {
+      path.classList.add('is-visible');
+    });
+  }, 180);
 }
 
 function formatNumber(num) {
