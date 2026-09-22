@@ -73,8 +73,8 @@
     z-index: 220;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding: 18px 22px 20px;
+    gap: 18px;
+    padding: 18px 22px 26px;
     border-bottom: 1px solid var(--page-border);
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     background: rgba(255, 255, 255, 0.86);
@@ -497,7 +497,31 @@
   .detail-value.empty { color: var(--text-tertiary); }
   .detail-value a { color: var(--accent); text-underline-offset: 3px; }
   .detail-navigation { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 32px; }
-  .detail-nav-button { min-width: 0; padding: 14px 16px; border: 1px solid var(--page-border); border-radius: var(--radius-md); background: var(--page-surface-strong); color: var(--text-primary); cursor: pointer; text-align: left; }
+  .detail-screen .btn,
+  .detail-nav-button {
+    border: 1px solid rgba(15, 23, 42, 0.09);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(246, 248, 252, 0.82));
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 20px rgba(15, 23, 42, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .detail-nav-button { min-width: 0; padding: 14px 16px; border-radius: var(--radius-md); color: var(--text-primary); cursor: pointer; text-align: left; }
+  .detail-screen .btn:hover,
+  .detail-nav-button:hover:not(:disabled) {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(230, 242, 255, 0.88));
+    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.06), 0 14px 28px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  }
+  .detail-screen .btn:active,
+  .detail-nav-button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), inset 0 2px 7px rgba(15, 23, 42, 0.1);
+  }
+  .detail-screen .btn:focus-visible,
+  .detail-nav-button:focus-visible {
+    outline: 3px solid rgba(0, 113, 227, 0.28);
+    outline-offset: 3px;
+  }
   .detail-nav-button.next { text-align: right; }
   .detail-nav-button:disabled { visibility: hidden; }
   .detail-nav-number { display: block; margin-bottom: 5px; color: var(--text-quaternary); font-size: 0.68rem; font-weight: 700; }
@@ -636,6 +660,7 @@
         <div class="topbar-row">
           <div class="brand-copy">
             <h1 onclick="closeDetail()">IT Governance Handbook</h1>
+            <p class="subtitle">💡IT 사업수행 프로세스에 참고할 최신 표준과 정책문서, 문서 담당자를 쉽게 찾고 활용할 수 있습니다!</p>
           </div>
           <div class="topbar-actions">
             <button class="btn btn-primary" id="saveButton" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드" hidden>저장</button>
