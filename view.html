@@ -218,6 +218,8 @@
     cursor: pointer;
     user-select: none;
     transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    animation: pop-in 0.58s cubic-bezier(0.22, 1.35, 0.36, 1) both;
+    animation-delay: calc(var(--enter-delay, 0) * 1ms);
   }
 
   .flow-header-cell::after {
@@ -361,7 +363,8 @@
     box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 20px rgba(15, 23, 42, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.92);
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    animation: float-up 0.5s ease both;
+    animation: pop-in 0.64s cubic-bezier(0.22, 1.35, 0.36, 1) both;
+    animation-delay: calc(var(--enter-delay, 0) * 1ms);
   }
 
   .node-card::before {
@@ -574,14 +577,21 @@
     box-shadow: 0 22px 36px rgba(0, 113, 227, 0.3);
   }
 
-  @keyframes float-up {
-    from {
+  @keyframes pop-in {
+    0% {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(16px) scale(0.94);
     }
-    to {
+    60% {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(-4px) scale(1.02);
+    }
+    80% {
+      transform: translateY(2px) scale(0.99);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
     }
   }
 
@@ -866,9 +876,9 @@ function getColumns(rows) {
   return seen;
 }
 
-function headerCellHtml(cat, count) {
+function headerCellHtml(cat, count, index) {
   const color = colorForCategory(cat);
-  return '<div class="flow-header-cell" data-cat="' + esc(cat) + '" onclick="toggleCategory(\'' + escAttr(cat) + '\')" style="--cat-color:' + color + '">' +
+  return '<div class="flow-header-cell" data-cat="' + esc(cat) + '" onclick="toggleCategory(\'' + escAttr(cat) + '\')" style="--cat-color:' + color + ';--enter-delay:' + (index * 70) + '">' +
     '<span class="cat-icon">' + iconForCategory(cat) + '</span>' +
     '<span class="cat-text">' +
       '<span class="cat-name">' + esc(cat) + '</span>' +
@@ -881,7 +891,7 @@ function cellHtml(row, idx, col) {
   const cat = (row.분류 || '').trim() || '미분류';
   const color = colorForCategory(cat);
   let html = '<div class="flow-cell" data-cat="' + esc(cat) + '" data-col="' + col + '" style="grid-column:' + col + ';grid-row:' + (idx + 1) + ';" data-idx="' + idx + '">';
-  html += '<div class="node-card" style="--cat-color:' + color + '" onclick="openDetail(' + idx + ')">';
+  html += '<div class="node-card" style="--cat-color:' + color + ';--enter-delay:' + Math.min(160 + idx * 45, 700) + '" onclick="openDetail(' + idx + ')">';
   html += '<div class="node-head">';
   html += '<span class="node-index">#' + (idx + 1) + '</span>';
   html += '<span class="node-name">' + esc(row.항목명 || '(항목명 없음)') + '</span>';
@@ -1080,9 +1090,9 @@ function renderInner() {
   flowGrid.style.gridTemplateColumns = templateColumns;
   flowGrid.style.gridTemplateRows = 'repeat(' + rows.length + ', auto)';
 
-  flowHeader.innerHTML = columns.map(function(cat) {
+  flowHeader.innerHTML = columns.map(function(cat, index) {
     const count = rows.filter(function(r) { return ((r.분류 || '').trim() || '미분류') === cat; }).length;
-    return headerCellHtml(cat, count);
+    return headerCellHtml(cat, count, index);
   }).join('');
 
   let cellsHtml = '';
