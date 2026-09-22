@@ -201,6 +201,10 @@
     border-top: 1px solid var(--page-border);
   }
 
+  .flow-menu-toggle {
+    display: none;
+  }
+
   .flow-header-cell {
     position: relative;
     display: grid;
@@ -680,6 +684,42 @@
       grid-template-columns: 1fr !important;
     }
 
+    .flow-menu-toggle {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      padding: 10px 14px;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--text-primary);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+      cursor: pointer;
+    }
+
+    .flow-menu-toggle::after {
+      content: '\2630';
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .flow-menu-toggle.is-filtered {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .flow-header {
+      display: none;
+    }
+
+    .flow-header.is-open {
+      display: grid;
+      margin-top: 10px;
+    }
+
     .flow-cell {
       grid-column: 1 !important;
       grid-row: auto !important;
@@ -760,6 +800,7 @@
             <button class="btn btn-primary" id="saveButton" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드" hidden>저장</button>
           </div>
         </div>
+        <button class="flow-menu-toggle" id="flowMenuToggle" type="button" onclick="toggleFlowMenu()" aria-controls="flowHeader" aria-expanded="false">분류 필터</button>
         <div class="flow-header" id="flowHeader"></div>
       </header>
       <div class="board-body" id="boardBody">
@@ -913,6 +954,23 @@ let overviewBoardScrollTop = 0;
 function toggleCategory(cat) {
   activeCategory = (activeCategory === cat) ? null : cat;
   applyCategoryFilter();
+  closeFlowMenu();
+}
+
+function toggleFlowMenu() {
+  const flowHeader = document.getElementById('flowHeader');
+  const toggle = document.getElementById('flowMenuToggle');
+  if (!flowHeader || !toggle) return;
+  const isOpen = flowHeader.classList.toggle('is-open');
+  toggle.setAttribute('aria-expanded', String(isOpen));
+}
+
+function closeFlowMenu() {
+  const flowHeader = document.getElementById('flowHeader');
+  const toggle = document.getElementById('flowMenuToggle');
+  if (!flowHeader || !toggle) return;
+  flowHeader.classList.remove('is-open');
+  toggle.setAttribute('aria-expanded', 'false');
 }
 
 function applyCategoryFilter() {
@@ -921,6 +979,12 @@ function applyCategoryFilter() {
     el.classList.toggle('inactive', !!activeCategory && cat !== activeCategory);
     el.classList.toggle('active', !!activeCategory && cat === activeCategory);
   });
+
+  const flowMenuToggle = document.getElementById('flowMenuToggle');
+  if (flowMenuToggle) {
+    flowMenuToggle.textContent = activeCategory || '분류 필터';
+    flowMenuToggle.classList.toggle('is-filtered', !!activeCategory);
+  }
 
   let visibleRow = 0;
   let visibleCount = 0;
@@ -1104,11 +1168,11 @@ function drawConnectorsInner() {
   svg.setAttribute('width', width);
   svg.setAttribute('height', height);
   svg.innerHTML = '<defs><marker id="flowArrow" markerWidth="6" markerHeight="6" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L5,2.5 z" fill="rgba(120, 124, 130, 0.62)" /></marker></defs>' + paths;
-  setTimeout(function() {
+  requestAnimationFrame(function() {
     Array.prototype.forEach.call(svg.querySelectorAll('.flow-connector'), function(path) {
       path.classList.add('is-visible');
     });
-  }, 180);
+  });
 }
 
 function formatNumber(num) {
