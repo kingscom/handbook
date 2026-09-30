@@ -93,6 +93,7 @@
     font-size: clamp(1.2rem, 1rem + 0.6vw, 1.65rem);
     font-weight: 700;
     letter-spacing: -0.03em;
+    cursor: pointer;
   }
 
   .brand-copy .subtitle {
@@ -406,6 +407,9 @@
     box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 20px rgba(15, 23, 42, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.92);
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .node-card.is-entering {
     animation: pop-in 0.48s cubic-bezier(0.22, 1.35, 0.36, 1) both;
     animation-delay: calc(var(--enter-delay, 0) * 1ms);
   }
@@ -788,7 +792,7 @@
       <header class="topbar" id="topbar">
         <div class="topbar-row">
           <div class="brand-copy">
-            <h1 onclick="closeDetail()">IT Governance Handbook</h1>
+            <h1 onclick="returnToFlow()">IT Governance Handbook</h1>
             <p class="subtitle">💡IT 사업수행 프로세스에 참고할 최신 표준과 정책문서, 문서 담당자를 쉽게 찾고 활용할 수 있습니다</p>
           </div>
           <div class="topbar-actions">
@@ -949,6 +953,8 @@ let overviewBoardScrollTop = 0;
 function toggleCategory(cat) {
   activeCategory = (activeCategory === cat) ? null : cat;
   applyCategoryFilter();
+  const boardBody = document.getElementById('boardBody');
+  if (boardBody) boardBody.scrollTop = 0;
   closeFlowMenu();
 }
 
@@ -1000,6 +1006,10 @@ function applyCategoryFilter() {
     }
   });
 
+  const flowGrid = document.getElementById('flowGrid');
+  if (flowGrid) {
+    flowGrid.style.gridTemplateRows = 'repeat(' + (activeCategory ? visibleCount : lastRows.length) + ', auto)';
+  }
   updateFilterSummary(visibleCount, lastRows.length);
   drawConnectors();
 }
@@ -1034,7 +1044,7 @@ function cellHtml(row, idx, col) {
   const cat = (row.분류 || '').trim() || '미분류';
   const color = colorForCategory(cat);
   let html = '<div class="flow-cell" data-cat="' + esc(cat) + '" data-col="' + col + '" style="grid-column:' + col + ';grid-row:' + (idx + 1) + ';" data-idx="' + idx + '">';
-    html += '<div class="node-card" style="--cat-color:' + color + ';--enter-delay:0" onclick="openDetail(' + idx + ')">';
+    html += '<div class="node-card is-entering" style="--cat-color:' + color + ';--enter-delay:0" onclick="openDetail(' + idx + ')">';
   html += '<div class="node-head">';
   html += '<span class="node-index">#' + (idx + 1) + '</span>';
   html += '<span class="node-name">' + esc(row.항목명 || '(항목명 없음)') + '</span>';
@@ -1101,6 +1111,17 @@ function closeDetail() {
   });
 }
 
+function returnToFlow() {
+  currentDetailIndex = -1;
+  document.getElementById('detailScreen').classList.remove('visible');
+  document.getElementById('flowHeader').style.display = '';
+  document.getElementById('flowBoard').style.display = 'block';
+  activeCategory = null;
+  applyCategoryFilter();
+  document.getElementById('boardBody').scrollTop = 0;
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
 window.addEventListener('keydown', function(event) {
   if (event.target.matches('button, a, input, textarea, select')) return;
   if (currentDetailIndex < 0) return;
@@ -1127,6 +1148,11 @@ function drawConnectors() {
 function drawConnectorsInner() {
   const grid = document.getElementById('flowGrid');
   if (!grid) return;
+  let svg = document.getElementById('flowSvg');
+  if (svg) {
+    svg.setAttribute('width', '0');
+    svg.setAttribute('height', '0');
+  }
   const gridRect = grid.getBoundingClientRect();
   const width = grid.scrollWidth;
   const height = grid.scrollHeight;
@@ -1153,7 +1179,6 @@ function drawConnectorsInner() {
     paths += '<path class="flow-connector is-visible" pathLength="1" d="' + d + '" fill="none" stroke="rgba(120, 124, 130, 0.42)" stroke-width="2" marker-end="url(#flowArrow)" />';
   }
 
-  let svg = document.getElementById('flowSvg');
   if (!svg) {
     svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('id', 'flowSvg');
@@ -1252,6 +1277,11 @@ function renderInner() {
     cellsHtml += cellHtml(row, idx, colIndex[cat]);
   });
   flowGrid.innerHTML = cellsHtml;
+  window.setTimeout(function() {
+    flowGrid.querySelectorAll('.node-card.is-entering').forEach(function(card) {
+      card.classList.remove('is-entering');
+    });
+  }, 520);
 
   activeCategory = null;
   applyCategoryFilter();
