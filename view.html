@@ -759,11 +759,6 @@
     html {
       scroll-behavior: auto;
     }
-
-    * {
-      animation: none !important;
-      transition: none !important;
-    }
   }
 
   @supports not (display: grid) {
@@ -1006,7 +1001,7 @@ function applyCategoryFilter() {
   });
 
   updateFilterSummary(visibleCount, lastRows.length);
-  requestAnimationFrame(drawConnectors);
+  drawConnectors();
 }
 
 function updateHeaderOffset() {
@@ -1155,7 +1150,7 @@ function drawConnectorsInner() {
     const d = Math.abs(x1 - x2) < 4
       ? 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2
       : 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + midY + ' ' + x2 + ',' + midY + ' ' + x2 + ',' + y2;
-    paths += '<path class="flow-connector" pathLength="1" d="' + d + '" fill="none" stroke="rgba(120, 124, 130, 0.42)" stroke-width="2" marker-end="url(#flowArrow)" />';
+    paths += '<path class="flow-connector is-visible" pathLength="1" d="' + d + '" fill="none" stroke="rgba(120, 124, 130, 0.42)" stroke-width="2" marker-end="url(#flowArrow)" />';
   }
 
   let svg = document.getElementById('flowSvg');
@@ -1168,11 +1163,6 @@ function drawConnectorsInner() {
   svg.setAttribute('width', width);
   svg.setAttribute('height', height);
   svg.innerHTML = '<defs><marker id="flowArrow" markerWidth="6" markerHeight="6" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L5,2.5 z" fill="rgba(120, 124, 130, 0.62)" /></marker></defs>' + paths;
-  requestAnimationFrame(function() {
-    Array.prototype.forEach.call(svg.querySelectorAll('.flow-connector'), function(path) {
-      path.classList.add('is-visible');
-    });
-  });
 }
 
 function formatNumber(num) {
@@ -1265,7 +1255,6 @@ function renderInner() {
 
   activeCategory = null;
   applyCategoryFilter();
-  requestAnimationFrame(drawConnectors);
 }
 
 let resizeTimer;
