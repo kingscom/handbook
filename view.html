@@ -111,6 +111,34 @@
     justify-content: flex-end;
   }
 
+  .layout-switcher {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px;
+    border: 1px solid var(--page-border);
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.045);
+  }
+
+  .layout-option {
+    appearance: none;
+    min-height: 32px;
+    padding: 5px 10px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text-tertiary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .layout-option[aria-pressed="true"] {
+    background: #fff;
+    color: var(--text-primary);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
+  }
+
   .btn {
     appearance: none;
     border: 1px solid var(--page-border);
@@ -535,6 +563,140 @@
     color: var(--accent-hover);
   }
 
+  /* C안: 입력 순서를 좌→우로 읽는 간결한 Process Map */
+  .layout-process .flow-header,
+  .layout-process .flow-menu-toggle {
+    display: none !important;
+  }
+
+  .layout-process .board-body {
+    padding: 0 22px 16px;
+  }
+
+  .layout-process .flow-board {
+    padding: 14px 16px 8px;
+  }
+
+  .process-legend {
+    display: none;
+  }
+
+  .layout-process .process-legend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin: 10px 0 0;
+    padding: 10px 16px;
+    border: 1px solid var(--page-border);
+    border-radius: 8px;
+    background: rgba(0, 113, 227, 0.08);
+    color: var(--text-tertiary);
+    font-size: 0.76rem;
+    font-weight: 650;
+  }
+
+  .process-area-label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 18px;
+    padding-right: 12px;
+    border-right: 1px solid var(--page-border-strong);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 750;
+    letter-spacing: 0.06em;
+  }
+
+  .process-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .process-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cat-color);
+  }
+
+  .layout-process .flow-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--process-columns), minmax(0, 1fr));
+    grid-auto-rows: minmax(56px, auto);
+    column-gap: 48px;
+    row-gap: 40px;
+    width: 100%;
+    align-items: center;
+  }
+
+  .layout-process .flow-cell {
+    grid-column: var(--process-column) !important;
+    grid-row: var(--process-row) !important;
+  }
+
+  .layout-process .node-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 56px;
+    padding: 8px 2px;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.14);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .layout-process .node-card::before {
+    position: static;
+    flex: 0 0 9px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--cat-color, var(--accent));
+  }
+
+  .layout-process .node-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--cat-color, var(--accent));
+    box-shadow: none;
+  }
+
+  .layout-process .node-head {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .layout-process .node-index {
+    flex: 0 0 auto;
+    font-size: 0.68rem;
+  }
+
+  .layout-process .node-name {
+    font-size: 0.8rem;
+    font-weight: 650;
+    line-height: 1.35;
+  }
+
+  .layout-process .node-details {
+    display: none;
+  }
+
+  .layout-process .node-card[title] {
+    cursor: pointer;
+  }
+
+  .layout-process .flow-connector {
+    stroke: rgba(105, 113, 124, 0.52);
+    stroke-width: 1.25;
+  }
+
   .detail-screen { display: none; max-width: 840px; margin: 0 auto; }
   .detail-screen.visible { display: block; }
   .detail-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 36px; }
@@ -679,6 +841,10 @@
       justify-content: flex-start;
     }
 
+    .layout-process .flow-board {
+      padding: 36px 8px 56px;
+    }
+
     .board-body {
       padding: 24px 16px 32px;
     }
@@ -796,6 +962,10 @@
             <p class="subtitle">💡IT 사업수행 프로세스에 참고할 최신 표준과 정책문서, 문서 담당자를 쉽게 찾고 활용할 수 있습니다</p>
           </div>
           <div class="topbar-actions">
+            <div class="layout-switcher" aria-label="레이아웃 선택">
+              <button class="layout-option" id="layoutOptionA" type="button" onclick="setLayout('a')" aria-pressed="true">A안</button>
+              <button class="layout-option" id="layoutOptionC" type="button" onclick="setLayout('c')" aria-pressed="false">C안</button>
+            </div>
             <button class="btn btn-primary" id="saveButton" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드" hidden>저장</button>
           </div>
         </div>
@@ -803,6 +973,7 @@
         <div class="flow-header" id="flowHeader"></div>
       </header>
       <div class="board-body" id="boardBody">
+        <div class="process-legend" id="processLegend" aria-label="분류 색상 범례"></div>
         <div class="flow-board" id="flowBoard">
           <div class="flow-grid" id="flowGrid"></div>
         </div>
@@ -826,6 +997,7 @@
 
 <script>
 const STORAGE_KEY = 'it_portal_data_v1';
+const LAYOUT_STORAGE_KEY = 'it_portal_layout_v1';
 
 const CAT_CONFIG = {
   '분석': { icon: '🔍', color: '#0a84ff' },
@@ -949,6 +1121,30 @@ let lastRows = [];
 let currentDetailIndex = -1;
 let overviewScrollTop = 0;
 let overviewBoardScrollTop = 0;
+let currentLayout = loadLayoutPreference();
+
+function loadLayoutPreference() {
+  try {
+    const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
+    return savedLayout === 'c' ? 'c' : 'a';
+  } catch (e) {
+    return 'a';
+  }
+}
+
+function setLayout(layout) {
+  currentLayout = layout === 'c' ? 'c' : 'a';
+  try { localStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout); } catch (e) {}
+
+  const page = document.querySelector('.page');
+  const optionA = document.getElementById('layoutOptionA');
+  const optionC = document.getElementById('layoutOptionC');
+  if (page) page.classList.toggle('layout-process', currentLayout === 'c');
+  if (optionA) optionA.setAttribute('aria-pressed', String(currentLayout === 'a'));
+  if (optionC) optionC.setAttribute('aria-pressed', String(currentLayout === 'c'));
+
+  if (lastRows.length) render();
+}
 
 function toggleCategory(cat) {
   activeCategory = (activeCategory === cat) ? null : cat;
@@ -980,6 +1176,20 @@ function applyCategoryFilter() {
     el.classList.toggle('inactive', !!activeCategory && cat !== activeCategory);
     el.classList.toggle('active', !!activeCategory && cat === activeCategory);
   });
+
+  if (currentLayout === 'c') {
+    const processRows = Math.max(1, Math.ceil(lastRows.length / getProcessColumns()));
+    const flowGrid = document.getElementById('flowGrid');
+    document.querySelectorAll('.flow-cell').forEach(function(el) {
+      el.classList.remove('hidden');
+    });
+    if (flowGrid) {
+      flowGrid.style.gridTemplateRows = 'repeat(' + processRows + ', minmax(56px, auto))';
+    }
+    updateFilterSummary(lastRows.length, lastRows.length);
+    drawConnectors();
+    return;
+  }
 
   const flowMenuToggle = document.getElementById('flowMenuToggle');
   if (flowMenuToggle) {
@@ -1043,8 +1253,12 @@ function headerCellHtml(cat, count, index) {
 function cellHtml(row, idx, col) {
   const cat = (row.분류 || '').trim() || '미분류';
   const color = colorForCategory(cat);
-  let html = '<div class="flow-cell" data-cat="' + esc(cat) + '" data-col="' + col + '" style="grid-column:' + col + ';grid-row:' + (idx + 1) + ';" data-idx="' + idx + '">';
-    html += '<div class="node-card is-entering" style="--cat-color:' + color + ';--enter-delay:0" onclick="openDetail(' + idx + ')">';
+  const processColumns = getProcessColumns();
+  const processRow = Math.floor(idx / processColumns) + 1;
+  const positionInRow = idx % processColumns;
+  const processColumn = processRow % 2 === 1 ? positionInRow + 1 : processColumns - positionInRow;
+  let html = '<div class="flow-cell" data-cat="' + esc(cat) + '" data-col="' + col + '" style="grid-column:' + col + ';grid-row:' + (idx + 1) + ';--process-column:' + processColumn + ';--process-row:' + processRow + ';" data-idx="' + idx + '">';
+    html += '<div class="node-card is-entering" title="' + escAttr(cat) + '" style="--cat-color:' + color + ';--enter-delay:0" onclick="openDetail(' + idx + ')">';
   html += '<div class="node-head">';
   html += '<span class="node-index">#' + (idx + 1) + '</span>';
   html += '<span class="node-name">' + esc(row.항목명 || '(항목명 없음)') + '</span>';
@@ -1168,14 +1382,40 @@ function drawConnectorsInner() {
     if (!a || !b) continue;
     const ar = a.getBoundingClientRect();
     const br = b.getBoundingClientRect();
-    const x1 = ar.left + ar.width / 2 - gridRect.left;
-    const y1 = ar.bottom - gridRect.top;
-    const x2 = br.left + br.width / 2 - gridRect.left;
-    const y2 = br.top - gridRect.top;
-    const midY = (y1 + y2) / 2;
-    const d = Math.abs(x1 - x2) < 4
-      ? 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2
-      : 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + midY + ' ' + x2 + ',' + midY + ' ' + x2 + ',' + y2;
+    let x1;
+    let y1;
+    let x2;
+    let y2;
+    let d;
+    if (currentLayout === 'c') {
+      const aCenter = ar.left + ar.width / 2;
+      const bCenter = br.left + br.width / 2;
+      if (Math.abs(aCenter - bCenter) < 4) {
+        x1 = ar.right - gridRect.left;
+        y1 = ar.bottom - gridRect.top;
+        x2 = br.right - gridRect.left;
+        y2 = br.top - gridRect.top;
+        const detourX = x1 + 26;
+        d = 'M' + x1 + ',' + y1 + ' C' + detourX + ',' + y1 + ' ' + detourX + ',' + y2 + ' ' + x2 + ',' + y2;
+      } else {
+        const movesRight = bCenter > aCenter;
+        x1 = (movesRight ? ar.right : ar.left) - gridRect.left;
+        y1 = ar.top + ar.height / 2 - gridRect.top;
+        x2 = (movesRight ? br.left : br.right) - gridRect.left;
+        y2 = br.top + br.height / 2 - gridRect.top;
+        const bendX = x1 + (x2 - x1) / 2;
+        d = 'M' + x1 + ',' + y1 + ' C' + bendX + ',' + y1 + ' ' + bendX + ',' + y2 + ' ' + x2 + ',' + y2;
+      }
+    } else {
+      x1 = ar.left + ar.width / 2 - gridRect.left;
+      y1 = ar.bottom - gridRect.top;
+      x2 = br.left + br.width / 2 - gridRect.left;
+      y2 = br.top - gridRect.top;
+      const midY = (y1 + y2) / 2;
+      d = Math.abs(x1 - x2) < 4
+        ? 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2
+        : 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + midY + ' ' + x2 + ',' + midY + ' ' + x2 + ',' + y2;
+    }
     paths += '<path class="flow-connector is-visible" pathLength="1" d="' + d + '" fill="none" stroke="rgba(120, 124, 130, 0.42)" stroke-width="2" marker-end="url(#flowArrow)" />';
   }
 
@@ -1192,6 +1432,12 @@ function drawConnectorsInner() {
 
 function formatNumber(num) {
   return String(num || 0);
+}
+
+function getProcessColumns() {
+  const boardBody = document.getElementById('boardBody');
+  const usableWidth = boardBody ? boardBody.clientWidth - 64 : 960;
+  return Math.max(2, Math.floor((usableWidth + 48) / 198));
 }
 
 function updateFilterSummary(visibleCount, totalCount) {
@@ -1260,15 +1506,23 @@ function renderInner() {
 
   const flowHeader = document.getElementById('flowHeader');
   const flowGrid = document.getElementById('flowGrid');
+  const processLegend = document.getElementById('processLegend');
+  const processColumns = getProcessColumns();
+
+  document.querySelector('.page').classList.toggle('layout-process', currentLayout === 'c');
+  flowGrid.style.setProperty('--process-columns', processColumns);
 
   const templateColumns = 'repeat(' + columns.length + ', minmax(0, 1fr))';
   flowHeader.style.gridTemplateColumns = templateColumns;
-  flowGrid.style.gridTemplateColumns = templateColumns;
-  flowGrid.style.gridTemplateRows = 'repeat(' + rows.length + ', auto)';
+  flowGrid.style.gridTemplateColumns = currentLayout === 'c' ? '' : templateColumns;
+  flowGrid.style.gridTemplateRows = currentLayout === 'c' ? '' : 'repeat(' + rows.length + ', auto)';
 
   flowHeader.innerHTML = columns.map(function(cat, index) {
     const count = rows.filter(function(r) { return ((r.분류 || '').trim() || '미분류') === cat; }).length;
     return headerCellHtml(cat, count, index);
+  }).join('');
+  processLegend.innerHTML = '<span class="process-area-label">업무 흐름</span>' + columns.map(function(cat) {
+    return '<span class="process-legend-item" style="--cat-color:' + colorForCategory(cat) + '"><span class="process-legend-dot"></span>' + esc(cat) + '</span>';
   }).join('');
 
   let cellsHtml = '';
@@ -1292,7 +1546,8 @@ window.addEventListener('resize', function() {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(function() {
     updateHeaderOffset();
-    drawConnectors();
+    if (currentLayout === 'c') render();
+    else drawConnectors();
   }, 150);
 });
 
@@ -1309,6 +1564,7 @@ window.addEventListener('load', function() {
 });
 
 updateSaveButtonVisibility();
+setLayout(currentLayout);
 render();
 </script>
 </body>
