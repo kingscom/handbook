@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "build": "node scripts/build-view.js",
     "lint:design": "npx @google/design.md lint DESIGN.md",
     "serve": "npx serve ."
   }

@@ -52,6 +52,44 @@ This approach keeps the repository simple while making it easy for both humans a
 
 ## Content model
 
+### Viewing modes
+
+The interactive handbook viewer exposes a Windows Explorer-style 보기 방식 dropdown
+for 기본 보기 / 모아 보기. The trigger displays the current mode and a downward
+chevron; the menu marks the selected mode with a checkmark and `aria-checked`.
+The menu button and radio menu items support keyboard navigation (arrows,
+Home/End, Enter/Space), Escape with focus restoration, and dismissal on selection,
+outside clicks, or focus leaving the widget. Startup and downloaded snapshots
+collapse the menu without stealing focus; the saved mode preference is unchanged.
+Each mode owns its grid placement, filtering behavior, connectors, and mode-specific
+styles in a separate script under `views/`. The main viewer retains shared data
+loading, cards, details, and navigation. The view registry provides `render`,
+`filter`, and `connector` methods so changes to one mode do not require editing
+the other mode.
+
+Development loads the separate scripts and the shared `styles/view.css` directly.
+The shared stylesheet retains all page, card, detail, animation, and responsive
+rules; mode-specific styles stay in their existing view modules.
+An auto-generated classic-script companion, `styles/view-source.js`, assigns the
+exact canonical CSS text to `window.HandbookSharedCss` using a safely escaped JSON
+string. It must not be hand edited. This companion bypasses local-file fetch and
+CSSOM restrictions; the current files can be opened and saved directly via
+`file://`, without a server or build.
+
+The debug Save action prefers existing marked inline CSS, then the live linked
+stylesheet's CSSOM rules. When linked CSS is unloaded, empty, or inaccessible, it
+uses the generated companion; it aborts only if no nonempty CSS source exists.
+Accessible live CSSOM (including HTTP) takes precedence over the fallback, so
+current stylesheet edits are used. After editing `styles/view.css`, run
+`npm run build` to synchronize the companion for local-file saves.
+
+The build regenerates the companion from canonical CSS, inlines the marked
+stylesheet as `<style data-shared-styles>`, and bundles the view scripts into
+standalone HTML under `dist/`. Both the build and Save remove the companion script
+tag after embedding CSS. Save also embeds loaded view sources and current data
+without fetching local files. Neither standalone output needs external CSS, the
+companion, or view scripts.
+
 The handbook uses plain Markdown files with consistent sections such as:
 
 - Overview

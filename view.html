@@ -4,951 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IT 프로세스 문서 - 흐름 보기</title>
-  <style>
-  :root {
-    --page-bg: #f5f5f7;
-    --page-surface: rgba(255, 255, 255, 0.74);
-    --page-surface-strong: rgba(255, 255, 255, 0.92);
-    --page-border: rgba(15, 23, 42, 0.08);
-    --page-border-strong: rgba(15, 23, 42, 0.12);
-    --text-primary: #1d1d1f;
-    --text-secondary: #424245;
-    --text-tertiary: #6e6e73;
-    --text-quaternary: #8e8e93;
-    --accent: #0071e3;
-    --accent-hover: #0077ed;
-    --accent-soft: rgba(0, 113, 227, 0.1);
-    --warning: #b05c00;
-    --warning-bg: rgba(255, 159, 10, 0.12);
-    --warning-border: rgba(255, 159, 10, 0.28);
-    --shadow-soft: 0 14px 40px rgba(15, 23, 42, 0.08);
-    --shadow-card: 0 10px 30px rgba(15, 23, 42, 0.06);
-    --radius-xl: 20px;
-    --radius-lg: 16px;
-    --radius-md: 12px;
-    --radius-sm: 10px;
-    --topbar-h: 84px;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html {
-    scroll-behavior: smooth;
-  }
-
-  body {
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro KR', 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
-    color: var(--text-primary);
-    background:
-      radial-gradient(circle at top left, rgba(0, 113, 227, 0.16), transparent 30%),
-      radial-gradient(circle at top right, rgba(52, 199, 89, 0.12), transparent 24%),
-      linear-gradient(180deg, #fbfbfd 0%, var(--page-bg) 34%, #eef2f7 100%);
-  }
-
-  button,
-  input,
-  textarea {
-    font: inherit;
-  }
-
-  a {
-    color: inherit;
-  }
-
-  .page-shell {
-    width: 100%;
-    max-width: 1520px;
-    height: 100%;
-    margin: 0 auto;
-    padding: 18px 8px 20px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .topbar {
-    flex-shrink: 0;
-    z-index: 220;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    padding: 18px 22px 26px;
-    border-bottom: 1px solid var(--page-border);
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    background: rgba(255, 255, 255, 0.86);
-    backdrop-filter: blur(22px) saturate(180%);
-    -webkit-backdrop-filter: blur(22px) saturate(180%);
-  }
-
-  .topbar-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-  }
-
-  .brand-copy h1 {
-    font-size: clamp(1.2rem, 1rem + 0.6vw, 1.65rem);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    cursor: pointer;
-  }
-
-  .brand-copy .subtitle {
-    margin-top: 6px;
-    font-size: 0.9rem;
-    color: var(--text-tertiary);
-    letter-spacing: -0.01em;
-  }
-
-  .topbar-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
-  .layout-switcher {
-    display: inline-flex;
-    align-items: center;
-    padding: 3px;
-    border: 1px solid var(--page-border);
-    border-radius: 8px;
-    background: rgba(15, 23, 42, 0.045);
-  }
-
-  .layout-option {
-    appearance: none;
-    min-height: 32px;
-    padding: 5px 10px;
-    border: 0;
-    border-radius: 5px;
-    background: transparent;
-    color: var(--text-tertiary);
-    font-size: 0.78rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  .layout-option[aria-pressed="true"] {
-    background: #fff;
-    color: var(--text-primary);
-    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
-  }
-
-  .btn {
-    appearance: none;
-    border: 1px solid var(--page-border);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.72);
-    color: var(--text-primary);
-    padding: 11px 16px;
-    font-size: 0.88rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    cursor: pointer;
-    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .btn:hover {
-    transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.9);
-    border-color: var(--page-border-strong);
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
-  }
-
-  .btn-primary {
-    background: linear-gradient(180deg, #1d8cff 0%, var(--accent) 100%);
-    border-color: rgba(0, 113, 227, 0.34);
-    color: #fff;
-  }
-
-  .btn-primary:hover {
-    background: linear-gradient(180deg, #2892ff 0%, var(--accent-hover) 100%);
-  }
-
-  .page {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    flex: 1;
-    min-height: 0;
-  }
-
-  .glass-card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-    border: 1px solid var(--page-border);
-    border-radius: var(--radius-xl);
-    background: var(--page-surface);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    box-shadow: var(--shadow-soft);
-  }
-
-  .filter-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-radius: var(--radius-sm);
-    background: var(--accent-soft);
-    color: var(--accent);
-    font-size: 0.86rem;
-    font-weight: 700;
-  }
-
-  .filter-pill.is-neutral {
-    background: rgba(15, 23, 42, 0.05);
-    color: var(--text-secondary);
-  }
-
-  .board-body {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    padding: 40px 22px;
-  }
-
-  .flow-board {
-    position: relative;
-    width: 100%;
-    min-width: 0;
-  }
-
-  .flow-header {
-    display: grid;
-    gap: 12px;
-    padding-top: 14px;
-    border-top: 1px solid var(--page-border);
-  }
-
-  .flow-menu-toggle {
-    display: none;
-  }
-
-  .flow-header-cell {
-    position: relative;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 10px;
-    min-height: 64px;
-    padding: 12px 14px;
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(15, 23, 42, 0.09);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(246, 248, 252, 0.76));
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 20px rgba(15, 23, 42, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-    cursor: pointer;
-    user-select: none;
-    transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-    animation: pop-in 0.58s cubic-bezier(0.22, 1.35, 0.36, 1) both;
-    animation-delay: calc(var(--enter-delay, 0) * 1ms);
-  }
-
-  .flow-header-cell::after {
-    content: '';
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    width: 24px;
-    height: 24px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    background: var(--cat-color, var(--accent));
-    opacity: 0;
-    pointer-events: none;
-    transform: translate(6px, -50%) scale(0.8);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-  }
-
-  .flow-header-cell::before {
-    content: '';
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    z-index: 1;
-    width: 12px;
-    height: 12px;
-    background: #fff;
-    clip-path: polygon(0 0, 100% 0, 62% 44%, 62% 100%, 38% 100%, 38% 44%);
-    opacity: 0;
-    pointer-events: none;
-    transform: translate(6px, -50%) scale(0.8);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-  }
-
-  .flow-header-cell:hover {
-    transform: translateY(-3px);
-    border-color: var(--cat-color, var(--accent));
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), color-mix(in srgb, var(--cat-color, var(--accent)) 9%, white));
-    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.06), 0 14px 28px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.96);
-  }
-
-  .flow-header-cell:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), inset 0 2px 7px rgba(15, 23, 42, 0.1);
-  }
-
-  .flow-header-cell:hover::after {
-    opacity: 1;
-    transform: translate(0, -50%) scale(1);
-  }
-
-  .flow-header-cell:hover::before {
-    opacity: 1;
-    transform: translate(0, -50%) scale(1);
-  }
-
-  .flow-header-cell:hover .cat-count {
-    opacity: 0;
-    transform: translateX(-8px);
-  }
-
-  .flow-header-cell.inactive {
-    opacity: 0.42;
-  }
-
-  .flow-header-cell.active {
-    min-height: 48px;
-    padding: 6px 14px;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--cat-color) 86%, white), var(--cat-color));
-    border-color: color-mix(in srgb, var(--cat-color) 72%, #1d1d1f);
-    box-shadow: 0 3px 7px color-mix(in srgb, var(--cat-color) 28%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    color: #fff;
-  }
-
-  .flow-header-cell.active .cat-icon {
-    background: #fff;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 1px 3px rgba(15, 23, 42, 0.18);
-  }
-
-  .flow-header-cell.active .cat-name,
-  .flow-header-cell.active .cat-count {
-    color: #fff;
-  }
-
-  .flow-header-cell.active .cat-count {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
-  .flow-header-cell.active::after,
-  .flow-header-cell.active::before {
-    opacity: 1;
-    transform: translate(0, -50%) scale(1);
-  }
-
-  .flow-header-cell.active .cat-count {
-    opacity: 0;
-    transform: translateX(-8px);
-  }
-
-  .cat-icon {
-    width: 32px;
-    height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.8);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 1px 2px rgba(15, 23, 42, 0.12);
-    font-size: 0.92rem;
-  }
-
-  .cat-text {
-    min-width: 0;
-  }
-
-  .cat-name {
-    display: block;
-    font-size: 0.88rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-
-  .cat-count {
-    padding: 6px 9px;
-    border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.88);
-    color: var(--cat-color, var(--accent));
-    font-size: 0.72rem;
-    font-weight: 700;
-    white-space: nowrap;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-  }
-
-  .flow-grid {
-    display: grid;
-    gap: 12px;
-    row-gap: 16px;
-    position: relative;
-    width: 100%;
-  }
-
-  .flow-connectors {
-    position: absolute;
-    top: 0;
-    left: 0;
-    overflow: visible;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  .flow-connector {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    opacity: 0;
-  }
-
-  .flow-connector.is-visible {
-    stroke-dashoffset: 0;
-    opacity: 1;
-    animation: connector-draw 0.22s ease-out forwards;
-  }
-
-  .flow-cell {
-    position: relative;
-    z-index: 2;
-  }
-
-  .flow-cell.hidden {
-    display: none;
-  }
-
-  .node-card {
-    position: relative;
-    overflow: hidden;
-    padding: 10px 10px 10px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(15, 23, 42, 0.09);
-    background: linear-gradient(135deg, var(--page-surface-strong), rgba(246, 248, 252, 0.82));
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 20px rgba(15, 23, 42, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.92);
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  }
-
-  .node-card.is-entering {
-    animation: pop-in 0.48s cubic-bezier(0.22, 1.35, 0.36, 1) both;
-    animation-delay: calc(var(--enter-delay, 0) * 1ms);
-  }
-
-  .node-card::before {
-    content: '';
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 4px;
-    background: linear-gradient(180deg, var(--cat-color, var(--accent)), rgba(29, 29, 31, 0.3));
-  }
-
-  .node-card:hover {
-    transform: translateY(-6px);
-    border-color: var(--cat-color, var(--accent));
-    box-shadow: 0 7px 12px rgba(15, 23, 42, 0.08), 0 22px 34px rgba(15, 23, 42, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.96);
-  }
-
-  .node-card:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), inset 0 2px 7px rgba(15, 23, 42, 0.1);
-  }
-
-  .node-head {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 4px;
-  }
-
-  .node-index {
-    display: block;
-    color: var(--text-tertiary);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 0.62rem;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    line-height: 1.1;
-  }
-
-  .node-name {
-    min-width: 0;
-    font-size: 0.82rem;
-    font-weight: 700;
-    line-height: 1.32;
-    letter-spacing: -0.005em;
-    white-space: normal;
-    word-break: keep-all;
-    overflow-wrap: anywhere;
-  }
-
-  .node-details {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-top: 6px;
-  }
-
-  .node-field {
-    display: grid;
-    grid-template-columns: 58px minmax(0, 1fr);
-    gap: 8px;
-    align-items: start;
-    font-size: 0.76rem;
-    line-height: 1.55;
-  }
-
-  .field-label {
-    padding-top: 1px;
-    font-size: 0.64rem;
-    font-weight: 700;
-    letter-spacing: 0.015em;
-    color: var(--text-quaternary);
-    text-transform: uppercase;
-  }
-
-  .field-value {
-    min-width: 0;
-    color: var(--text-secondary);
-    word-break: break-word;
-    font-size: 0.72rem;
-  }
-
-  .field-value.is-empty {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    width: fit-content;
-    padding: 2px 8px;
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: var(--warning);
-    background: var(--warning-bg);
-    border: 1px solid var(--warning-border);
-    border-radius: 8px;
-  }
-
-  .node-content {
-    white-space: pre-wrap;
-    cursor: pointer;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .node-content.expanded {
-    -webkit-line-clamp: unset;
-    line-clamp: unset;
-    overflow: visible;
-  }
-
-  .node-link {
-    text-decoration: underline;
-    text-decoration-color: rgba(15, 23, 42, 0.24);
-    text-underline-offset: 2px;
-    word-break: break-all;
-    cursor: pointer;
-    color: var(--accent);
-  }
-
-  .node-link:hover {
-    color: var(--accent-hover);
-  }
-
-  /* C안: 입력 순서를 좌→우로 읽는 간결한 Process Map */
-  .layout-process .flow-header,
-  .layout-process .flow-menu-toggle {
-    display: none !important;
-  }
-
-  .layout-process .board-body {
-    padding: 0 22px 16px;
-  }
-
-  .layout-process .flow-board {
-    padding: 14px 16px 8px;
-  }
-
-  .process-legend {
-    display: none;
-  }
-
-  .layout-process .process-legend {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    margin: 10px 0 0;
-    padding: 10px 16px;
-    border: 1px solid var(--page-border);
-    border-radius: 8px;
-    background: rgba(0, 113, 227, 0.08);
-    color: var(--text-tertiary);
-    font-size: 0.76rem;
-    font-weight: 650;
-  }
-
-  .process-area-label {
-    display: inline-flex;
-    align-items: center;
-    min-height: 18px;
-    padding-right: 12px;
-    border-right: 1px solid var(--page-border-strong);
-    color: var(--text-secondary);
-    font-size: 0.7rem;
-    font-weight: 750;
-    letter-spacing: 0.06em;
-  }
-
-  .process-legend-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-  }
-
-  .process-legend-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--cat-color);
-  }
-
-  .layout-process .flow-grid {
-    display: grid;
-    grid-template-columns: repeat(var(--process-columns), minmax(0, 1fr));
-    grid-auto-rows: minmax(56px, auto);
-    column-gap: 48px;
-    row-gap: 40px;
-    width: 100%;
-    align-items: center;
-  }
-
-  .layout-process .flow-cell {
-    grid-column: var(--process-column) !important;
-    grid-row: var(--process-row) !important;
-  }
-
-  .layout-process .node-card {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 56px;
-    padding: 8px 2px;
-    overflow: visible;
-    border: 0;
-    border-radius: 0;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.14);
-    background: transparent;
-    box-shadow: none;
-  }
-
-  .layout-process .node-card::before {
-    position: static;
-    flex: 0 0 9px;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--cat-color, var(--accent));
-  }
-
-  .layout-process .node-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--cat-color, var(--accent));
-    box-shadow: none;
-  }
-
-  .layout-process .node-head {
-    display: flex;
-    align-items: baseline;
-    gap: 7px;
-    min-width: 0;
-  }
-
-  .layout-process .node-index {
-    flex: 0 0 auto;
-    font-size: 0.68rem;
-  }
-
-  .layout-process .node-name {
-    font-size: 0.8rem;
-    font-weight: 650;
-    line-height: 1.35;
-  }
-
-  .layout-process .node-details {
-    display: none;
-  }
-
-  .layout-process .node-card[title] {
-    cursor: pointer;
-  }
-
-  .layout-process .flow-connector {
-    stroke: rgba(105, 113, 124, 0.52);
-    stroke-width: 1.25;
-  }
-
-  .detail-screen { display: none; max-width: 840px; margin: 0 auto; }
-  .detail-screen.visible { display: block; }
-  .detail-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 36px; }
-  .detail-number { color: var(--text-quaternary); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; }
-  .detail-name { margin-top: 10px; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.18; letter-spacing: -0.035em; }
-  .detail-grid { border-top: 1px solid var(--page-border); }
-  .detail-row { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 24px; padding: 18px 0; border-bottom: 1px solid var(--page-border); font-size: 0.9rem; line-height: 1.7; }
-  .detail-label { color: var(--text-quaternary); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; }
-  .detail-value { white-space: pre-wrap; word-break: break-word; }
-  .detail-value.empty { color: var(--text-tertiary); }
-  .detail-value a { color: var(--accent); text-underline-offset: 3px; }
-  .detail-navigation { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 32px; }
-  .detail-screen .btn,
-  .detail-nav-button {
-    border: 1px solid rgba(15, 23, 42, 0.09);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(246, 248, 252, 0.82));
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 20px rgba(15, 23, 42, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.92);
-    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-  .detail-nav-button { min-width: 0; padding: 14px 16px; border-radius: var(--radius-md); color: var(--text-primary); cursor: pointer; text-align: left; }
-  .detail-screen .btn:hover,
-  .detail-nav-button:hover:not(:disabled) {
-    transform: translateY(-3px);
-    border-color: var(--accent);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(230, 242, 255, 0.88));
-    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.06), 0 14px 28px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.96);
-  }
-  .detail-screen .btn:active,
-  .detail-nav-button:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), inset 0 2px 7px rgba(15, 23, 42, 0.1);
-  }
-  .detail-screen .btn:focus-visible,
-  .detail-nav-button:focus-visible {
-    outline: 3px solid rgba(0, 113, 227, 0.28);
-    outline-offset: 3px;
-  }
-  .detail-nav-button.next { text-align: right; }
-  .detail-nav-button:disabled { visibility: hidden; }
-  .detail-nav-number { display: block; margin-bottom: 5px; color: var(--text-quaternary); font-size: 0.68rem; font-weight: 700; }
-  .detail-nav-name { display: block; overflow: hidden; font-size: 0.82rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-
-  .empty-state {
-    text-align: center;
-    padding: 96px 24px;
-    color: var(--text-tertiary);
-  }
-
-  .empty-state h2 {
-    font-size: 1.4rem;
-    margin-bottom: 10px;
-    color: var(--text-primary);
-    letter-spacing: -0.03em;
-  }
-
-  .empty-state p {
-    font-size: 0.94rem;
-    line-height: 1.7;
-  }
-
-  .empty-state a {
-    color: var(--accent);
-    text-decoration: none;
-  }
-
-  .help-fab {
-    position: fixed;
-    right: 26px;
-    bottom: 26px;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: linear-gradient(180deg, #1d8cff 0%, var(--accent) 100%);
-    color: #fff;
-    border: 1px solid rgba(0, 113, 227, 0.36);
-    cursor: pointer;
-    box-shadow: 0 18px 32px rgba(0, 113, 227, 0.22);
-    z-index: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .help-fab:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 22px 36px rgba(0, 113, 227, 0.3);
-  }
-
-  @keyframes pop-in {
-    0% {
-      opacity: 0;
-      transform: translateY(16px) scale(0.94);
-    }
-    60% {
-      opacity: 1;
-      transform: translateY(-4px) scale(1.02);
-    }
-    80% {
-      transform: translateY(2px) scale(0.99);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  @keyframes connector-draw {
-    from {
-      opacity: 0;
-      stroke-dashoffset: 1;
-    }
-    to {
-      opacity: 1;
-      stroke-dashoffset: 0;
-    }
-  }
-
-  @media (max-width: 860px) {
-    .page-shell {
-      padding: 8px 0;
-    }
-
-    .glass-card {
-      border-radius: 0;
-      border-left: 0;
-      border-right: 0;
-    }
-
-    .topbar {
-      gap: 14px;
-      padding: 16px 18px 20px;
-    }
-
-    .topbar-row {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    .topbar-actions {
-      width: 100%;
-      justify-content: flex-start;
-    }
-
-    .layout-process .flow-board {
-      padding: 36px 8px 56px;
-    }
-
-    .board-body {
-      padding: 24px 16px 32px;
-    }
-
-    .flow-header,
-    .flow-grid {
-      grid-template-columns: 1fr !important;
-    }
-
-    .flow-menu-toggle {
-      width: 100%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 48px;
-      padding: 10px 14px;
-      border: 1px solid rgba(15, 23, 42, 0.1);
-      border-radius: var(--radius-md);
-      background: rgba(255, 255, 255, 0.82);
-      color: var(--text-primary);
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
-      cursor: pointer;
-    }
-
-    .flow-menu-toggle::after {
-      content: '\2630';
-      font-size: 1.15rem;
-      line-height: 1;
-    }
-
-    .flow-menu-toggle.is-filtered {
-      border-color: var(--accent);
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
-
-    .flow-header {
-      display: none;
-    }
-
-    .flow-header.is-open {
-      display: grid;
-      margin-top: 10px;
-    }
-
-    .flow-cell {
-      grid-column: 1 !important;
-      grid-row: auto !important;
-    }
-
-    .flow-connectors {
-      display: none;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .flow-header-cell,
-    .node-card {
-      border-radius: var(--radius-lg);
-    }
-
-    .node-field {
-      grid-template-columns: 1fr;
-      gap: 4px;
-    }
-
-    .brand-copy h1 { font-size: 1.3rem; }
-    .brand-copy .subtitle { font-size: 0.82rem; line-height: 1.55; }
-    .flow-header { gap: 10px; padding-top: 10px; }
-    .flow-header-cell { min-height: 58px; }
-    .node-card { padding: 12px 12px 12px 16px; }
-    .detail-screen { width: 100%; }
-    .detail-top { flex-direction: column; gap: 16px; margin-bottom: 26px; }
-    .detail-top .btn { width: 100%; }
-    .detail-name { font-size: 1.8rem; }
-    .detail-navigation { grid-template-columns: 1fr; }
-    .detail-row { grid-template-columns: 1fr; gap: 6px; }
-    .help-fab { right: 16px; bottom: 16px; width: 50px; height: 50px; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-  }
-
-  @supports not (display: grid) {
-    .flow-header,
-    .flow-grid {
-      display: flex;
-      flex-wrap: wrap;
-    }
-
-    .flow-header-cell,
-    .flow-cell {
-      flex: 0 0 200px;
-      margin: 0 12px 12px 0;
-    }
-
-    .flow-connectors {
-      display: none;
-    }
-  }
-  </style>
+  <link rel="stylesheet" href="styles/view.css" data-shared-styles>
 </head>
 <body>
 
@@ -962,9 +18,25 @@
             <p class="subtitle">💡IT 사업수행 프로세스에 참고할 최신 표준과 정책문서, 문서 담당자를 쉽게 찾고 활용할 수 있습니다</p>
           </div>
           <div class="topbar-actions">
-            <div class="layout-switcher" aria-label="레이아웃 선택">
-              <button class="layout-option" id="layoutOptionA" type="button" onclick="setLayout('a')" aria-pressed="true">A안</button>
-              <button class="layout-option" id="layoutOptionC" type="button" onclick="setLayout('c')" aria-pressed="false">C안</button>
+            <div class="layout-dropdown" id="layoutDropdown">
+              <button class="layout-trigger" id="layoutMenuButton" type="button" onclick="toggleLayoutMenu()" aria-haspopup="menu" aria-expanded="false" aria-controls="layoutMenu">
+                <span class="layout-icon layout-trigger-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" focusable="false"><rect x="3.5" y="3.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14.5" y="3.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3.5" y="14.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14.5" y="14.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                <span class="layout-trigger-copy"><span class="layout-trigger-title">보기 방식</span><span id="viewModeLabel">기본 보기</span></span>
+                <svg class="layout-chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true" focusable="false"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="layout-menu" id="layoutMenu" role="menu" aria-labelledby="layoutMenuButton" hidden>
+                <div class="layout-menu-heading" role="presentation">보기 방식</div>
+                <button class="layout-option" id="layoutOptionA" type="button" role="menuitemradio" aria-checked="true" aria-labelledby="layoutNameA" aria-describedby="layoutDescriptionA" tabindex="-1" onclick="selectLayout('a')">
+                  <span class="layout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><rect x="3" y="4" width="7" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="4" width="7" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 9h2m-2 4h2m9-4h2m-2 4h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+                  <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameA">기본 보기</span><span class="layout-option-description" id="layoutDescriptionA">분류별로 흐름을 확인</span></span>
+                  <span class="layout-check" aria-hidden="true">✓</span>
+                </button>
+                <button class="layout-option" id="layoutOptionC" type="button" role="menuitemradio" aria-checked="false" aria-labelledby="layoutNameC" aria-describedby="layoutDescriptionC" tabindex="-1" onclick="selectLayout('c')">
+                  <span class="layout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><rect x="3" y="3" width="18" height="5" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="16" width="18" height="5" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v8m-3-3 3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameC">모아 보기</span><span class="layout-option-description" id="layoutDescriptionC">전체 흐름을 한눈에</span></span>
+                  <span class="layout-check" aria-hidden="true">✓</span>
+                </button>
+              </div>
             </div>
             <button class="btn btn-primary" id="saveButton" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드" hidden>저장</button>
           </div>
@@ -995,6 +67,9 @@
   </svg>
 </button>
 
+<script data-shared-style-source src="styles/view-source.js"></script>
+<script data-view-module="a" src="views/basic.js"></script>
+<script data-view-module="c" src="views/collected.js"></script>
 <script>
 const STORAGE_KEY = 'it_portal_data_v1';
 const LAYOUT_STORAGE_KEY = 'it_portal_layout_v1';
@@ -1049,6 +124,36 @@ function loadData() {
   return EMBEDDED_DATA.length > 0 ? EMBEDDED_DATA : null;
 }
 
+function embedSharedStyles(snapshot) {
+  const inline = document.querySelector('style[data-shared-styles]');
+  const link = document.querySelector('link[data-shared-styles]');
+  const target = snapshot.querySelector('link[data-shared-styles], style[data-shared-styles]');
+  // Built and previously saved HTML already contains the complete CSS source.
+  let css = inline ? inline.textContent : '';
+  if (!css.trim() && link) {
+    try {
+      // Prefer actual live CSS, including edits; never fetch local files.
+      const sheet = link.sheet;
+      if (sheet && !sheet.disabled) {
+        css = Array.from(sheet.cssRules, function(rule) { return rule.cssText; }).join('\n');
+      }
+    } catch (e) {
+      // file:// may block CSSOM; the classic-script companion remains readable.
+    }
+  }
+  if (!css.trim()) {
+    css = typeof window.HandbookSharedCss === 'string' ? window.HandbookSharedCss : '';
+  }
+  if (!css.trim()) throw new Error('공통 스타일 소스가 없거나 비어 있습니다.');
+
+  const style = document.createElement('style');
+  style.setAttribute('data-shared-styles', '');
+  // Keep CSS text from terminating the style element in serialized HTML.
+  style.textContent = css.replace(/<\/style/gi, '\\3c /style');
+  if (target) target.replaceWith(style);
+  else snapshot.querySelector('head').appendChild(style);
+}
+
 function saveAndReturn() {
   const data = loadData();
   if (!data || data.length === 0) {
@@ -1071,11 +176,30 @@ function saveAndReturn() {
     return;
   }
 
-  const newBlock = '// __EMBEDDED_DATA_START__\nconst EMBEDDED_DATA = ' + JSON.stringify(data, null, 2) + ';\n// __EMBEDDED_DATA_END__';
-  const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const serializedData = JSON.stringify(data, null, 2).replace(/</g, '\\u003c');
+  const newBlock = '// __EMBEDDED_DATA_START__\nconst EMBEDDED_DATA = ' + serializedData + ';\n// __EMBEDDED_DATA_END__';
+  // Bundle the loaded modules without fetch so saving also works with file://.
+  const snapshot = document.documentElement.cloneNode(true);
+  snapshot.querySelector('#layoutMenu').hidden = true;
+  snapshot.querySelector('#layoutMenuButton').setAttribute('aria-expanded', 'false');
+  try {
+    embedSharedStyles(snapshot);
+  } catch (e) {
+    // Never export unstyled HTML when every shared CSS source is unavailable.
+    alert('공통 스타일을 내장할 수 없어 저장을 중단했습니다. 스타일 파일과 자동 생성된 CSS 소스 스크립트가 있는지 확인해주세요.');
+    return;
+  }
+  snapshot.querySelectorAll('script[data-shared-style-source]').forEach(function(script) { script.remove(); });
+  snapshot.querySelectorAll('script[data-view-module]').forEach(function(script) {
+    const view = window.HandbookViews[script.dataset.viewModule];
+    script.removeAttribute('src');
+    script.textContent = view.source;
+  });
+  snapshot.querySelectorAll('style[data-view-styles]').forEach(function(style) { style.remove(); });
+  const fullHtml = '<!DOCTYPE html>\n' + snapshot.outerHTML;
   const updatedHtml = fullHtml.replace(
     /\/\/ __EMBEDDED_DATA_START__[\s\S]*?\/\/ __EMBEDDED_DATA_END__/,
-    newBlock
+    function() { return newBlock; }
   );
 
   const blob = new Blob([updatedHtml], { type: 'text/html;charset=utf-8' });
@@ -1123,6 +247,40 @@ let overviewScrollTop = 0;
 let overviewBoardScrollTop = 0;
 let currentLayout = loadLayoutPreference();
 
+function currentView() {
+  return window.HandbookViews[currentLayout];
+}
+
+function viewContext() {
+  const columns = getColumns(lastRows);
+  const colIndex = {};
+  columns.forEach(function(cat, index) { colIndex[cat] = index + 1; });
+  return {
+    rows: lastRows,
+    columns: columns,
+    colIndex: colIndex,
+    grid: document.getElementById('flowGrid'),
+    header: document.getElementById('flowHeader'),
+    legend: document.getElementById('processLegend'),
+    helpers: {
+      category: function(row) { return (row.분류 || '').trim() || '미분류'; },
+      escape: esc,
+      color: colorForCategory,
+      card: cardHtml,
+      headerCell: headerCellHtml
+    }
+  };
+}
+
+function installViewStyles() {
+  Object.keys(window.HandbookViews).forEach(function(key) {
+    const style = document.createElement('style');
+    style.dataset.viewStyles = key;
+    style.textContent = window.HandbookViews[key].styles;
+    document.head.appendChild(style);
+  });
+}
+
 function loadLayoutPreference() {
   try {
     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
@@ -1140,11 +298,72 @@ function setLayout(layout) {
   const optionA = document.getElementById('layoutOptionA');
   const optionC = document.getElementById('layoutOptionC');
   if (page) page.classList.toggle('layout-process', currentLayout === 'c');
-  if (optionA) optionA.setAttribute('aria-pressed', String(currentLayout === 'a'));
-  if (optionC) optionC.setAttribute('aria-pressed', String(currentLayout === 'c'));
+  if (optionA) optionA.setAttribute('aria-checked', String(currentLayout === 'a'));
+  if (optionC) optionC.setAttribute('aria-checked', String(currentLayout === 'c'));
+  document.getElementById('viewModeLabel').textContent = currentLayout === 'c' ? '모아 보기' : '기본 보기';
+  closeLayoutMenu();
 
+  activeCategory = null;
+  closeFlowMenu();
+  if (currentDetailIndex >= 0) closeDetail();
   if (lastRows.length) render();
 }
+
+function closeLayoutMenu(returnFocus) {
+  document.getElementById('layoutMenu').hidden = true;
+  const trigger = document.getElementById('layoutMenuButton');
+  trigger.setAttribute('aria-expanded', 'false');
+  if (returnFocus) trigger.focus();
+}
+
+function openLayoutMenu(index) {
+  const menu = document.getElementById('layoutMenu');
+  const options = Array.from(menu.querySelectorAll('[role="menuitemradio"]'));
+  menu.hidden = false;
+  document.getElementById('layoutMenuButton').setAttribute('aria-expanded', 'true');
+  const target = index === undefined
+    ? options.find(function(option) { return option.getAttribute('aria-checked') === 'true'; })
+    : options[index];
+  (target || options[0]).focus();
+}
+
+function toggleLayoutMenu() {
+  if (document.getElementById('layoutMenu').hidden) openLayoutMenu();
+  else closeLayoutMenu(true);
+}
+
+function selectLayout(layout) {
+  setLayout(layout);
+  document.getElementById('layoutMenuButton').focus();
+}
+
+const layoutDropdown = document.getElementById('layoutDropdown');
+layoutDropdown.addEventListener('keydown', function(event) {
+  const menu = document.getElementById('layoutMenu');
+  if (event.key === 'Escape' && !menu.hidden) {
+    event.preventDefault();
+    event.stopPropagation();
+    closeLayoutMenu(true);
+    return;
+  }
+  if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const options = Array.from(menu.querySelectorAll('[role="menuitemradio"]'));
+  const index = options.indexOf(document.activeElement);
+  let next;
+  if (event.key === 'Home') next = 0;
+  else if (event.key === 'End') next = options.length - 1;
+  else if (index < 0) next = event.key === 'ArrowUp' ? options.length - 1 : 0;
+  else next = (index + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+  openLayoutMenu(next);
+});
+layoutDropdown.addEventListener('focusout', function(event) {
+  if (!layoutDropdown.contains(event.relatedTarget)) closeLayoutMenu();
+});
+document.addEventListener('click', function(event) {
+  if (!layoutDropdown.contains(event.target)) closeLayoutMenu();
+});
 
 function toggleCategory(cat) {
   activeCategory = (activeCategory === cat) ? null : cat;
@@ -1177,49 +396,7 @@ function applyCategoryFilter() {
     el.classList.toggle('active', !!activeCategory && cat === activeCategory);
   });
 
-  if (currentLayout === 'c') {
-    const processRows = Math.max(1, Math.ceil(lastRows.length / getProcessColumns()));
-    const flowGrid = document.getElementById('flowGrid');
-    document.querySelectorAll('.flow-cell').forEach(function(el) {
-      el.classList.remove('hidden');
-    });
-    if (flowGrid) {
-      flowGrid.style.gridTemplateRows = 'repeat(' + processRows + ', minmax(56px, auto))';
-    }
-    updateFilterSummary(lastRows.length, lastRows.length);
-    drawConnectors();
-    return;
-  }
-
-  const flowMenuToggle = document.getElementById('flowMenuToggle');
-  if (flowMenuToggle) {
-    flowMenuToggle.textContent = activeCategory || '분류 필터';
-    flowMenuToggle.classList.toggle('is-filtered', !!activeCategory);
-  }
-
-  let visibleRow = 0;
-  let visibleCount = 0;
-  document.querySelectorAll('.flow-cell').forEach(function(el) {
-    const cat = el.dataset.cat;
-    const isVisible = !activeCategory || cat === activeCategory;
-    el.classList.toggle('hidden', !isVisible);
-    if (!isVisible) return;
-
-    visibleCount++;
-    visibleRow++;
-    if (activeCategory) {
-      el.style.gridRow = visibleRow;
-      el.style.gridColumn = el.dataset.col;
-    } else {
-      el.style.gridRow = Number(el.dataset.idx) + 1;
-      el.style.gridColumn = el.dataset.col;
-    }
-  });
-
-  const flowGrid = document.getElementById('flowGrid');
-  if (flowGrid) {
-    flowGrid.style.gridTemplateRows = 'repeat(' + (activeCategory ? visibleCount : lastRows.length) + ', auto)';
-  }
+  const visibleCount = currentView().filter(viewContext(), activeCategory);
   updateFilterSummary(visibleCount, lastRows.length);
   drawConnectors();
 }
@@ -1250,21 +427,16 @@ function headerCellHtml(cat, count, index) {
   '</div>';
 }
 
-function cellHtml(row, idx, col) {
+function cardHtml(row, idx) {
   const cat = (row.분류 || '').trim() || '미분류';
   const color = colorForCategory(cat);
-  const processColumns = getProcessColumns();
-  const processRow = Math.floor(idx / processColumns) + 1;
-  const positionInRow = idx % processColumns;
-  const processColumn = processRow % 2 === 1 ? positionInRow + 1 : processColumns - positionInRow;
-  let html = '<div class="flow-cell" data-cat="' + esc(cat) + '" data-col="' + col + '" style="grid-column:' + col + ';grid-row:' + (idx + 1) + ';--process-column:' + processColumn + ';--process-row:' + processRow + ';" data-idx="' + idx + '">';
-    html += '<div class="node-card is-entering" title="' + escAttr(cat) + '" style="--cat-color:' + color + ';--enter-delay:0" onclick="openDetail(' + idx + ')">';
+  let html = '<div class="node-card is-entering" title="' + esc(cat) + '" style="--cat-color:' + color + ';--enter-delay:0" onclick="openDetail(' + idx + ')">';
   html += '<div class="node-head">';
   html += '<span class="node-index">#' + (idx + 1) + '</span>';
   html += '<span class="node-name">' + esc(row.항목명 || '(항목명 없음)') + '</span>';
   html += '</div>';
   html += row.주관팀 ? '<div class="node-details"><span class="field-value">' + esc(row.주관팀) + '</span></div>' : '';
-  html += '</div></div>';
+  html += '</div>';
   return html;
 }
 
@@ -1308,6 +480,7 @@ function openDetail(index) {
   currentDetailIndex = index;
   renderDetail();
   document.getElementById('flowHeader').style.display = 'none';
+  document.getElementById('processLegend').style.display = 'none';
   document.getElementById('flowBoard').style.display = 'none';
   document.getElementById('detailScreen').classList.add('visible');
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1317,6 +490,7 @@ function closeDetail() {
   currentDetailIndex = -1;
   document.getElementById('detailScreen').classList.remove('visible');
   document.getElementById('flowHeader').style.display = '';
+  document.getElementById('processLegend').style.display = '';
   document.getElementById('flowBoard').style.display = 'block';
   requestAnimationFrame(drawConnectors);
   requestAnimationFrame(function() {
@@ -1329,6 +503,7 @@ function returnToFlow() {
   currentDetailIndex = -1;
   document.getElementById('detailScreen').classList.remove('visible');
   document.getElementById('flowHeader').style.display = '';
+  document.getElementById('processLegend').style.display = '';
   document.getElementById('flowBoard').style.display = 'block';
   activeCategory = null;
   applyCategoryFilter();
@@ -1382,40 +557,7 @@ function drawConnectorsInner() {
     if (!a || !b) continue;
     const ar = a.getBoundingClientRect();
     const br = b.getBoundingClientRect();
-    let x1;
-    let y1;
-    let x2;
-    let y2;
-    let d;
-    if (currentLayout === 'c') {
-      const aCenter = ar.left + ar.width / 2;
-      const bCenter = br.left + br.width / 2;
-      if (Math.abs(aCenter - bCenter) < 4) {
-        x1 = ar.right - gridRect.left;
-        y1 = ar.bottom - gridRect.top;
-        x2 = br.right - gridRect.left;
-        y2 = br.top - gridRect.top;
-        const detourX = x1 + 26;
-        d = 'M' + x1 + ',' + y1 + ' C' + detourX + ',' + y1 + ' ' + detourX + ',' + y2 + ' ' + x2 + ',' + y2;
-      } else {
-        const movesRight = bCenter > aCenter;
-        x1 = (movesRight ? ar.right : ar.left) - gridRect.left;
-        y1 = ar.top + ar.height / 2 - gridRect.top;
-        x2 = (movesRight ? br.left : br.right) - gridRect.left;
-        y2 = br.top + br.height / 2 - gridRect.top;
-        const bendX = x1 + (x2 - x1) / 2;
-        d = 'M' + x1 + ',' + y1 + ' C' + bendX + ',' + y1 + ' ' + bendX + ',' + y2 + ' ' + x2 + ',' + y2;
-      }
-    } else {
-      x1 = ar.left + ar.width / 2 - gridRect.left;
-      y1 = ar.bottom - gridRect.top;
-      x2 = br.left + br.width / 2 - gridRect.left;
-      y2 = br.top - gridRect.top;
-      const midY = (y1 + y2) / 2;
-      d = Math.abs(x1 - x2) < 4
-        ? 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2
-        : 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + midY + ' ' + x2 + ',' + midY + ' ' + x2 + ',' + y2;
-    }
+    const d = currentView().connector(ar, br, gridRect);
     paths += '<path class="flow-connector is-visible" pathLength="1" d="' + d + '" fill="none" stroke="rgba(120, 124, 130, 0.42)" stroke-width="2" marker-end="url(#flowArrow)" />';
   }
 
@@ -1432,12 +574,6 @@ function drawConnectorsInner() {
 
 function formatNumber(num) {
   return String(num || 0);
-}
-
-function getProcessColumns() {
-  const boardBody = document.getElementById('boardBody');
-  const usableWidth = boardBody ? boardBody.clientWidth - 64 : 960;
-  return Math.max(2, Math.floor((usableWidth + 48) / 198));
 }
 
 function updateFilterSummary(visibleCount, totalCount) {
@@ -1500,37 +636,12 @@ function renderInner() {
 
   const columns = getColumns(rows);
   assignCategoryColors(columns);
-  const colIndex = {};
-  columns.forEach(function(c, i) { colIndex[c] = i + 1; });
   lastRows = rows;
 
-  const flowHeader = document.getElementById('flowHeader');
   const flowGrid = document.getElementById('flowGrid');
-  const processLegend = document.getElementById('processLegend');
-  const processColumns = getProcessColumns();
 
   document.querySelector('.page').classList.toggle('layout-process', currentLayout === 'c');
-  flowGrid.style.setProperty('--process-columns', processColumns);
-
-  const templateColumns = 'repeat(' + columns.length + ', minmax(0, 1fr))';
-  flowHeader.style.gridTemplateColumns = templateColumns;
-  flowGrid.style.gridTemplateColumns = currentLayout === 'c' ? '' : templateColumns;
-  flowGrid.style.gridTemplateRows = currentLayout === 'c' ? '' : 'repeat(' + rows.length + ', auto)';
-
-  flowHeader.innerHTML = columns.map(function(cat, index) {
-    const count = rows.filter(function(r) { return ((r.분류 || '').trim() || '미분류') === cat; }).length;
-    return headerCellHtml(cat, count, index);
-  }).join('');
-  processLegend.innerHTML = '<span class="process-area-label">업무 흐름</span>' + columns.map(function(cat) {
-    return '<span class="process-legend-item" style="--cat-color:' + colorForCategory(cat) + '"><span class="process-legend-dot"></span>' + esc(cat) + '</span>';
-  }).join('');
-
-  let cellsHtml = '';
-  rows.forEach(function(row, idx) {
-    const cat = (row.분류 || '').trim() || '미분류';
-    cellsHtml += cellHtml(row, idx, colIndex[cat]);
-  });
-  flowGrid.innerHTML = cellsHtml;
+  currentView().render(viewContext());
   window.setTimeout(function() {
     flowGrid.querySelectorAll('.node-card.is-entering').forEach(function(card) {
       card.classList.remove('is-entering');
@@ -1546,7 +657,7 @@ window.addEventListener('resize', function() {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(function() {
     updateHeaderOffset();
-    if (currentLayout === 'c') render();
+    if (currentView().rerenderOnResize && currentDetailIndex < 0) render();
     else drawConnectors();
   }, 150);
 });
@@ -1563,6 +674,7 @@ window.addEventListener('load', function() {
   drawConnectors();
 });
 
+installViewStyles();
 updateSaveButtonVisibility();
 setLayout(currentLayout);
 render();
