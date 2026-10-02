@@ -36,6 +36,11 @@
                   <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameC">모아 보기</span><span class="layout-option-description" id="layoutDescriptionC">전체 흐름을 한눈에</span></span>
                   <span class="layout-check" aria-hidden="true">✓</span>
                 </button>
+                <button class="layout-option" id="layoutOptionB" type="button" role="menuitemradio" aria-checked="false" aria-labelledby="layoutNameB" aria-describedby="layoutDescriptionB" tabindex="-1" onclick="selectLayout('b')">
+                  <span class="layout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><rect x="3" y="4" width="8" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="4" width="8" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="13" width="8" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="8" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                  <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameB">카드로 보기</span><span class="layout-option-description" id="layoutDescriptionB">업무를 빠르게 탐색</span></span>
+                  <span class="layout-check" aria-hidden="true">✓</span>
+                </button>
               </div>
             </div>
             <button class="btn btn-primary" id="saveButton" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드" hidden>저장</button>
@@ -70,6 +75,7 @@
 <script data-shared-style-source src="styles/view-source.js"></script>
 <script data-view-module="a" src="views/basic.js"></script>
 <script data-view-module="c" src="views/collected.js"></script>
+<script data-view-module="b" src="views/cards.js"></script>
 <script>
 const STORAGE_KEY = 'it_portal_data_v1';
 const LAYOUT_STORAGE_KEY = 'it_portal_layout_v1';
@@ -265,6 +271,7 @@ function viewContext() {
     helpers: {
       category: function(row) { return (row.분류 || '').trim() || '미분류'; },
       escape: esc,
+      attribute: esc,
       color: colorForCategory,
       card: cardHtml,
       headerCell: headerCellHtml
@@ -284,23 +291,26 @@ function installViewStyles() {
 function loadLayoutPreference() {
   try {
     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
-    return savedLayout === 'c' ? 'c' : 'a';
+    return ['a', 'b', 'c'].includes(savedLayout) ? savedLayout : 'a';
   } catch (e) {
     return 'a';
   }
 }
 
 function setLayout(layout) {
-  currentLayout = layout === 'c' ? 'c' : 'a';
+  currentLayout = ['a', 'b', 'c'].includes(layout) ? layout : 'a';
   try { localStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout); } catch (e) {}
 
   const page = document.querySelector('.page');
   const optionA = document.getElementById('layoutOptionA');
+  const optionB = document.getElementById('layoutOptionB');
   const optionC = document.getElementById('layoutOptionC');
   if (page) page.classList.toggle('layout-process', currentLayout === 'c');
+  if (page) page.classList.toggle('layout-cards', currentLayout === 'b');
   if (optionA) optionA.setAttribute('aria-checked', String(currentLayout === 'a'));
+  if (optionB) optionB.setAttribute('aria-checked', String(currentLayout === 'b'));
   if (optionC) optionC.setAttribute('aria-checked', String(currentLayout === 'c'));
-  document.getElementById('viewModeLabel').textContent = currentLayout === 'c' ? '모아 보기' : '기본 보기';
+  document.getElementById('viewModeLabel').textContent = currentView().label;
   closeLayoutMenu();
 
   activeCategory = null;
@@ -641,6 +651,7 @@ function renderInner() {
   const flowGrid = document.getElementById('flowGrid');
 
   document.querySelector('.page').classList.toggle('layout-process', currentLayout === 'c');
+  document.querySelector('.page').classList.toggle('layout-cards', currentLayout === 'b');
   currentView().render(viewContext());
   window.setTimeout(function() {
     flowGrid.querySelectorAll('.node-card.is-entering').forEach(function(card) {
