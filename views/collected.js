@@ -93,12 +93,10 @@
       const aCenter = a.left + a.width / 2;
       const bCenter = b.left + b.width / 2;
       if (Math.abs(aCenter - bCenter) < 4) {
-        const x1 = a.right - grid.left;
+        const x = aCenter - grid.left;
         const y1 = a.bottom - grid.top;
-        const x2 = b.right - grid.left;
         const y2 = b.top - grid.top;
-        const detour = x1 + 26;
-        return 'M' + x1 + ',' + y1 + ' C' + detour + ',' + y1 + ' ' + detour + ',' + y2 + ' ' + x2 + ',' + y2;
+        return 'M' + x + ',' + y1 + ' L' + x + ',' + y2;
       }
       const movesRight = bCenter > aCenter;
       const x1 = (movesRight ? a.right : a.left) - grid.left;
