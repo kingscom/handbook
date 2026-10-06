@@ -60,12 +60,16 @@
 				.layout-process .node-card { padding: 10px 12px 8px 15px; }
 			}
 			@media (max-width: 640px) {
-				.layout-process .flow-header { padding: 18px 0 0; }
-				.layout-process .journey-filters { padding-right: 12px; padding-left: 12px; }
+				.layout-process .flow-menu-toggle { display: inline-flex !important; flex: 1 1 auto; width: auto; min-width: 0; min-height: 42px; margin: 0; padding: 8px 12px; }
+				.layout-process .flow-header { padding: 12px 0 0; }
+				.layout-process .flow-header:not(.is-open) { display: none; }
+				.layout-process .flow-header.is-open { display: block; }
+				.layout-process .journey-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0; }
+				.layout-process .journey-filters .flow-header-cell { min-height: 52px; padding: 8px 10px; }
 				.layout-process .flow-grid { padding: 16px 12px 24px; gap: 8px; }
-				.layout-process .flow-cell { min-height: 80px; }
-				.layout-process .node-card { height: 80px; min-height: 80px; padding: 9px 12px 7px 15px; }
-				.layout-process .node-name { font-size: .9rem; }
+				.layout-process .flow-cell { min-height: 88px; }
+				.layout-process .node-card { height: 88px; min-height: 88px; padding: 10px 12px 8px 15px; }
+				.layout-process .node-name { font-size: .92rem; }
 			}
 		`,
 
@@ -95,6 +99,11 @@
 		},
 
 		filter: function(context, activeCategory) {
+			const toggle = document.getElementById('flowMenuToggle');
+			if (toggle) {
+				toggle.textContent = activeCategory || '분류 필터';
+				toggle.classList.toggle('is-filtered', !!activeCategory);
+			}
 			let matchedCount = 0;
 			context.grid.querySelectorAll('.flow-cell').forEach(function(cell) {
 				const matches = !activeCategory || cell.dataset.cat === activeCategory;

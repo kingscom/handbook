@@ -31,7 +31,12 @@
       .layout-cards .flow-connectors { display: none; }
       .layout-cards .detail-screen { padding-top: 8px; }
       @media (max-width: 860px) { .layout-cards .board-body { padding: 24px 18px 32px; } .layout-cards .flow-grid { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)) !important; gap: 14px 22px; } }
-      @media (max-width: 560px) { .layout-cards .flow-grid { grid-template-columns: 1fr !important; } }
+      @media (max-width: 640px) {
+        .layout-cards .board-body { padding: 16px 12px 24px; }
+        .layout-cards .flow-grid { grid-template-columns: 1fr !important; gap: 10px; }
+        .process-card { min-height: 92px; padding: 12px; }
+        .process-card-name { margin-top: 10px; font-size: .96rem; line-height: 1.4; }
+      }
     `,
 
     render: function(context) {

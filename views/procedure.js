@@ -24,6 +24,7 @@
 
   function closeDetail() {
     const panel = document.getElementById('procedureDetailContent');
+    const detailAside = document.getElementById('procedureSideDetail');
     if (!panel) return;
     document.querySelectorAll('.procedure-card.is-inspected').forEach(function(card) {
       card.classList.remove('is-inspected');
@@ -32,6 +33,10 @@
   }
 
   function registerDetailActions() {
+    window.openProcedureCardDetail = function(index) {
+      if (window.matchMedia('(max-width: 640px)').matches) window.openDetail(index);
+      else window.openProcedureDetail(index);
+    };
     window.openProcedureDetail = function(index) {
       const context = window.HandbookProcedureContext;
       const row = context && context.rows[index];
@@ -102,7 +107,7 @@
       .layout-procedure .procedure-side-field span { color: #6d7d89; font-size: .65rem; font-weight: 800; }
       .layout-procedure .procedure-side-field div { color: #334b5d; font-size: .76rem; line-height: 1.55; overflow-wrap: anywhere; }
       .layout-procedure .procedure-side-field a { color: #1264a3; font-weight: 700; }
-      .layout-procedure #processLegend, .layout-procedure #detailScreen { display: none !important; }
+      .layout-procedure #processLegend { display: none !important; }
       @media (max-width: 860px) {
         .layout-procedure .flow-header:not(.is-open) { display: none; }
         .layout-procedure .flow-header.is-open { display: grid; }
@@ -151,7 +156,7 @@
         const name = row.항목명 || '(항목명 없음)';
         return '<article class="flow-cell procedure-step" data-cat="' + helpers.escape(category) + '" data-idx="' + index + '">' +
           '<div class="procedure-marker"><span class="procedure-number" style="--cat-color:' + helpers.color(category) + '">' + step + '</span></div>' +
-          '<button class="node-card procedure-card" type="button" data-idx="' + index + '" style="--cat-color:' + helpers.color(category) + '" onclick="openProcedureDetail(' + index + ')" aria-label="' + helpers.escape(step + '번 ' + name + ' 상세 보기') + '">' +
+          '<button class="node-card procedure-card" type="button" data-idx="' + index + '" style="--cat-color:' + helpers.color(category) + '" onclick="openProcedureCardDetail(' + index + ')" aria-label="' + helpers.escape(step + '번 ' + name + ' 상세 보기') + '">' +
             '<span class="procedure-category">' + iconFor(category) + ' ' + helpers.escape(category) + '</span>' +
             '<span class="procedure-title-row"><span class="node-name">' + helpers.escape(name) + '</span><span class="procedure-detail">상세 보기</span></span>' +
           '</button></article>';

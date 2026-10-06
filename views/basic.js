@@ -35,6 +35,12 @@
       .flow-grid.is-filter-active .flow-cell.is-filter-match .node-card { border-color: var(--cat-color, var(--accent)); box-shadow: 0 4px 12px color-mix(in srgb, var(--cat-color, var(--accent)) 18%, transparent); }
       .flow-grid.is-filter-active .flow-connectors { display: none; }
       @media (max-width: 860px) { .flow-grid.is-filter-active .flow-cell { grid-column: 1 !important; grid-row: var(--filter-mobile-row) !important; } }
+      @media (max-width: 640px) {
+        .page:not(.layout-process):not(.layout-cards):not(.layout-procedure) .flow-grid { gap: 10px; row-gap: 10px; }
+        .page:not(.layout-process):not(.layout-cards):not(.layout-procedure) .node-card { min-height: 64px; }
+        .page:not(.layout-process):not(.layout-cards):not(.layout-procedure) .flow-grid.parallel-flow { grid-template-columns: 1fr !important; }
+        .page:not(.layout-process):not(.layout-cards):not(.layout-procedure) .flow-grid.parallel-flow .flow-cell { grid-column: 1 !important; grid-row: auto !important; }
+      }
     `,
 
     render: function(context) {
