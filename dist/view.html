@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT 프로세스 문서 - 흐름 보기</title>
+  <style data-shared-styles>
+  :root {
+    --page-bg: #f5f5f7;
+    --page-surface: rgba(255, 255, 255, 0.74);
+    --page-surface-strong: rgba(255, 255, 255, 0.92);
+    --page-border: rgba(15, 23, 42, 0.08);
+    --page-border-strong: rgba(15, 23, 42, 0.12);
+    --text-primary: #1d1d1f;
+    --text-secondary: #424245;
+    --text-tertiary: #6e6e73;
+    --text-quaternary: #8e8e93;
+    --accent: #0071e3;
+    --accent-hover: #0077ed;
+    --accent-soft: rgba(0, 113, 227, 0.1);
+    --warning: #b05c00;
+    --warning-bg: rgba(255, 159, 10, 0.12);
+    --warning-border: rgba(255, 159, 10, 0.28);
+    --shadow-soft: 0 14px 40px rgba(15, 23, 42, 0.08);
+    --shadow-card: 0 10px 30px rgba(15, 23, 42, 0.06);
+    --radius-xl: 20px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 10px;
+    --topbar-h: 84px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  [hidden] { display: none !important; }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro KR', 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
+    color: var(--text-primary);
+    background:
+      radial-gradient(circle at top left, rgba(0, 113, 227, 0.16), transparent 30%),
+      radial-gradient(circle at top right, rgba(52, 199, 89, 0.12), transparent 24%),
+      linear-gradient(180deg, #fbfbfd 0%, var(--page-bg) 34%, #eef2f7 100%);
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .page-shell {
+    width: 100%;
+    max-width: 1520px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 18px 8px 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar {
+    flex-shrink: 0;
+    z-index: 220;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 18px 22px 26px;
+    border-bottom: 1px solid var(--page-border);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+  }
+
+  .topbar-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .brand-copy h1 {
+    font-size: clamp(1.2rem, 1rem + 0.6vw, 1.65rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    cursor: pointer;
+  }
+
+  .brand-copy .subtitle {
+    margin-top: 6px;
+    font-size: 0.9rem;
+    color: var(--text-tertiary);
+    letter-spacing: -0.01em;
+  }
+
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .layout-dropdown {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .layout-trigger {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 7px 11px 7px 8px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #fff, #f5f8fc) padding-box, linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(0, 113, 227, 0.22)) border-box;
+    color: var(--text-primary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 5px 14px rgba(15, 23, 42, 0.05);
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  }
+
+  .layout-trigger:hover,
+  .layout-trigger[aria-expanded="true"] {
+    background: linear-gradient(145deg, #fff, #edf5ff) padding-box, linear-gradient(145deg, rgba(0, 113, 227, 0.18), rgba(0, 113, 227, 0.35)) border-box;
+    border-color: rgba(0, 113, 227, 0.24);
+    box-shadow: 0 3px 7px rgba(15, 23, 42, 0.04), 0 7px 18px rgba(0, 113, 227, 0.1);
+  }
+
+  .layout-trigger:active {
+    transform: translateY(1px);
+    box-shadow: inset 0 2px 5px rgba(0, 113, 227, 0.08);
+  }
+
+  .layout-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    border-radius: 10px;
+    background: linear-gradient(145deg, #fff, #edf1f7);
+    color: var(--text-secondary);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .layout-trigger-icon {
+    width: 32px;
+    height: 32px;
+    border-color: rgba(0, 113, 227, 0.12);
+    background: linear-gradient(145deg, #edf6ff, #dfeeff);
+    color: var(--accent);
+  }
+
+  .layout-trigger-copy,
+  .layout-option-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    min-width: 0;
+    line-height: 1.3;
+  }
+
+  .layout-trigger-title {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
+  }
+
+  #viewModeLabel {
+    font-size: 0.8rem;
+    font-weight: 650;
+    color: var(--accent);
+  }
+
+  .layout-chevron {
+    flex-shrink: 0;
+    color: var(--text-tertiary);
+    margin-left: 6px;
+    transition: transform 0.18s ease, color 0.18s ease;
+  }
+
+  .layout-trigger[aria-expanded="true"] .layout-chevron {
+    color: var(--accent);
+    transform: rotate(180deg);
+  }
+
+  .layout-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    z-index: 1;
+    width: 240px;
+    max-width: calc(100vw - 36px);
+    padding: 7px;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 16px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 254, 0.97));
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16), 0 3px 8px rgba(15, 23, 42, 0.06), inset 0 1px 0 #fff;
+    transform-origin: top right;
+  }
+
+  .layout-menu:not([hidden]) {
+    animation: layout-menu-in 0.16s ease-out both;
+  }
+
+  .layout-menu-heading {
+    padding: 7px 10px 10px;
+    color: var(--text-tertiary);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .layout-option {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 66px;
+    padding: 10px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .layout-option + .layout-option {
+    margin-top: 3px;
+  }
+
+  .layout-option-copy {
+    flex: 1;
+  }
+
+  .layout-option-name {
+    font-size: 0.82rem;
+    font-weight: 650;
+  }
+
+  .layout-option-description {
+    color: var(--text-tertiary);
+    font-size: 0.68rem;
+    font-weight: 400;
+    word-break: keep-all;
+  }
+
+  .layout-option:hover,
+  .layout-option:focus-visible {
+    background: #eef2f7;
+    border-color: rgba(15, 23, 42, 0.06);
+  }
+
+  .layout-option[aria-checked="true"] {
+    color: var(--text-primary);
+    font-weight: 600;
+    background: #eaf3ff;
+    border-color: rgba(0, 113, 227, 0.1);
+  }
+
+  .layout-option[aria-checked="true"]:hover,
+  .layout-option[aria-checked="true"]:focus-visible {
+    background: #deedff;
+  }
+
+  .layout-option[aria-checked="true"] .layout-icon {
+    color: var(--accent);
+    border-color: rgba(0, 113, 227, 0.14);
+    background: linear-gradient(145deg, #fff, #dcecff);
+  }
+
+  .layout-check {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.68rem;
+    box-shadow: 0 2px 5px rgba(0, 113, 227, 0.18);
+    text-align: center;
+    visibility: hidden;
+  }
+
+  .layout-option[aria-checked="true"] .layout-check {
+    visibility: visible;
+  }
+
+  .layout-trigger:focus-visible,
+  .layout-option:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  @keyframes layout-menu-in {
+    from { opacity: 0; transform: translateY(-5px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .btn {
+    appearance: none;
+    border: 1px solid var(--page-border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-primary);
+    padding: 11px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--page-border-strong);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  }
+
+  .btn-primary {
+    background: linear-gradient(180deg, #1d8cff 0%, var(--accent) 100%);
+    border-color: rgba(0, 113, 227, 0.34);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(180deg, #2892ff 0%, var(--accent-hover) 100%);
+  }
+
+  .page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .glass-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid var(--page-border);
+    border-radius: var(--radius-xl);
+    background: var(--page-surface);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .glass-card.board-wrapper {
+    overflow: visible;
+  }
+
+  .filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 0.86rem;
+    font-weight: 700;
+  }
+
+  .filter-pill.is-neutral {
+    background: rgba(15, 23, 42, 0.05);
+    color: var(--text-secondary);
+  }
+
+  .board-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 40px 22px;
+  }
+
+  .flow-board {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .flow-header {
+    display: grid;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--page-border);
+  }
+
+  .flow-menu-toggle {
+    display: none;
+  }
+
+  .flow-header-cell {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    min-height: 64px;
+    padding: 12px 14px;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(15, 23, 42, 0.09);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(246, 248, 252, 0.76));
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 20px rgba(15, 23, 42, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    animation: pop-in 0.58s cubic-bezier(0.22, 1.35, 0.36, 1) both;
+    animation-delay: calc(var(--enter-delay, 0) * 1ms);
+  }
+
+  .flow-header-cell::after {
+    content: '';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--cat-color, var(--accent));
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(6px, -50%) scale(0.8);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .flow-header-cell::before {
+    content: '';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    z-index: 1;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    clip-path: polygon(0 0, 100% 0, 62% 44%, 62% 100%, 38% 100%, 38% 44%);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(6px, -50%) scale(0.8);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .flow-header-cell:hover {
+    transform: translateY(-3px);
+    border-color: var(--cat-color, var(--accent));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), color-mix(in srgb, var(--cat-color, var(--accent)) 9%, white));
+    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.06), 0 14px 28px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  }
+
+  .flow-header-cell:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), inset 0 2px 7px rgba(15, 23, 42, 0.1);
+  }
+
+  .flow-header-cell:hover::after {
+    opacity: 1;
+    transform: translate(0, -50%) scale(1);
+  }
+
+  .flow-header-cell:hover::before {
+    opacity: 1;
+    transform: translate(0, -50%) scale(1);
+  }
+
+  .flow-header-cell:hover .cat-count {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+
+  .flow-header-cell.inactive {
+    opacity: 0.42;
+  }
+
+  .flow-header-cell.active {
+    min-height: 48px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--cat-color) 86%, white), var(--cat-color));
+    border-color: color-mix(in srgb, var(--cat-color) 72%, #1d1d1f);
+    box-shadow: 0 3px 7px color-mix(in srgb, var(--cat-color) 28%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    color: #fff;
+  }
+
+  .flow-header-cell.active .cat-icon {
+    background: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 1px 3px rgba(15, 23, 42, 0.18);
+  }
+
+  .flow-header-cell.active .cat-name,
+  .flow-header-cell.active .cat-count {
+    color: #fff;
+  }
+
+  .flow-header-cell.active .cat-count {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .flow-header-cell.active::after,
+  .flow-header-cell.active::before {
+    opacity: 1;
+    transform: translate(0, -50%) scale(1);
+  }
+
+  .flow-header-cell.active .cat-count {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+
+  .cat-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 1px 2px rgba(15, 23, 42, 0.12);
+    font-size: 0.92rem;
+  }
+
+  .cat-text {
+    min-width: 0;
+  }
+
+  .cat-name {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .cat-count {
+    padding: 6px 9px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.88);
+    color: var(--cat-color, var(--accent));
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .flow-grid {
+    display: grid;
+    gap: 12px;
+    row-gap: 16px;
+    position: relative;
+    width: 100%;
+  }
+
+  .flow-connectors {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .flow-connector {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+
+  .flow-connector.is-visible {
+    stroke-dashoffset: 0;
+    opacity: 1;
+    animation: connector-draw 0.22s ease-out forwards;
+  }
+
+  .flow-cell {
+    position: relative;
+    z-index: 2;
+  }
+
+  .flow-cell.hidden {
+    display: none;
+  }
+
+  .node-card {
+    position: relative;
+    overflow: hidden;
+    padding: 10px 10px 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(15, 23, 42, 0.09);
+    background: linear-gradient(135deg, var(--page-surface-strong), rgba(246, 248, 252, 0.82));
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 20px rgba(15, 23, 42, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .node-card.is-entering {
+    animation: pop-in 0.48s cubic-bezier(0.22, 1.35, 0.36, 1) both;
+    animation-delay: calc(var(--enter-delay, 0) * 1ms);
+  }
+
+  .node-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--cat-color, var(--accent)), rgba(29, 29, 31, 0.3));
+  }
+
+  .node-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--cat-color, var(--accent));
+    box-shadow: 0 7px 12px rgba(15, 23, 42, 0.08), 0 22px 34px rgba(15, 23, 42, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  }
+
+  .node-card:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), inset 0 2px 7px rgba(15, 23, 42, 0.1);
+  }
+
+  .node-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .node-index {
+    display: block;
+    color: var(--text-tertiary);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+  }
+
+  .node-name {
+    min-width: 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.32;
+    letter-spacing: -0.005em;
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  .node-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .node-field {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+    font-size: 0.76rem;
+    line-height: 1.55;
+  }
+
+  .field-label {
+    padding-top: 1px;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.015em;
+    color: var(--text-quaternary);
+    text-transform: uppercase;
+  }
+
+  .field-value {
+    min-width: 0;
+    color: var(--text-secondary);
+    word-break: break-word;
+    font-size: 0.72rem;
+  }
+
+  .field-value.is-empty {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    padding: 2px 8px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--warning);
+    background: var(--warning-bg);
+    border: 1px solid var(--warning-border);
+    border-radius: 8px;
+  }
+
+  .node-content {
+    white-space: pre-wrap;
+    cursor: pointer;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .node-content.expanded {
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    overflow: visible;
+  }
+
+  .node-link {
+    text-decoration: underline;
+    text-decoration-color: rgba(15, 23, 42, 0.24);
+    text-underline-offset: 2px;
+    word-break: break-all;
+    cursor: pointer;
+    color: var(--accent);
+  }
+
+  .node-link:hover {
+    color: var(--accent-hover);
+  }
+
+  .detail-screen { display: none; max-width: 840px; margin: 0 auto; }
+  .detail-screen.visible { display: block; }
+  .detail-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 36px; }
+  .detail-number { color: var(--text-quaternary); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; }
+  .detail-name { margin-top: 10px; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.18; letter-spacing: -0.035em; }
+  .detail-grid { border-top: 1px solid var(--page-border); }
+  .detail-row { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 24px; padding: 18px 0; border-bottom: 1px solid var(--page-border); font-size: 0.9rem; line-height: 1.7; }
+  .detail-label { color: var(--text-quaternary); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; }
+  .detail-value { white-space: pre-wrap; word-break: break-word; }
+  .detail-value.empty { color: var(--text-tertiary); }
+  .detail-value a { color: var(--accent); text-underline-offset: 3px; }
+  .detail-navigation { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 32px; }
+  .detail-screen .btn,
+  .detail-nav-button {
+    border: 1px solid rgba(15, 23, 42, 0.09);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(246, 248, 252, 0.82));
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 8px 20px rgba(15, 23, 42, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .detail-nav-button { min-width: 0; padding: 14px 16px; border-radius: var(--radius-md); color: var(--text-primary); cursor: pointer; text-align: left; }
+  .detail-screen .btn:hover,
+  .detail-nav-button:hover:not(:disabled) {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(230, 242, 255, 0.88));
+    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.06), 0 14px 28px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  }
+  .detail-screen .btn:active,
+  .detail-nav-button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), inset 0 2px 7px rgba(15, 23, 42, 0.1);
+  }
+  .detail-screen .btn:focus-visible,
+  .detail-nav-button:focus-visible {
+    outline: 3px solid rgba(0, 113, 227, 0.28);
+    outline-offset: 3px;
+  }
+  .detail-nav-button.next { text-align: right; }
+  .detail-nav-button:disabled { visibility: hidden; }
+  .detail-nav-number { display: block; margin-bottom: 5px; color: var(--text-quaternary); font-size: 0.68rem; font-weight: 700; }
+  .detail-nav-name { display: block; overflow: hidden; font-size: 0.82rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+
+  .empty-state {
+    text-align: center;
+    padding: 96px 24px;
+    color: var(--text-tertiary);
+  }
+
+  .empty-state h2 {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+  }
+
+  .empty-state p {
+    font-size: 0.94rem;
+    line-height: 1.7;
+  }
+
+  .empty-state a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .help-fab {
+    position: fixed;
+    right: 26px;
+    bottom: 26px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #1d8cff 0%, var(--accent) 100%);
+    color: #fff;
+    border: 1px solid rgba(0, 113, 227, 0.36);
+    cursor: pointer;
+    box-shadow: 0 18px 32px rgba(0, 113, 227, 0.22);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .help-fab:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 22px 36px rgba(0, 113, 227, 0.3);
+  }
+
+  @keyframes pop-in {
+    0% {
+      opacity: 0;
+      transform: translateY(16px) scale(0.94);
+    }
+    60% {
+      opacity: 1;
+      transform: translateY(-4px) scale(1.02);
+    }
+    80% {
+      transform: translateY(2px) scale(0.99);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes connector-draw {
+    from {
+      opacity: 0;
+      stroke-dashoffset: 1;
+    }
+    to {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .page-shell {
+      padding: 8px 0;
+    }
+
+    .glass-card {
+      border-radius: 0;
+      border-left: 0;
+      border-right: 0;
+    }
+
+    .topbar {
+      gap: 14px;
+      padding: 16px 18px 20px;
+    }
+
+    .topbar-row {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .topbar-actions {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .layout-menu {
+      left: 0;
+      right: auto;
+      transform-origin: top left;
+    }
+
+    .board-body {
+      padding: 24px 16px 32px;
+    }
+
+    .flow-header,
+    .flow-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    .flow-menu-toggle {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      padding: 10px 14px;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--text-primary);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+      cursor: pointer;
+    }
+
+    .flow-menu-toggle::after {
+      content: '\2630';
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .flow-menu-toggle.is-filtered {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .flow-header {
+      display: none;
+    }
+
+    .flow-header.is-open {
+      display: grid;
+      margin-top: 10px;
+    }
+
+    .flow-cell {
+      grid-column: 1 !important;
+      grid-row: auto !important;
+    }
+
+    .flow-connectors {
+      display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .flow-header-cell,
+    .node-card {
+      border-radius: var(--radius-lg);
+    }
+
+    .node-field {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+
+    .brand-copy h1 { font-size: 1.3rem; }
+    .brand-copy .subtitle { font-size: 0.82rem; line-height: 1.55; }
+    .flow-header { gap: 10px; padding-top: 10px; }
+    .flow-header-cell { min-height: 58px; }
+    .node-card { padding: 12px 12px 12px 16px; }
+    .detail-screen { width: 100%; }
+    .detail-top { flex-direction: column; gap: 16px; margin-bottom: 26px; }
+    .detail-top .btn { width: 100%; }
+    .detail-name { font-size: 1.8rem; }
+    .detail-navigation { grid-template-columns: 1fr; }
+    .detail-row { grid-template-columns: 1fr; gap: 6px; }
+    .help-fab { right: 16px; bottom: 16px; width: 50px; height: 50px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    .layout-trigger,
+    .layout-chevron,
+    .layout-option {
+      transition: none;
+    }
+
+    .layout-menu:not([hidden]) {
+      animation: none;
+    }
+  }
+
+  @supports not (display: grid) {
+    .flow-header,
+    .flow-grid {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .flow-header-cell,
+    .flow-cell {
+      flex: 0 0 200px;
+      margin: 0 12px 12px 0;
+    }
+
+    .flow-connectors {
+      display: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-shell">
+  <main class="page">
+    <div class="glass-card board-wrapper">
+      <header class="topbar" id="topbar">
+        <div class="topbar-row">
+          <div class="brand-copy">
+            <h1 onclick="returnToFlow()">IT Governance Handbook</h1>
+            <p class="subtitle">💡IT 사업수행 프로세스에 참고할 최신 표준과 정책문서, 문서 담당자를 쉽게 찾고 활용할 수 있습니다</p>
+          </div>
+          <div class="topbar-actions">
+            <div class="layout-dropdown" id="layoutDropdown">
+              <button class="layout-trigger" id="layoutMenuButton" type="button" onclick="toggleLayoutMenu()" aria-haspopup="menu" aria-expanded="false" aria-controls="layoutMenu">
+                <span class="layout-icon layout-trigger-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" focusable="false"><rect x="3.5" y="3.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14.5" y="3.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3.5" y="14.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14.5" y="14.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                <span class="layout-trigger-copy"><span class="layout-trigger-title">보기 방식</span><span id="viewModeLabel">기본 보기</span></span>
+                <svg class="layout-chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true" focusable="false"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="layout-menu" id="layoutMenu" role="menu" aria-labelledby="layoutMenuButton" hidden>
+                <div class="layout-menu-heading" role="presentation">보기 방식</div>
+                <button class="layout-option" id="layoutOptionA" type="button" role="menuitemradio" aria-checked="true" aria-labelledby="layoutNameA" aria-describedby="layoutDescriptionA" tabindex="-1" onclick="selectLayout('a')">
+                  <span class="layout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><rect x="3" y="4" width="7" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="4" width="7" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 9h2m-2 4h2m9-4h2m-2 4h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+                  <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameA">기본 보기</span><span class="layout-option-description" id="layoutDescriptionA">분류별로 흐름을 확인</span></span>
+                  <span class="layout-check" aria-hidden="true">✓</span>
+                </button>
+                <button class="layout-option" id="layoutOptionC" type="button" role="menuitemradio" aria-checked="false" aria-labelledby="layoutNameC" aria-describedby="layoutDescriptionC" tabindex="-1" onclick="selectLayout('c')">
+                  <span class="layout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><rect x="3" y="3" width="18" height="5" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="16" width="18" height="5" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v8m-3-3 3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameC">모아 보기</span><span class="layout-option-description" id="layoutDescriptionC">전체 흐름을 한눈에</span></span>
+                  <span class="layout-check" aria-hidden="true">✓</span>
+                </button>
+                <button class="layout-option" id="layoutOptionB" type="button" role="menuitemradio" aria-checked="false" aria-labelledby="layoutNameB" aria-describedby="layoutDescriptionB" tabindex="-1" onclick="selectLayout('b')">
+                  <span class="layout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><rect x="3" y="4" width="8" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="4" width="8" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="13" width="8" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="8" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                  <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameB">카드로 보기</span><span class="layout-option-description" id="layoutDescriptionB">업무를 빠르게 탐색</span></span>
+                  <span class="layout-check" aria-hidden="true">✓</span>
+                </button>
+                <button class="layout-option" id="layoutOptionD" type="button" role="menuitemradio" aria-checked="false" aria-labelledby="layoutNameD" aria-describedby="layoutDescriptionD" tabindex="-1" onclick="selectLayout('d')">
+                  <span class="layout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="M3 7c4 0 4 10 8 10s4-10 10-10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 12c4 0 4-7 8-7s4 7 10 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="11" cy="12" r="2" fill="currentColor"/></svg></span>
+                  <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameD">프로세스 패브릭</span><span class="layout-option-description" id="layoutDescriptionD">연결된 업무 흐름을 탐색</span></span>
+                  <span class="layout-check" aria-hidden="true">✓</span>
+                </button>
+                <button class="layout-option" id="layoutOptionE" type="button" role="menuitemradio" aria-checked="false" aria-labelledby="layoutNameE" aria-describedby="layoutDescriptionE" tabindex="-1" onclick="selectLayout('e')">
+                  <span class="layout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="M5 5h14M5 12h14M5 19h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="3" cy="5" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="19" r="1" fill="currentColor"/></svg></span>
+                  <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameE">업무 구조</span><span class="layout-option-description" id="layoutDescriptionE">WBS와 의존 관계를 분리해 확인</span></span>
+                  <span class="layout-check" aria-hidden="true">✓</span>
+                </button>
+              </div>
+            </div>
+            <button class="btn btn-primary" id="saveButton" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드" hidden>저장</button>
+          </div>
+        </div>
+        <button class="flow-menu-toggle" id="flowMenuToggle" type="button" onclick="toggleFlowMenu()" aria-controls="flowHeader" aria-expanded="false">분류 필터</button>
+        <div class="flow-header" id="flowHeader"></div>
+      </header>
+      <div class="board-body" id="boardBody">
+        <div class="process-legend" id="processLegend" aria-label="분류 색상 범례"></div>
+        <div class="flow-board" id="flowBoard">
+          <div class="flow-grid" id="flowGrid"></div>
+        </div>
+        <section class="detail-screen" id="detailScreen" aria-label="프로세스 상세정보"></section>
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <h2>표시할 데이터가 없습니다</h2>
+          <p><a href="input.html">입력 화면</a>에서 항목을 먼저 추가하세요.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<button class="help-fab" onclick="window.open('https://forms.cloud.microsoft/r/CcsSg1CJcD', '_blank', 'noopener,noreferrer')" title="문의하기" aria-label="문의하기">
+  <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+    <rect x="2" y="3" width="20" height="14" rx="7" fill="#fff"/>
+    <path d="M8 17 L8 21.5 L12.5 17 Z" fill="#fff"/>
+    <text x="12" y="14" text-anchor="middle" font-size="10" font-weight="800" fill="#0071e3" font-family="'Segoe UI', Arial, sans-serif">?</text>
+  </svg>
+</button>
+
+<script data-view-module="a">
+(function registerBasicView() {
+  'use strict';
+
+  window.HandbookViews = window.HandbookViews || {};
+  window.HandbookViews.a = {
+    label: '기본 보기',
+    source: '(' + registerBasicView.toString() + ')();',
+    styles: '.process-legend { display: none; }',
+
+    render: function(context) {
+      const { rows, columns, colIndex, grid, header, legend, helpers } = context;
+      const template = 'repeat(' + columns.length + ', minmax(0, 1fr))';
+      header.style.gridTemplateColumns = template;
+      grid.style.gridTemplateColumns = template;
+      grid.style.gridTemplateRows = 'repeat(' + rows.length + ', auto)';
+      header.innerHTML = columns.map(function(cat, index) {
+        const count = rows.filter(function(row) { return helpers.category(row) === cat; }).length;
+        return helpers.headerCell(cat, count, index);
+      }).join('');
+      legend.innerHTML = '';
+      grid.innerHTML = rows.map(function(row, index) {
+        const cat = helpers.category(row);
+        const col = colIndex[cat];
+        return '<div class="flow-cell" data-cat="' + helpers.escape(cat) + '" data-col="' + col + '" data-idx="' + index + '" style="grid-column:' + col + ';grid-row:' + (index + 1) + '">' + helpers.card(row, index) + '</div>';
+      }).join('');
+    },
+
+    filter: function(context, activeCategory) {
+      const toggle = document.getElementById('flowMenuToggle');
+      toggle.textContent = activeCategory || '분류 필터';
+      toggle.classList.toggle('is-filtered', !!activeCategory);
+      let count = 0;
+      context.grid.querySelectorAll('.flow-cell').forEach(function(cell) {
+        const visible = !activeCategory || cell.dataset.cat === activeCategory;
+        cell.classList.toggle('hidden', !visible);
+        if (!visible) return;
+        count++;
+        cell.style.gridRow = activeCategory ? count : Number(cell.dataset.idx) + 1;
+        cell.style.gridColumn = cell.dataset.col;
+      });
+      context.grid.style.gridTemplateRows = 'repeat(' + (activeCategory ? count : context.rows.length) + ', auto)';
+      return count;
+    },
+
+    connector: function(a, b, grid) {
+      const x1 = a.left + a.width / 2 - grid.left;
+      const y1 = a.bottom - grid.top;
+      const x2 = b.left + b.width / 2 - grid.left;
+      const y2 = b.top - grid.top;
+      const midY = (y1 + y2) / 2;
+      return Math.abs(x1 - x2) < 4
+        ? 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2
+        : 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + midY + ' ' + x2 + ',' + midY + ' ' + x2 + ',' + y2;
+    }
+  };
+})();
+</script>
+<script data-view-module="c">
+(function registerCollectedView() {
+  'use strict';
+
+  function getColumns() {
+    const board = document.getElementById('boardBody');
+    const width = board ? board.clientWidth - 64 : 960;
+    return Math.max(2, Math.floor((width + 48) / 198));
+  }
+
+  window.HandbookViews = window.HandbookViews || {};
+  window.HandbookViews.c = {
+    label: '모아 보기',
+    source: '(' + registerCollectedView.toString() + ')();',
+    rerenderOnResize: true,
+    styles: `
+      .layout-process .flow-header,
+      .layout-process .flow-menu-toggle { display: none !important; }
+      .layout-process .board-body { padding: 0 22px 16px; }
+      .layout-process .flow-board { padding: 14px 16px 8px; }
+      .layout-process .detail-screen { padding-top: 40px; }
+      .layout-process .process-legend {
+        display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px;
+        margin: 10px 0 0; padding: 10px 16px;
+        border: 1px solid var(--page-border); border-radius: 8px;
+        background: rgba(0, 113, 227, 0.08); color: var(--text-tertiary);
+        font-size: 0.76rem; font-weight: 650;
+      }
+      .process-area-label {
+        display: inline-flex; align-items: center; min-height: 18px; padding-right: 12px;
+        border-right: 1px solid var(--page-border-strong); color: var(--text-secondary);
+        font-size: 0.7rem; font-weight: 750; letter-spacing: 0.06em;
+      }
+      .process-legend-item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+      .process-legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cat-color); }
+      .layout-process .flow-grid {
+        display: grid; grid-template-columns: repeat(var(--process-columns), minmax(0, 1fr)) !important;
+        grid-auto-rows: minmax(56px, auto); column-gap: 48px; row-gap: 40px;
+        width: 100%; align-items: center;
+      }
+      .layout-process .flow-cell {
+        grid-column: var(--process-column) !important; grid-row: var(--process-row) !important;
+      }
+      .layout-process .node-card {
+        display: flex; align-items: center; gap: 8px; min-height: 56px; padding: 8px 2px;
+        overflow: visible; border: 0; border-radius: 0;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.14); background: transparent; box-shadow: none;
+      }
+      .layout-process .node-card::before {
+        position: static; flex: 0 0 9px; width: 9px; height: 9px;
+        border-radius: 50%; background: var(--cat-color, var(--accent));
+      }
+      .layout-process .node-card:hover { transform: translateY(-2px); border-color: var(--cat-color, var(--accent)); box-shadow: none; }
+      .layout-process .node-head { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
+      .layout-process .node-index { flex: 0 0 auto; font-size: 0.68rem; }
+      .layout-process .node-name { font-size: 0.8rem; font-weight: 650; line-height: 1.35; }
+      .layout-process .node-details { display: none; }
+      .layout-process .node-card[title] { cursor: pointer; }
+      .layout-process .flow-connector { stroke: rgba(105, 113, 124, 0.52); stroke-width: 1.25; }
+      @media (max-width: 900px) {
+        .layout-process .flow-grid { column-gap: 24px; }
+        .layout-process .flow-connectors { display: block; }
+      }
+      @media (max-width: 860px) {
+        .layout-process .flow-board { padding: 36px 8px 56px; }
+      }
+    `,
+
+    render: function(context) {
+      const { rows, columns, grid, header, legend, helpers } = context;
+      const count = getColumns();
+      grid.style.setProperty('--process-columns', count);
+      grid.style.gridTemplateColumns = '';
+      grid.style.gridTemplateRows = '';
+      header.innerHTML = '';
+      legend.innerHTML = '<span class="process-area-label">업무 흐름</span>' + columns.map(function(cat) {
+        return '<span class="process-legend-item" style="--cat-color:' + helpers.color(cat) + '"><span class="process-legend-dot"></span>' + helpers.escape(cat) + '</span>';
+      }).join('');
+      grid.innerHTML = rows.map(function(row, index) {
+        const processRow = Math.floor(index / count) + 1;
+        const position = index % count;
+        const processColumn = processRow % 2 === 1 ? position + 1 : count - position;
+        return '<div class="flow-cell" data-cat="' + helpers.escape(helpers.category(row)) + '" data-idx="' + index + '" style="--process-column:' + processColumn + ';--process-row:' + processRow + '">' + helpers.card(row, index) + '</div>';
+      }).join('');
+    },
+
+    filter: function(context) {
+      context.grid.querySelectorAll('.flow-cell').forEach(function(cell) { cell.classList.remove('hidden'); });
+      context.grid.style.gridTemplateRows = 'repeat(' + Math.max(1, Math.ceil(context.rows.length / getColumns())) + ', minmax(56px, auto))';
+      return context.rows.length;
+    },
+
+    connector: function(a, b, grid) {
+      const aCenter = a.left + a.width / 2;
+      const bCenter = b.left + b.width / 2;
+      if (Math.abs(aCenter - bCenter) < 4) {
+        const x = aCenter - grid.left;
+        const y1 = a.bottom - grid.top;
+        const y2 = b.top - grid.top;
+        return 'M' + x + ',' + y1 + ' L' + x + ',' + y2;
+      }
+      const movesRight = bCenter > aCenter;
+      const x1 = (movesRight ? a.right : a.left) - grid.left;
+      const y1 = a.top + a.height / 2 - grid.top;
+      const x2 = (movesRight ? b.left : b.right) - grid.left;
+      const y2 = b.top + b.height / 2 - grid.top;
+      const bend = x1 + (x2 - x1) / 2;
+      return 'M' + x1 + ',' + y1 + ' C' + bend + ',' + y1 + ' ' + bend + ',' + y2 + ' ' + x2 + ',' + y2;
+    }
+  };
+})();
+</script>
+<script data-view-module="b">
+(function registerCardsView() {
+  'use strict';
+
+  window.HandbookViews = window.HandbookViews || {};
+  window.HandbookViews.b = {
+    label: '카드로 보기',
+    source: '(' + registerCardsView.toString() + ')();',
+    styles: `
+      .layout-cards .node-card {
+        min-height: 112px;
+        padding: 16px 16px 15px 20px;
+        border-color: color-mix(in srgb, var(--cat-color, var(--accent)) 18%, var(--page-border));
+        border-radius: 8px;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), color-mix(in srgb, var(--cat-color, var(--accent)) 5%, #f7f9fc));
+        box-shadow: 0 3px 7px rgba(15, 23, 42, 0.05), 0 12px 24px rgba(15, 23, 42, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.98);
+      }
+      .layout-cards .node-card::before { width: 5px; }
+      .layout-cards .node-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08), 0 20px 32px color-mix(in srgb, var(--cat-color, var(--accent)) 14%, transparent), inset 0 1px 0 #fff;
+      }
+      .layout-cards .node-head { gap: 7px; }
+      .layout-cards .node-index { color: var(--cat-color, var(--accent)); font-size: 0.68rem; font-weight: 700; }
+      .layout-cards .node-name { font-size: 0.9rem; line-height: 1.42; }
+      .layout-cards .node-details { margin-top: 10px; }
+    `,
+
+    render: function(context) {
+      window.HandbookViews.a.render(context);
+    },
+
+    filter: function(context, activeCategory) {
+      return window.HandbookViews.a.filter(context, activeCategory);
+    },
+
+    connector: function(a, b, grid) {
+      return window.HandbookViews.a.connector(a, b, grid);
+    }
+  };
+})();
+</script>
+<script data-view-module="d">
+(function registerFabricView() {
+  'use strict';
+
+  let focusedIndex = -1;
+
+  function layoutPoint(index, total) {
+    const columns = Math.max(4, Math.min(7, Math.ceil(Math.sqrt(total * 1.5))));
+    const row = Math.floor(index / columns);
+    const rows = Math.max(1, Math.ceil(total / columns));
+    const position = index % columns;
+    const reversed = row % 2 === 1;
+    const column = reversed ? columns - position - 1 : position;
+    const x = 8 + column * (84 / Math.max(1, columns - 1));
+    const y = 14 + row * (72 / Math.max(1, rows - 1)) + ((index % 3 === 1) ? 3 : (index % 3 === 2 ? -2 : 0));
+    return { x: x, y: y };
+  }
+
+  function curve(from, to) {
+    const spread = Math.abs(to.x - from.x) * 0.42;
+    const direction = to.x >= from.x ? 1 : -1;
+    return 'M' + from.x + ',' + from.y + ' C' + (from.x + spread * direction) + ',' + from.y + ' ' + (to.x - spread * direction) + ',' + to.y + ' ' + to.x + ',' + to.y;
+  }
+
+  function updateFocus(index) {
+    focusedIndex = index;
+    const canvas = document.querySelector('.fabric-canvas');
+    if (!canvas) return;
+    canvas.classList.toggle('is-focused', index >= 0);
+    canvas.querySelectorAll('.fabric-node').forEach(function(node) {
+      const nodeIndex = Number(node.dataset.index);
+      node.classList.toggle('is-focus', nodeIndex === index);
+      node.classList.toggle('is-neighbor', nodeIndex === index - 1 || nodeIndex === index + 1);
+      node.classList.toggle('is-previous', nodeIndex === index - 1);
+      node.classList.toggle('is-next', nodeIndex === index + 1);
+    });
+    canvas.querySelectorAll('.fabric-thread').forEach(function(thread) {
+      const from = Number(thread.dataset.from);
+      const to = Number(thread.dataset.to);
+      thread.classList.toggle('is-active', from === index || to === index);
+      thread.classList.toggle('is-neighbor', from === index - 1 || to === index + 1);
+    });
+  }
+
+  window.fabricFocus = updateFocus;
+  window.fabricBlur = function() { updateFocus(-1); };
+
+  window.HandbookViews = window.HandbookViews || {};
+  window.HandbookViews.d = {
+    label: '프로세스 패브릭',
+    source: '(' + registerFabricView.toString() + ')();',
+    rerenderOnResize: true,
+    styles: `
+      .layout-fabric .flow-header, .layout-fabric .flow-menu-toggle, .layout-fabric .process-legend { display: none !important; }
+      .layout-fabric .board-body { padding: 32px 40px 44px; }
+      .layout-fabric .flow-board { max-width: 1440px; min-height: 550px; margin: 0 auto; }
+      .layout-fabric .flow-grid { display: block; min-height: 550px; }
+      .layout-fabric .flow-connectors { display: none; }
+      .fabric-canvas { position: relative; min-height: 550px; isolation: isolate; }
+      .fabric-threads { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+      .fabric-thread { fill: none; stroke: var(--thread-color); stroke-width: .28; stroke-linecap: round; opacity: .64; transition: opacity .22s ease, stroke-width .22s ease; }
+      .fabric-thread.is-secondary { opacity: .26; }
+      .fabric-node { position: absolute; z-index: 1; display: flex; align-items: baseline; gap: 7px; max-width: min(180px, 22vw); padding: 4px 5px; border: 0; background: transparent; color: var(--text-secondary); text-align: left; cursor: pointer; transform: translate(-50%, -50%); transition: color .22s ease, transform .25s ease, opacity .22s ease; }
+      .fabric-node::before { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--node-color); content: ''; }
+      .fabric-node-number { color: var(--text-quaternary); font: 600 .62rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; }
+      .fabric-node-name { overflow: hidden; font-size: .78rem; font-weight: 600; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+      .fabric-node:hover, .fabric-node:focus-visible { color: var(--text-primary); outline: 0; transform: translate(-50%, -50%) scale(1.04); }
+      .fabric-node:focus-visible { box-shadow: 0 0 0 3px rgba(0,113,227,.15); border-radius: 5px; }
+      .fabric-canvas.is-focused .fabric-node { opacity: .2; }
+      .fabric-canvas.is-focused .fabric-node.is-focus { z-index: 3; color: var(--text-primary); opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+      .fabric-canvas.is-focused .fabric-node.is-neighbor { z-index: 2; color: var(--text-primary); opacity: .9; transform: translate(-50%, -50%) scale(1.07); }
+      .fabric-canvas.is-focused .fabric-node.is-previous { transform: translate(calc(-50% - 10px), calc(-50% + 8px)) scale(1.07); }
+      .fabric-canvas.is-focused .fabric-node.is-next { transform: translate(calc(-50% + 10px), calc(-50% - 8px)) scale(1.07); }
+      .fabric-canvas.is-focused .fabric-thread { opacity: .08; }
+      .fabric-canvas.is-focused .fabric-thread.is-active { stroke-width: .5; opacity: 1; }
+      .fabric-canvas.is-focused .fabric-thread.is-neighbor { stroke-width: .38; opacity: .72; }
+      .layout-fabric .detail-screen { padding-top: 8px; }
+      @media (max-width: 860px) { .layout-fabric .board-body { padding: 24px 16px 32px; } .layout-fabric .flow-board, .layout-fabric .flow-grid, .fabric-canvas { min-height: 620px; } .fabric-node { max-width: 36vw; } }
+      @media (prefers-reduced-motion: reduce) { .fabric-thread, .fabric-node { transition: none; } }
+    `,
+    render: function(context) {
+      const { rows, grid, header, legend, helpers } = context;
+      focusedIndex = -1;
+      header.innerHTML = '';
+      legend.innerHTML = '';
+      grid.style.gridTemplateColumns = '';
+      grid.style.gridTemplateRows = '';
+      const points = rows.map(function(_, index) { return layoutPoint(index, rows.length); });
+      const threads = rows.slice(0, -1).map(function(row, index) {
+        const stage = helpers.category(row);
+        return '<path class="fabric-thread' + (index % 3 === 2 ? ' is-secondary' : '') + '" data-from="' + index + '" data-to="' + (index + 1) + '" style="--thread-color:' + helpers.color(stage) + '" d="' + curve(points[index], points[index + 1]) + '"/>';
+      }).join('');
+      const nodes = rows.map(function(row, index) {
+        const point = points[index];
+        const stage = helpers.category(row);
+        const label = helpers.escape((index + 1) + '번 ' + (row.항목명 || '항목명 없음') + ' 상세 보기');
+        return '<button class="fabric-node" type="button" data-index="' + index + '" style="left:' + point.x + '%;top:' + point.y + '%;--node-color:' + helpers.color(stage) + '" onmouseenter="fabricFocus(' + index + ')" onmouseleave="fabricBlur()" onfocus="fabricFocus(' + index + ')" onblur="fabricBlur()" onclick="openDetail(' + index + ')" aria-label="' + label + '"><span class="fabric-node-number">' + String(index + 1).padStart(2, '0') + '</span><span class="fabric-node-name">' + helpers.escape(row.항목명 || '(항목명 없음)') + '</span></button>';
+      }).join('');
+      grid.innerHTML = '<div class="fabric-canvas"><svg class="fabric-threads" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' + threads + '</svg>' + nodes + '</div>';
+    },
+    filter: function(context) { return context.rows.length; },
+    connector: function() { return ''; }
+  };
+})();
+</script>
+<script data-view-module="e">
+(function registerStructureView() {
+  'use strict';
+
+  const STAGES = ['계약', '분석', '보안', '설계', '개발', '검증', '운영'];
+  let selectedIndex = -1;
+  let viewMode = 'structure';
+
+  function stageOrder(stage) {
+    const index = STAGES.indexOf(stage);
+    return index < 0 ? STAGES.length : index;
+  }
+
+  function grouped(rows, helpers) {
+    const groups = {};
+    rows.forEach(function(row, index) {
+      const stage = helpers.category(row);
+      if (!groups[stage]) groups[stage] = [];
+      groups[stage].push({ row: row, index: index });
+    });
+    return Object.keys(groups).sort(function(a, b) { return stageOrder(a) - stageOrder(b) || a.localeCompare(b, 'ko'); }).map(function(stage) {
+      return { stage: stage, items: groups[stage] };
+    });
+  }
+
+  function itemNumber(groupIndex, itemIndex) {
+    return String(groupIndex + 1).padStart(2, '0') + '.' + String(itemIndex + 1).padStart(2, '0');
+  }
+
+  function focusClass(index) {
+    if (selectedIndex < 0) return '';
+    if (index === selectedIndex) return ' is-selected';
+    if (index === selectedIndex - 1 || index === selectedIndex + 1) return ' is-related';
+    return ' is-muted';
+  }
+
+  function structureMarkup(context) {
+    const groups = grouped(context.rows, context.helpers);
+    return '<div class="structure-outline">' + groups.map(function(group, groupIndex) {
+      const color = context.helpers.color(group.stage);
+      return '<section class="wbs-stage" style="--stage-color:' + color + '"><div class="wbs-stage-heading"><span class="wbs-stage-line"></span><span class="wbs-stage-number">' + String(groupIndex + 1).padStart(2, '0') + '</span><h2>' + context.helpers.escape(group.stage) + '</h2><span class="wbs-stage-count">' + group.items.length + '</span></div><ol class="wbs-items">' + group.items.map(function(item, itemIndex) {
+        return '<li><button class="wbs-item' + focusClass(item.index) + '" type="button" onclick="structureFocus(' + item.index + ')" aria-label="' + context.helpers.escape(itemNumber(groupIndex, itemIndex) + ' ' + (item.row.항목명 || '항목명 없음') + ' 의존 관계 보기') + '"><span class="wbs-item-number">' + itemNumber(groupIndex, itemIndex) + '</span><span class="wbs-item-name">' + context.helpers.escape(item.row.항목명 || '(항목명 없음)') + '</span><span class="wbs-item-action" aria-hidden="true">관계 보기</span></button></li>';
+      }).join('') + '</ol></section>';
+    }).join('') + '</div>';
+  }
+
+  function dependencyMarkup(context) {
+    const row = context.rows[selectedIndex];
+    if (!row) return '<div class="dependency-empty"><p>업무 구조에서 업무를 선택하면 해당 업무의 관계를 표시합니다.</p></div>';
+    const previous = context.rows[selectedIndex - 1];
+    const next = context.rows[selectedIndex + 1];
+    const node = function(kind, index, item) {
+      if (!item) return '<div class="dependency-node is-empty"><span>' + kind + '</span><strong>없음</strong></div>';
+      const stage = context.helpers.category(item);
+      return '<button class="dependency-node" type="button" style="--stage-color:' + context.helpers.color(stage) + '" onclick="openDetail(' + index + ')"><span>' + kind + ' · ' + context.helpers.escape(stage) + '</span><strong>' + String(index + 1).padStart(2, '0') + '. ' + context.helpers.escape(item.항목명 || '(항목명 없음)') + '</strong></button>';
+    };
+    return '<div class="dependency-focus"><p class="dependency-caption">선택한 업무를 중심으로 입력 순서의 의존 관계만 표시합니다.</p><div class="dependency-map">' +
+      '<div class="dependency-previous">' + node('Previous', selectedIndex - 1, previous) + '</div><div class="dependency-arrow dependency-arrow-in" aria-hidden="true">→</div>' +
+      '<button class="dependency-current" type="button" style="--stage-color:' + context.helpers.color(context.helpers.category(row)) + '" onclick="openDetail(' + selectedIndex + ')" aria-label="' + context.helpers.escape((selectedIndex + 1) + '번 ' + (row.항목명 || '항목명 없음') + ' 상세 보기') + '"><span>Selected · ' + context.helpers.escape(context.helpers.category(row)) + '</span><strong>' + String(selectedIndex + 1).padStart(2, '0') + '. ' + context.helpers.escape(row.항목명 || '(항목명 없음)') + '</strong></button>' +
+      '<div class="dependency-arrow dependency-arrow-out" aria-hidden="true">→</div><div class="dependency-next">' + node('Next', selectedIndex + 1, next) + '</div>' +
+    '</div></div>';
+  }
+
+  function render(context) {
+    const { grid, header, legend } = context;
+    header.innerHTML = '';
+    legend.innerHTML = '';
+    grid.style.gridTemplateColumns = '';
+    grid.style.gridTemplateRows = '';
+    grid.innerHTML = '<div class="structure-toolbar"><div class="structure-tabs" role="tablist" aria-label="업무 구조 보기"><button type="button" role="tab" aria-selected="' + (viewMode === 'structure') + '" onclick="structureSetMode(\'structure\')">Structure</button><button type="button" role="tab" aria-selected="' + (viewMode === 'dependencies') + '" onclick="structureSetMode(\'dependencies\')">Dependencies</button></div><p>' + (viewMode === 'structure' ? '업무 체계를 먼저 확인하고, 업무를 선택해 관계를 확인하세요.' : '선택된 업무의 Previous / Next 관계입니다.') + '</p></div>' + (viewMode === 'structure' ? structureMarkup(context) : dependencyMarkup(context));
+  }
+
+  window.structureFocus = function(index) {
+    selectedIndex = index;
+    viewMode = 'dependencies';
+    if (window.HandbookViews.e && window.__structureContext) render(window.__structureContext);
+  };
+  window.structureSetMode = function(mode) {
+    viewMode = mode;
+    if (window.HandbookViews.e && window.__structureContext) render(window.__structureContext);
+  };
+
+  window.HandbookViews = window.HandbookViews || {};
+  window.HandbookViews.e = {
+    label: '업무 구조',
+    source: '(' + registerStructureView.toString() + ')();',
+    styles: `
+      .layout-structure .flow-header, .layout-structure .flow-menu-toggle, .layout-structure .process-legend { display: none !important; }
+      .layout-structure .board-body { padding: 34px 40px 48px; background: rgba(255,255,255,.28); }
+      .layout-structure .flow-board { max-width: 1060px; margin: 0 auto; }
+      .layout-structure .flow-grid { display: block; }
+      .layout-structure .flow-connectors { display: none; }
+      .structure-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 25px; border-bottom: 1px solid var(--page-border); }
+      .structure-toolbar p { color: var(--text-tertiary); font-size: .78rem; }
+      .structure-tabs { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--page-border); border-radius: 8px; background: rgba(15,23,42,.035); }
+      .structure-tabs button { min-height: 29px; padding: 4px 10px; border: 0; border-radius: 5px; background: transparent; color: var(--text-tertiary); font-size: .72rem; font-weight: 650; cursor: pointer; }
+      .structure-tabs button[aria-selected="true"] { background: #fff; color: var(--text-primary); box-shadow: 0 1px 3px rgba(15,23,42,.1); }
+      .structure-outline { padding-top: 18px; }
+      .wbs-stage { padding: 22px 0 12px; border-bottom: 1px solid var(--page-border); }
+      .wbs-stage-heading { display: flex; align-items: center; gap: 10px; min-height: 30px; }
+      .wbs-stage-line { width: 3px; height: 22px; border-radius: 2px; background: var(--stage-color); }
+      .wbs-stage-number { color: var(--text-quaternary); font: 650 .7rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .wbs-stage h2 { font-size: .94rem; font-weight: 700; letter-spacing: -.02em; }
+      .wbs-stage-count { margin-left: auto; color: var(--text-quaternary); font-size: .7rem; }
+      .wbs-items { margin: 10px 0 0 23px; padding: 0; list-style: none; }
+      .wbs-item { display: grid; grid-template-columns: 56px minmax(0,1fr) auto; align-items: center; gap: 12px; width: 100%; min-height: 38px; padding: 6px 8px; border: 0; border-radius: 5px; background: transparent; color: var(--text-primary); text-align: left; cursor: pointer; }
+      .wbs-item:hover, .wbs-item:focus-visible { background: rgba(0,113,227,.055); color: var(--text-primary); outline: 0; }
+      .wbs-item-number { color: var(--text-tertiary); font: 600 .68rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .wbs-item-name { overflow: hidden; color: var(--text-primary); font-size: .82rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+      .wbs-item-action { color: var(--accent); font-size: .66rem; opacity: 0; transition: opacity .15s ease; }
+      .wbs-item:hover .wbs-item-action, .wbs-item:focus-visible .wbs-item-action { opacity: 1; }
+      .wbs-item.is-muted { opacity: .24; }
+      .wbs-item.is-related { background: rgba(0,113,227,.045); }
+      .wbs-item.is-selected { background: rgba(0,113,227,.1); color: var(--text-primary); }
+      .dependency-focus { padding: 70px 0 45px; }
+      .dependency-caption { margin-bottom: 32px; color: var(--text-tertiary); font-size: .78rem; text-align: center; }
+      .dependency-map { display: grid; grid-template-columns: minmax(0,1fr) 36px minmax(220px,1.25fr) 36px minmax(0,1fr); align-items: center; gap: 10px; }
+      .dependency-node, .dependency-current { display: flex; flex-direction: column; gap: 7px; min-height: 90px; padding: 15px; border: 1px solid var(--page-border); border-left: 3px solid var(--stage-color, transparent); border-radius: 7px; background: rgba(255,255,255,.5); color: var(--text-primary); text-align: left; }
+      .dependency-node { cursor: pointer; }
+      .dependency-node:hover { border-color: rgba(0,113,227,.26); background: #fff; }
+      .dependency-node span, .dependency-current span { color: var(--text-quaternary); font-size: .65rem; font-weight: 650; }
+      .dependency-node strong, .dependency-current strong { font-size: .8rem; font-weight: 650; line-height: 1.4; }
+      .dependency-node.is-empty { justify-content: center; border-left-color: transparent; color: var(--text-quaternary); }
+      .dependency-current { position: relative; width: 100%; cursor: pointer; border-color: color-mix(in srgb, var(--stage-color) 32%, var(--page-border)); border-left-width: 3px; background: rgba(255,255,255,.82); box-shadow: 0 8px 20px rgba(15,23,42,.06); transition: background .15s ease, border-color .15s ease, box-shadow .15s ease; }
+      .dependency-current:hover, .dependency-current:focus-visible { border-color: color-mix(in srgb, var(--stage-color) 60%, var(--page-border)); background: #fff; box-shadow: 0 10px 24px rgba(15,23,42,.09); outline: 0; }
+      .dependency-arrow { color: var(--text-quaternary); font-size: 1.2rem; text-align: center; }
+      .dependency-empty { padding: 96px 20px; color: var(--text-tertiary); font-size: .85rem; text-align: center; }
+      .layout-structure .detail-screen { padding-top: 8px; }
+      @media (max-width: 720px) { .layout-structure .board-body { padding: 24px 18px 32px; } .structure-toolbar { align-items: flex-start; flex-direction: column; gap: 12px; } .dependency-focus { padding-top: 38px; } .dependency-map { grid-template-columns: 1fr; gap: 10px; } .dependency-arrow { display: none; } .dependency-current { order: -1; } .wbs-items { margin-left: 8px; } }
+    `,
+    render: function(context) {
+      window.__structureContext = context;
+      render(context);
+    },
+    filter: function(context) { return context.rows.length; },
+    connector: function() { return ''; }
+  };
+})();
+</script>
+<script>
+const STORAGE_KEY = 'it_portal_data_v1';
+const LAYOUT_STORAGE_KEY = 'it_portal_layout_v1';
+
+const CAT_CONFIG = {
+  '분석': { icon: '🔍', color: '#0a84ff' },
+  '설계': { icon: '📐', color: '#5e5ce6' },
+  '개발': { icon: '💻', color: '#30b0c7' },
+  '검증': { icon: '✅', color: '#ff453a' },
+  '운영': { icon: '🚀', color: '#ff9f0a' },
+  '계약': { icon: '📝', color: '#34c759' },
+  '보안': { icon: '🔐', color: '#bf5af2' }
+};
+const CATEGORY_PALETTE = ['#0a84ff', '#5e5ce6', '#30b0c7', '#ff453a', '#ff9f0a', '#34c759', '#bf5af2'];
+let categoryColors = {};
+
+function assignCategoryColors(categories) {
+  categoryColors = {};
+  categories.forEach(function(cat, index) {
+    categoryColors[cat] = CATEGORY_PALETTE[index % CATEGORY_PALETTE.length];
+  });
+}
+
+function colorForCategory(cat) {
+  if (categoryColors[cat]) return categoryColors[cat];
+  if (CAT_CONFIG[cat]) return CAT_CONFIG[cat].color;
+  let hash = 0;
+  for (let i = 0; i < cat.length; i++) hash = ((hash << 5) - hash) + cat.charCodeAt(i);
+  return CATEGORY_PALETTE[Math.abs(hash) % CATEGORY_PALETTE.length];
+}
+
+function iconForCategory(cat) {
+  return CAT_CONFIG[cat] ? CAT_CONFIG[cat].icon : '◌';
+}
+
+// ── EMBEDDED DATA (시크릿 모드용) ──
+// __EMBEDDED_DATA_START__
+const EMBEDDED_DATA = [];
+// __EMBEDDED_DATA_END__
+
+function safeGetSession(key) {
+  try { return sessionStorage.getItem(key); } catch (e) { return null; }
+}
+
+// localStorage는 오래된 데이터가 남아있을 수 있어 신뢰하지 않는다.
+// input.html에서 방금 넘겨준 sessionStorage 값이거나, 저장(다운로드)된 파일에 내장된 데이터만 사용한다.
+function loadData() {
+  const sessionData = safeGetSession(STORAGE_KEY);
+  if (sessionData) {
+    try { return JSON.parse(sessionData); } catch (e) {}
+  }
+  return EMBEDDED_DATA.length > 0 ? EMBEDDED_DATA : null;
+}
+
+function embedSharedStyles(snapshot) {
+  const inline = document.querySelector('style[data-shared-styles]');
+  const link = document.querySelector('link[data-shared-styles]');
+  const target = snapshot.querySelector('link[data-shared-styles], style[data-shared-styles]');
+  // Built and previously saved HTML already contains the complete CSS source.
+  let css = inline ? inline.textContent : '';
+  if (!css.trim() && link) {
+    try {
+      // Prefer actual live CSS, including edits; never fetch local files.
+      const sheet = link.sheet;
+      if (sheet && !sheet.disabled) {
+        css = Array.from(sheet.cssRules, function(rule) { return rule.cssText; }).join('\n');
+      }
+    } catch (e) {
+      // file:// may block CSSOM; the classic-script companion remains readable.
+    }
+  }
+  if (!css.trim()) {
+    css = typeof window.HandbookSharedCss === 'string' ? window.HandbookSharedCss : '';
+  }
+  if (!css.trim()) throw new Error('공통 스타일 소스가 없거나 비어 있습니다.');
+
+  const style = document.createElement('style');
+  style.setAttribute('data-shared-styles', '');
+  // Keep CSS text from terminating the style element in serialized HTML.
+  style.textContent = css.replace(/<\/style/gi, '\\3c /style');
+  if (target) target.replaceWith(style);
+  else snapshot.querySelector('head').appendChild(style);
+}
+
+function saveAndReturn() {
+  const data = loadData();
+  if (!data || data.length === 0) {
+    alert('저장할 데이터가 없습니다.');
+    window.location.href = 'input.html';
+    return;
+  }
+
+  let scriptEl = null;
+  const scripts = document.querySelectorAll('script');
+  for (let i = 0; i < scripts.length; i++) {
+    if (scripts[i].textContent.indexOf('__EMBEDDED_DATA_START__') !== -1) {
+      scriptEl = scripts[i];
+      break;
+    }
+  }
+  if (!scriptEl) {
+    alert('소스를 찾을 수 없습니다.');
+    window.location.href = 'input.html';
+    return;
+  }
+
+  const serializedData = JSON.stringify(data, null, 2).replace(/</g, '\\u003c');
+  const newBlock = '// __EMBEDDED_DATA_START__\nconst EMBEDDED_DATA = ' + serializedData + ';\n// __EMBEDDED_DATA_END__';
+  // Bundle the loaded modules without fetch so saving also works with file://.
+  const snapshot = document.documentElement.cloneNode(true);
+  snapshot.querySelector('#layoutMenu').hidden = true;
+  snapshot.querySelector('#layoutMenuButton').setAttribute('aria-expanded', 'false');
+  try {
+    embedSharedStyles(snapshot);
+  } catch (e) {
+    // Never export unstyled HTML when every shared CSS source is unavailable.
+    alert('공통 스타일을 내장할 수 없어 저장을 중단했습니다. 스타일 파일과 자동 생성된 CSS 소스 스크립트가 있는지 확인해주세요.');
+    return;
+  }
+  snapshot.querySelectorAll('script[data-shared-style-source]').forEach(function(script) { script.remove(); });
+  snapshot.querySelectorAll('script[data-view-module]').forEach(function(script) {
+    const view = window.HandbookViews[script.dataset.viewModule];
+    script.removeAttribute('src');
+    script.textContent = view.source;
+  });
+  snapshot.querySelectorAll('style[data-view-styles]').forEach(function(style) { style.remove(); });
+  const fullHtml = '<!DOCTYPE html>\n' + snapshot.outerHTML;
+  const updatedHtml = fullHtml.replace(
+    /\/\/ __EMBEDDED_DATA_START__[\s\S]*?\/\/ __EMBEDDED_DATA_END__/,
+    function() { return newBlock; }
+  );
+
+  const blob = new Blob([updatedHtml], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'view.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  alert('저장 완료! (' + data.length + '개 항목)');
+}
+
+function updateSaveButtonVisibility() {
+  const saveButton = document.getElementById('saveButton');
+  if (saveButton) saveButton.hidden = !/debug/i.test(window.location.href);
+}
+
+function esc(str) {
+  return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function escAttr(str) {
+  return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function isUrl(str) {
+  return /^https?:\/\//i.test((str || '').trim());
+}
+
+function openLink(link) {
+  if (isUrl(link)) {
+    window.open(link, '_blank', 'noopener,noreferrer');
+  } else {
+    alert('문서 위치: ' + link);
+  }
+}
+
+let activeCategory = null;
+let lastRows = [];
+let currentDetailIndex = -1;
+let overviewScrollTop = 0;
+let overviewBoardScrollTop = 0;
+let currentLayout = loadLayoutPreference();
+
+function currentView() {
+  return window.HandbookViews[currentLayout] || window.HandbookViews.a;
+}
+
+function viewContext() {
+  const columns = getColumns(lastRows);
+  const colIndex = {};
+  columns.forEach(function(cat, index) { colIndex[cat] = index + 1; });
+  return {
+    rows: lastRows,
+    columns: columns,
+    colIndex: colIndex,
+    grid: document.getElementById('flowGrid'),
+    header: document.getElementById('flowHeader'),
+    legend: document.getElementById('processLegend'),
+    helpers: {
+      category: function(row) { return (row.분류 || '').trim() || '미분류'; },
+      escape: esc,
+      attribute: esc,
+      color: colorForCategory,
+      card: cardHtml,
+      headerCell: headerCellHtml
+    }
+  };
+}
+
+function installViewStyles() {
+  Object.keys(window.HandbookViews).forEach(function(key) {
+    const style = document.createElement('style');
+    style.dataset.viewStyles = key;
+    style.textContent = window.HandbookViews[key].styles;
+    document.head.appendChild(style);
+  });
+}
+
+function loadLayoutPreference() {
+  try {
+    const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
+    return ['a', 'b', 'c', 'd', 'e'].includes(savedLayout) ? savedLayout : 'a';
+  } catch (e) {
+    return 'a';
+  }
+}
+
+function setLayout(layout) {
+  currentLayout = ['a', 'b', 'c', 'd', 'e'].includes(layout) ? layout : 'a';
+  try { localStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout); } catch (e) {}
+
+  const page = document.querySelector('.page');
+  const optionA = document.getElementById('layoutOptionA');
+  const optionB = document.getElementById('layoutOptionB');
+  const optionC = document.getElementById('layoutOptionC');
+  const optionD = document.getElementById('layoutOptionD');
+  const optionE = document.getElementById('layoutOptionE');
+  if (page) page.classList.toggle('layout-process', currentLayout === 'c');
+  if (page) page.classList.toggle('layout-cards', currentLayout === 'b');
+  if (page) page.classList.toggle('layout-fabric', currentLayout === 'd');
+  if (page) page.classList.toggle('layout-structure', currentLayout === 'e');
+  if (optionA) optionA.setAttribute('aria-checked', String(currentLayout === 'a'));
+  if (optionB) optionB.setAttribute('aria-checked', String(currentLayout === 'b'));
+  if (optionC) optionC.setAttribute('aria-checked', String(currentLayout === 'c'));
+  if (optionD) optionD.setAttribute('aria-checked', String(currentLayout === 'd'));
+  if (optionE) optionE.setAttribute('aria-checked', String(currentLayout === 'e'));
+  document.getElementById('viewModeLabel').textContent = currentView().label;
+  closeLayoutMenu();
+
+  activeCategory = null;
+  closeFlowMenu();
+  if (currentDetailIndex >= 0) closeDetail();
+  if (lastRows.length) render();
+}
+
+function closeLayoutMenu(returnFocus) {
+  document.getElementById('layoutMenu').hidden = true;
+  const trigger = document.getElementById('layoutMenuButton');
+  trigger.setAttribute('aria-expanded', 'false');
+  if (returnFocus) trigger.focus();
+}
+
+function openLayoutMenu(index) {
+  const menu = document.getElementById('layoutMenu');
+  const options = Array.from(menu.querySelectorAll('[role="menuitemradio"]'));
+  menu.hidden = false;
+  document.getElementById('layoutMenuButton').setAttribute('aria-expanded', 'true');
+  const target = index === undefined
+    ? options.find(function(option) { return option.getAttribute('aria-checked') === 'true'; })
+    : options[index];
+  (target || options[0]).focus();
+}
+
+function toggleLayoutMenu() {
+  if (document.getElementById('layoutMenu').hidden) openLayoutMenu();
+  else closeLayoutMenu(true);
+}
+
+function selectLayout(layout) {
+  setLayout(layout);
+  document.getElementById('layoutMenuButton').focus();
+}
+
+const layoutDropdown = document.getElementById('layoutDropdown');
+layoutDropdown.addEventListener('keydown', function(event) {
+  const menu = document.getElementById('layoutMenu');
+  if (event.key === 'Escape' && !menu.hidden) {
+    event.preventDefault();
+    event.stopPropagation();
+    closeLayoutMenu(true);
+    return;
+  }
+  if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const options = Array.from(menu.querySelectorAll('[role="menuitemradio"]'));
+  const index = options.indexOf(document.activeElement);
+  let next;
+  if (event.key === 'Home') next = 0;
+  else if (event.key === 'End') next = options.length - 1;
+  else if (index < 0) next = event.key === 'ArrowUp' ? options.length - 1 : 0;
+  else next = (index + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+  openLayoutMenu(next);
+});
+layoutDropdown.addEventListener('focusout', function(event) {
+  if (!layoutDropdown.contains(event.relatedTarget)) closeLayoutMenu();
+});
+document.addEventListener('click', function(event) {
+  if (!layoutDropdown.contains(event.target)) closeLayoutMenu();
+});
+
+function toggleCategory(cat) {
+  activeCategory = (activeCategory === cat) ? null : cat;
+  applyCategoryFilter();
+  const boardBody = document.getElementById('boardBody');
+  if (boardBody) boardBody.scrollTop = 0;
+  closeFlowMenu();
+}
+
+function toggleFlowMenu() {
+  const flowHeader = document.getElementById('flowHeader');
+  const toggle = document.getElementById('flowMenuToggle');
+  if (!flowHeader || !toggle) return;
+  const isOpen = flowHeader.classList.toggle('is-open');
+  toggle.setAttribute('aria-expanded', String(isOpen));
+}
+
+function closeFlowMenu() {
+  const flowHeader = document.getElementById('flowHeader');
+  const toggle = document.getElementById('flowMenuToggle');
+  if (!flowHeader || !toggle) return;
+  flowHeader.classList.remove('is-open');
+  toggle.setAttribute('aria-expanded', 'false');
+}
+
+function applyCategoryFilter() {
+  document.querySelectorAll('.flow-header-cell').forEach(function(el) {
+    const cat = el.dataset.cat;
+    el.classList.toggle('inactive', !!activeCategory && cat !== activeCategory);
+    el.classList.toggle('active', !!activeCategory && cat === activeCategory);
+  });
+
+  const visibleCount = currentView().filter(viewContext(), activeCategory);
+  updateFilterSummary(visibleCount, lastRows.length);
+  drawConnectors();
+}
+
+function updateHeaderOffset() {
+  const topbar = document.getElementById('topbar');
+  const height = topbar ? Math.ceil(topbar.getBoundingClientRect().height) : 84;
+  document.documentElement.style.setProperty('--topbar-h', height + 'px');
+}
+
+function getColumns(rows) {
+  const seen = [];
+  rows.forEach(function(r) {
+    const cat = (r.분류 || '').trim() || '미분류';
+    if (seen.indexOf(cat) === -1) seen.push(cat);
+  });
+  return seen;
+}
+
+function headerCellHtml(cat, count, index) {
+  const color = colorForCategory(cat);
+  return '<div class="flow-header-cell" data-cat="' + esc(cat) + '" onclick="toggleCategory(\'' + escAttr(cat) + '\')" style="--cat-color:' + color + ';--enter-delay:' + (index * 70) + '">' +
+    '<span class="cat-icon">' + iconForCategory(cat) + '</span>' +
+    '<span class="cat-text">' +
+      '<span class="cat-name">' + esc(cat) + '</span>' +
+    '</span>' +
+    '<span class="cat-count">' + count + '개</span>' +
+  '</div>';
+}
+
+function cardHtml(row, idx) {
+  const cat = (row.분류 || '').trim() || '미분류';
+  const color = colorForCategory(cat);
+  let html = '<div class="node-card is-entering" title="' + esc(cat) + '" style="--cat-color:' + color + ';--enter-delay:0" onclick="openDetail(' + idx + ')">';
+  html += '<div class="node-head">';
+  html += '<span class="node-index">#' + (idx + 1) + '</span>';
+  html += '<span class="node-name">' + esc(row.항목명 || '(항목명 없음)') + '</span>';
+  html += '</div>';
+  html += row.주관팀 ? '<div class="node-details"><span class="field-value">' + esc(row.주관팀) + '</span></div>' : '';
+  html += '</div>';
+  return html;
+}
+
+function detailField(label, value, isLink) {
+  const hasValue = value && String(value).trim();
+  let content = hasValue ? esc(String(value)) : '-';
+  if (hasValue && isLink) {
+    content = String(value).split('\\').map(function(link) {
+      const trimmedLink = link.trim();
+      if (!trimmedLink) return '';
+      return isUrl(trimmedLink)
+        ? '<a href="' + esc(trimmedLink) + '" target="_blank" rel="noopener noreferrer">' + esc(trimmedLink) + '</a>'
+        : esc(trimmedLink);
+    }).filter(Boolean).join('<br>');
+  }
+  return '<div class="detail-row"><div class="detail-label">' + label + '</div><div class="detail-value' + (hasValue ? '' : ' empty') + '">' + content + '</div></div>';
+}
+
+function detailNavigation(index, direction) {
+  const row = lastRows[index];
+  if (!row) return '<button class="detail-nav-button ' + direction + '" disabled></button>';
+  const number = String(index + 1).padStart(2, '0');
+  const arrow = direction === 'next' ? '&rarr;' : '&larr;';
+  return '<button class="detail-nav-button ' + direction + '" onclick="openDetail(' + index + ')"><span class="detail-nav-number">' + (direction === 'next' ? number + ' ' + arrow : arrow + ' ' + number) + '</span><span class="detail-nav-name">' + esc(row.항목명 || '(항목명 없음)') + '</span></button>';
+}
+
+function renderDetail() {
+  const row = lastRows[currentDetailIndex];
+  const detail = document.getElementById('detailScreen');
+  if (!row || !detail) return;
+  const category = (row.분류 || '').trim() || '미분류';
+  detail.innerHTML = '<div class="detail-top"><div><div class="detail-number">PROCESS ' + String(currentDetailIndex + 1).padStart(2, '0') + ' / ' + lastRows.length + '</div><h2 class="detail-name">' + esc(row.항목명 || '(항목명 없음)') + '</h2></div><button class="btn" onclick="closeDetail()">뒤로가기</button></div><div class="detail-grid">' + detailField('분류', iconForCategory(category) + ' ' + category) + detailField('주관팀', row.주관팀) + detailField('개정일자', row.개정일자) + detailField('문서명', row.문서명) + detailField('문서내용', row.문서내용) + detailField('문서링크', row.문서링크, true) + '</div><nav class="detail-navigation" aria-label="인접 항목 이동">' + detailNavigation(currentDetailIndex - 1, 'previous') + detailNavigation(currentDetailIndex + 1, 'next') + '</nav>';
+}
+
+function openDetail(index) {
+  if (index < 0 || index >= lastRows.length) return;
+  if (currentDetailIndex < 0) {
+    overviewScrollTop = window.scrollY;
+    overviewBoardScrollTop = document.getElementById('boardBody').scrollTop;
+  }
+  currentDetailIndex = index;
+  renderDetail();
+  document.getElementById('flowHeader').style.display = 'none';
+  document.getElementById('processLegend').style.display = 'none';
+  document.getElementById('flowBoard').style.display = 'none';
+  document.getElementById('detailScreen').classList.add('visible');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function closeDetail() {
+  currentDetailIndex = -1;
+  document.getElementById('detailScreen').classList.remove('visible');
+  document.getElementById('flowHeader').style.display = '';
+  document.getElementById('processLegend').style.display = '';
+  document.getElementById('flowBoard').style.display = 'block';
+  requestAnimationFrame(drawConnectors);
+  requestAnimationFrame(function() {
+    document.getElementById('boardBody').scrollTop = overviewBoardScrollTop;
+    window.scrollTo({ top: overviewScrollTop, behavior: 'auto' });
+  });
+}
+
+function returnToFlow() {
+  currentDetailIndex = -1;
+  document.getElementById('detailScreen').classList.remove('visible');
+  document.getElementById('flowHeader').style.display = '';
+  document.getElementById('processLegend').style.display = '';
+  document.getElementById('flowBoard').style.display = 'block';
+  activeCategory = null;
+  applyCategoryFilter();
+  document.getElementById('boardBody').scrollTop = 0;
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+window.addEventListener('keydown', function(event) {
+  if (event.target.matches('button, a, input, textarea, select')) return;
+  if (currentDetailIndex < 0) return;
+  if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+    event.preventDefault();
+    openDetail(currentDetailIndex - 1);
+  } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+    event.preventDefault();
+    openDetail(currentDetailIndex + 1);
+  } else if (event.key === 'Escape') {
+    event.preventDefault();
+    closeDetail();
+  }
+});
+
+function drawConnectors() {
+  try {
+    drawConnectorsInner();
+  } catch (e) {
+    // 연결선 그리기가 실패해도 카드 데이터는 그대로 보이도록 조용히 무시한다.
+  }
+}
+
+function drawConnectorsInner() {
+  const grid = document.getElementById('flowGrid');
+  if (!grid) return;
+  let svg = document.getElementById('flowSvg');
+  if (svg) {
+    svg.setAttribute('width', '0');
+    svg.setAttribute('height', '0');
+  }
+  const gridRect = grid.getBoundingClientRect();
+  const width = grid.scrollWidth;
+  const height = grid.scrollHeight;
+
+  const visibleCells = Array.from(grid.querySelectorAll('.flow-cell'))
+    .filter(function(c) { return !c.classList.contains('hidden'); })
+    .sort(function(a, b) { return Number(a.dataset.idx) - Number(b.dataset.idx); });
+
+  let paths = '';
+  for (let i = 0; i < visibleCells.length - 1; i++) {
+    const a = visibleCells[i];
+    const b = visibleCells[i + 1];
+    if (!a || !b) continue;
+    const ar = a.getBoundingClientRect();
+    const br = b.getBoundingClientRect();
+    const d = currentView().connector(ar, br, gridRect);
+    paths += '<path class="flow-connector is-visible" pathLength="1" d="' + d + '" fill="none" stroke="rgba(120, 124, 130, 0.42)" stroke-width="2" marker-end="url(#flowArrow)" />';
+  }
+
+  if (!svg) {
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('id', 'flowSvg');
+    svg.setAttribute('class', 'flow-connectors');
+    grid.appendChild(svg);
+  }
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+  svg.innerHTML = '<defs><marker id="flowArrow" markerWidth="6" markerHeight="6" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L5,2.5 z" fill="rgba(120, 124, 130, 0.62)" /></marker></defs>' + paths;
+}
+
+function formatNumber(num) {
+  return String(num || 0);
+}
+
+function updateFilterSummary(visibleCount, totalCount) {
+  const filterStatus = document.getElementById('filterStatus');
+  const boardCopy = document.querySelector('.board-copy p');
+  if (!filterStatus && !boardCopy) return;
+
+  if (!activeCategory) {
+    if (filterStatus) {
+      filterStatus.textContent = '전체 분류를 표시 중';
+      filterStatus.classList.add('is-neutral');
+    }
+    if (boardCopy) boardCopy.textContent = '전체 ' + formatNumber(totalCount) + '개 항목을 입력 순서대로 보여주고 있습니다. 카드를 눌러 세부 내용을 열고, 분류 헤더를 눌러 해당 영역만 집중해서 볼 수 있습니다.';
+    return;
+  }
+
+  if (filterStatus) {
+    filterStatus.textContent = activeCategory + '만 표시 중';
+    filterStatus.classList.remove('is-neutral');
+  }
+  if (boardCopy) boardCopy.textContent = activeCategory + ' 분류의 ' + formatNumber(visibleCount) + '개 항목만 모아 보고 있습니다. 헤더를 다시 누르면 전체 보기로 돌아갑니다.';
+}
+
+function render() {
+  try {
+    renderInner();
+  } catch (e) {
+    showRenderError(e);
+  }
+}
+
+function showRenderError(e) {
+  const board = document.getElementById('flowBoard');
+  const emptyState = document.getElementById('emptyState');
+  if (board) board.style.display = 'none';
+  if (emptyState) {
+    emptyState.style.display = 'block';
+    const msg = e && e.message ? e.message : String(e);
+    emptyState.innerHTML = '<h2>화면을 표시하는 중 문제가 발생했습니다</h2>' +
+      '<p>' + esc(msg) + '</p>' +
+      '<p><a href="input.html">입력 화면</a>으로 돌아가서 다시 시도해주세요.</p>';
+  }
+}
+
+function renderInner() {
+  const rows = loadData() || [];
+  const emptyState = document.getElementById('emptyState');
+  const board = document.getElementById('flowBoard');
+
+  updateHeaderOffset();
+
+  if (rows.length === 0) {
+    board.style.display = 'none';
+    emptyState.style.display = 'block';
+    updateFilterSummary(0, 0);
+    return;
+  }
+  board.style.display = 'block';
+  emptyState.style.display = 'none';
+
+  const columns = getColumns(rows);
+  assignCategoryColors(columns);
+  lastRows = rows;
+
+  const flowGrid = document.getElementById('flowGrid');
+
+  document.querySelector('.page').classList.toggle('layout-process', currentLayout === 'c');
+  document.querySelector('.page').classList.toggle('layout-cards', currentLayout === 'b');
+  document.querySelector('.page').classList.toggle('layout-fabric', currentLayout === 'd');
+  document.querySelector('.page').classList.toggle('layout-structure', currentLayout === 'e');
+  currentView().render(viewContext());
+  window.setTimeout(function() {
+    flowGrid.querySelectorAll('.node-card.is-entering').forEach(function(card) {
+      card.classList.remove('is-entering');
+    });
+  }, 520);
+
+  activeCategory = null;
+  applyCategoryFilter();
+}
+
+let resizeTimer;
+window.addEventListener('resize', function() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function() {
+    updateHeaderOffset();
+    if (currentView().rerenderOnResize && currentDetailIndex < 0) render();
+    else drawConnectors();
+  }, 150);
+});
+
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(function() {
+    updateHeaderOffset();
+    drawConnectors();
+  });
+}
+
+window.addEventListener('load', function() {
+  updateHeaderOffset();
+  drawConnectors();
+});
+
+installViewStyles();
+updateSaveButtonVisibility();
+setLayout(currentLayout);
+render();
+</script>
+</body>
+</html>
