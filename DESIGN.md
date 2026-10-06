@@ -55,7 +55,7 @@ This approach keeps the repository simple while making it easy for both humans a
 ### Viewing modes
 
 The interactive handbook viewer exposes a Windows Explorer-style 보기 방식 dropdown
-for 기본 보기 / 모아 보기 / 카드로 보기 / 프로세스 패브릭. The trigger displays the current mode and a downward
+for 기본 보기 / 모아 보기 / 카드로 보기. The trigger displays the current mode and a downward
 chevron; the menu marks the selected mode with a checkmark and `aria-checked`.
 The menu button and radio menu items support keyboard navigation (arrows,
 Home/End, Enter/Space), Escape with focus restoration, and dismissal on selection,
@@ -70,10 +70,6 @@ the other mode.
 카드로 보기는 별도의 데이터를 만들지 않고 같은 Process 행을 입력 순서대로 표시한다.
 각 카드는 번호, 업무명, `분류`(Stage)를 색상 점으로 보여주며, 검색과 상세 화면 이동은
 공통 데이터 및 상세 화면 로직을 그대로 사용한다.
-
-프로세스 패브릭은 동일한 입력 순서 연결을 Stage 색상의 가는 곡선 Thread로 표시한다.
-노드는 Thread의 꺾임 지점에 번호와 업무명만 표시하며, 호버 또는 키보드 포커스 시 해당
-노드와 인접 Previous/Next 관계를 당겨 강조하고 나머지 Thread는 흐리게 표시한다.
 
 Development loads the separate scripts and the shared `styles/view.css` directly.
 The shared stylesheet retains all page, card, detail, animation, and responsive
