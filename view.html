@@ -289,6 +289,8 @@ function installViewStyles() {
 }
 
 function loadLayoutPreference() {
+  const requestedLayout = new URLSearchParams(window.location.search).get('layout');
+  if (['a', 'b', 'c'].includes(requestedLayout)) return requestedLayout;
   try {
     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
     return ['a', 'b', 'c'].includes(savedLayout) ? savedLayout : 'a';
@@ -599,7 +601,8 @@ function updateFilterSummary(visibleCount, totalCount) {
 
   if (!activeCategory) {
     if (filterStatus) {
-      filterStatus.textContent = '전체 분류를 표시 중';
+      filterStatus.textContent = '';
+      filterStatus.hidden = true;
       filterStatus.classList.add('is-neutral');
     }
     if (boardCopy) boardCopy.textContent = '전체 ' + formatNumber(totalCount) + '개 항목을 입력 순서와 배치대로 보여주고 있습니다. 카드를 눌러 세부 내용을 열 수 있습니다.';
@@ -608,6 +611,7 @@ function updateFilterSummary(visibleCount, totalCount) {
 
   if (filterStatus) {
     filterStatus.textContent = activeCategory + ' 분류 ' + formatNumber(visibleCount) + '개 항목 강조 중';
+    filterStatus.hidden = false;
     filterStatus.classList.remove('is-neutral');
   }
   if (boardCopy) boardCopy.textContent = activeCategory + ' 분류의 ' + formatNumber(visibleCount) + '개 항목을 강조 표시 중입니다. 나머지 항목도 순서와 배치를 유지해 함께 표시합니다.';
