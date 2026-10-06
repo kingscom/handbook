@@ -437,12 +437,12 @@ function headerCellHtml(cat, count, index) {
   '</div>';
 }
 
-function cardHtml(row, idx) {
+function cardHtml(row, idx, indexLabel) {
   const cat = (row.분류 || '').trim() || '미분류';
   const color = colorForCategory(cat);
   let html = '<div class="node-card is-entering" title="' + esc(cat) + '" style="--cat-color:' + color + ';--enter-delay:0" onclick="openDetail(' + idx + ')">';
   html += '<div class="node-head">';
-  html += '<span class="node-index">#' + (idx + 1) + '</span>';
+  html += '<span class="node-index">' + esc(indexLabel || '#' + (idx + 1)) + '</span>';
   html += '<span class="node-name">' + esc(row.항목명 || '(항목명 없음)') + '</span>';
   html += '</div>';
   html += row.주관팀 ? '<div class="node-details"><span class="field-value">' + esc(row.주관팀) + '</span></div>' : '';
@@ -561,15 +561,21 @@ function drawConnectorsInner() {
     .sort(function(a, b) { return Number(a.dataset.idx) - Number(b.dataset.idx); });
 
   let paths = '';
-  for (let i = 0; i < visibleCells.length - 1; i++) {
-    const a = visibleCells[i];
-    const b = visibleCells[i + 1];
-    if (!a || !b) continue;
+  const viewConnections = currentView().connections
+    ? currentView().connections(viewContext(), visibleCells)
+    : null;
+  const connections = viewConnections || visibleCells.slice(1).map(function(cell, index) {
+    return [visibleCells[index], cell];
+  });
+  connections.forEach(function(connection) {
+    const a = connection[0];
+    const b = connection[1];
+    if (!a || !b) return;
     const ar = a.getBoundingClientRect();
     const br = b.getBoundingClientRect();
     const d = currentView().connector(ar, br, gridRect);
     paths += '<path class="flow-connector is-visible" pathLength="1" d="' + d + '" fill="none" stroke="rgba(120, 124, 130, 0.42)" stroke-width="2" marker-end="url(#flowArrow)" />';
-  }
+  });
 
   if (!svg) {
     svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -596,15 +602,15 @@ function updateFilterSummary(visibleCount, totalCount) {
       filterStatus.textContent = '전체 분류를 표시 중';
       filterStatus.classList.add('is-neutral');
     }
-    if (boardCopy) boardCopy.textContent = '전체 ' + formatNumber(totalCount) + '개 항목을 입력 순서대로 보여주고 있습니다. 카드를 눌러 세부 내용을 열고, 분류 헤더를 눌러 해당 영역만 집중해서 볼 수 있습니다.';
+    if (boardCopy) boardCopy.textContent = '전체 ' + formatNumber(totalCount) + '개 항목을 입력 순서와 배치대로 보여주고 있습니다. 카드를 눌러 세부 내용을 열 수 있습니다.';
     return;
   }
 
   if (filterStatus) {
-    filterStatus.textContent = activeCategory + '만 표시 중';
+    filterStatus.textContent = activeCategory + ' 분류 ' + formatNumber(visibleCount) + '개 항목 강조 중';
     filterStatus.classList.remove('is-neutral');
   }
-  if (boardCopy) boardCopy.textContent = activeCategory + ' 분류의 ' + formatNumber(visibleCount) + '개 항목만 모아 보고 있습니다. 헤더를 다시 누르면 전체 보기로 돌아갑니다.';
+  if (boardCopy) boardCopy.textContent = activeCategory + ' 분류의 ' + formatNumber(visibleCount) + '개 항목을 강조 표시 중입니다. 나머지 항목도 순서와 배치를 유지해 함께 표시합니다.';
 }
 
 function render() {

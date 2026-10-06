@@ -13,7 +13,7 @@ This repository serves as a lightweight team handbook and documentation workspac
 - `view.html`: shared page, data loading, detail screen, and accessible view-mode dropdown.
 - `styles/view.css`: all shared page, card, detail, animation, and responsive styles.
 - `styles/view-source.js`: auto-generated classic-script CSS source companion for local-file saves; do not hand edit.
-- `views/basic.js`: 기본 보기 — category columns, filtering, and vertical connectors.
+- `views/basic.js`: 기본 보기 — category columns and filtering; duplicate 순번 values are arranged as parallel branches with step connectors.
 - `views/collected.js`: 모아 보기 — compact process map, responsive placement, and horizontal connectors.
 - `views/cards.js`: 카드로 보기 — 동일 Process 데이터의 검색 가능한 타이포그래피 중심 카드 탐색.
 - `scripts/build-view.js`: embeds shared CSS and both view modules into `dist/view.html` for standalone distribution.

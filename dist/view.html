@@ -1055,16 +1055,6 @@
                   <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameB">카드로 보기</span><span class="layout-option-description" id="layoutDescriptionB">업무를 빠르게 탐색</span></span>
                   <span class="layout-check" aria-hidden="true">✓</span>
                 </button>
-                <button class="layout-option" id="layoutOptionD" type="button" role="menuitemradio" aria-checked="false" aria-labelledby="layoutNameD" aria-describedby="layoutDescriptionD" tabindex="-1" onclick="selectLayout('d')">
-                  <span class="layout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="M3 7c4 0 4 10 8 10s4-10 10-10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 12c4 0 4-7 8-7s4 7 10 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="11" cy="12" r="2" fill="currentColor"/></svg></span>
-                  <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameD">프로세스 패브릭</span><span class="layout-option-description" id="layoutDescriptionD">연결된 업무 흐름을 탐색</span></span>
-                  <span class="layout-check" aria-hidden="true">✓</span>
-                </button>
-                <button class="layout-option" id="layoutOptionE" type="button" role="menuitemradio" aria-checked="false" aria-labelledby="layoutNameE" aria-describedby="layoutDescriptionE" tabindex="-1" onclick="selectLayout('e')">
-                  <span class="layout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="M5 5h14M5 12h14M5 19h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="3" cy="5" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="19" r="1" fill="currentColor"/></svg></span>
-                  <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameE">업무 구조</span><span class="layout-option-description" id="layoutDescriptionE">WBS와 의존 관계를 분리해 확인</span></span>
-                  <span class="layout-check" aria-hidden="true">✓</span>
-                </button>
               </div>
             </div>
             <button class="btn btn-primary" id="saveButton" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드" hidden>저장</button>
@@ -1100,27 +1090,74 @@
 (function registerBasicView() {
   'use strict';
 
+  function parallelGroups(rows) {
+    const groups = new Map();
+    rows.forEach(function(row, index) {
+      const rawStep = row.순번;
+      if (rawStep === null || rawStep === undefined || String(rawStep).trim() === '') return;
+      const step = Number(rawStep);
+      if (!Number.isFinite(step)) return;
+      if (!groups.has(step)) groups.set(step, []);
+      groups.get(step).push({ row: row, index: index });
+    });
+    const groupedCount = Array.from(groups.values()).reduce(function(total, items) { return total + items.length; }, 0);
+    if (groupedCount !== rows.length || !Array.from(groups.values()).some(function(items) { return items.length > 1; })) return null;
+    return Array.from(groups.entries()).sort(function(a, b) { return a[0] - b[0]; }).map(function(entry) {
+      return { step: entry[0], items: entry[1] };
+    });
+  }
+
   window.HandbookViews = window.HandbookViews || {};
   window.HandbookViews.a = {
     label: '기본 보기',
     source: '(' + registerBasicView.toString() + ')();',
-    styles: '.process-legend { display: none; }',
+    styles: `
+      .process-legend { display: none; }
+      .node-card.is-muted { opacity: .34; filter: grayscale(.55); box-shadow: none; }
+      .node-card.is-filter-match { border-color: var(--cat-color, var(--accent)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--cat-color, var(--accent)) 22%, transparent), 0 8px 20px color-mix(in srgb, var(--cat-color, var(--accent)) 16%, transparent); }
+      .flow-header.is-parallel { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important; }
+      .flow-grid.parallel-flow { max-width: 780px; margin: 0 auto; padding: 18px 0 30px; grid-template-columns: repeat(var(--parallel-columns), minmax(0, 1fr)) !important; }
+      .flow-grid.parallel-flow .flow-cell { grid-column: var(--parallel-column) !important; grid-row: var(--parallel-row) !important; }
+    `,
 
     render: function(context) {
       const { rows, columns, colIndex, grid, header, legend, helpers } = context;
+      const groups = parallelGroups(rows);
       const template = 'repeat(' + columns.length + ', minmax(0, 1fr))';
-      header.style.gridTemplateColumns = template;
-      grid.style.gridTemplateColumns = template;
-      grid.style.gridTemplateRows = 'repeat(' + rows.length + ', auto)';
+      header.classList.toggle('is-parallel', !!groups);
+      header.style.gridTemplateColumns = groups ? '' : template;
       header.innerHTML = columns.map(function(cat, index) {
         const count = rows.filter(function(row) { return helpers.category(row) === cat; }).length;
         return helpers.headerCell(cat, count, index);
       }).join('');
       legend.innerHTML = '';
+      grid.classList.toggle('parallel-flow', !!groups);
+      if (groups) {
+        const maxBranches = Math.max.apply(null, groups.map(function(group) { return group.items.length; }));
+        grid.dataset.parallelColumns = String(maxBranches);
+        grid.style.setProperty('--parallel-columns', maxBranches);
+        grid.style.gridTemplateColumns = '';
+        grid.style.gridTemplateRows = 'repeat(' + groups.length + ', auto)';
+      } else {
+        delete grid.dataset.parallelColumns;
+        grid.style.removeProperty('--parallel-columns');
+        grid.style.gridTemplateColumns = template;
+        grid.style.gridTemplateRows = 'repeat(' + rows.length + ', auto)';
+      }
+      const groupedRows = groups ? groups.reduce(function(result, group, rowIndex) {
+        const startColumn = Math.floor((Number(grid.dataset.parallelColumns) - group.items.length) / 2) + 1;
+        group.items.forEach(function(item, branchIndex) {
+          result[item.index] = { step: group.step, column: startColumn + branchIndex, row: rowIndex + 1 };
+        });
+        return result;
+      }, {}) : null;
       grid.innerHTML = rows.map(function(row, index) {
         const cat = helpers.category(row);
         const col = colIndex[cat];
-        return '<div class="flow-cell" data-cat="' + helpers.escape(cat) + '" data-col="' + col + '" data-idx="' + index + '" style="grid-column:' + col + ';grid-row:' + (index + 1) + '">' + helpers.card(row, index) + '</div>';
+        const parallel = groupedRows && groupedRows[index];
+        const stepAttribute = parallel ? ' data-step="' + parallel.step + '"' : '';
+        const placement = parallel ? ' style="--parallel-column:' + parallel.column + ';--parallel-row:' + parallel.row + ';grid-column:' + parallel.column + ';grid-row:' + parallel.row + '"' : ' style="grid-column:' + col + ';grid-row:' + (index + 1) + '"';
+        return '<div class="flow-cell" data-cat="' + helpers.escape(cat) + '" data-col="' + col + '" data-idx="' + index + '"' + stepAttribute + placement + '>' + helpers.card(row, index, parallel ? 'STEP ' + parallel.step : '') + '</div>';
       }).join('');
     },
 
@@ -1130,15 +1167,36 @@
       toggle.classList.toggle('is-filtered', !!activeCategory);
       let count = 0;
       context.grid.querySelectorAll('.flow-cell').forEach(function(cell) {
-        const visible = !activeCategory || cell.dataset.cat === activeCategory;
-        cell.classList.toggle('hidden', !visible);
-        if (!visible) return;
-        count++;
-        cell.style.gridRow = activeCategory ? count : Number(cell.dataset.idx) + 1;
-        cell.style.gridColumn = cell.dataset.col;
+        const matches = !activeCategory || cell.dataset.cat === activeCategory;
+        const card = cell.querySelector('.node-card');
+        cell.classList.remove('hidden');
+        if (card) {
+          card.classList.toggle('is-muted', !!activeCategory && !matches);
+          card.classList.toggle('is-filter-match', !!activeCategory && matches);
+        }
+        if (matches) count++;
       });
-      context.grid.style.gridTemplateRows = 'repeat(' + (activeCategory ? count : context.rows.length) + ', auto)';
       return count;
+    },
+
+    connections: function(context, visibleCells) {
+      if (!context.grid.classList.contains('parallel-flow')) return null;
+      const steps = new Map();
+      visibleCells.forEach(function(cell) {
+        const step = Number(cell.dataset.step);
+        if (!steps.has(step)) steps.set(step, []);
+        steps.get(step).push(cell);
+      });
+      const groups = Array.from(steps.entries()).sort(function(a, b) { return a[0] - b[0]; });
+      const connections = [];
+      groups.forEach(function(group, index) {
+        const next = groups[index + 1];
+        if (!next) return;
+        group[1].forEach(function(from) {
+          next[1].forEach(function(to) { connections.push([from, to]); });
+        });
+      });
+      return connections;
     },
 
     connector: function(a, b, grid) {
@@ -1270,283 +1328,48 @@
 (function registerCardsView() {
   'use strict';
 
+  function cardHtml(row, index, helpers) {
+    const stage = helpers.category(row);
+    return '<button class="process-card" type="button" data-card-index="' + index + '" onclick="openDetail(' + index + ')" aria-label="' + helpers.escape((index + 1) + '번 ' + (row.항목명 || '항목명 없음') + ' 상세 보기') + '">' +
+      '<span class="process-card-top"><span class="process-card-index">' + String(index + 1).padStart(2, '0') + '</span><span class="process-card-stage"><i style="--stage-color:' + helpers.color(stage) + '"></i>' + helpers.escape(stage) + '</span></span>' +
+      '<strong class="process-card-name">' + helpers.escape(row.항목명 || '(항목명 없음)') + '</strong>' +
+    '</button>';
+  }
+
   window.HandbookViews = window.HandbookViews || {};
   window.HandbookViews.b = {
     label: '카드로 보기',
     source: '(' + registerCardsView.toString() + ')();',
     styles: `
-      .layout-cards .node-card {
-        min-height: 112px;
-        padding: 16px 16px 15px 20px;
-        border-color: color-mix(in srgb, var(--cat-color, var(--accent)) 18%, var(--page-border));
-        border-radius: 8px;
-        background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), color-mix(in srgb, var(--cat-color, var(--accent)) 5%, #f7f9fc));
-        box-shadow: 0 3px 7px rgba(15, 23, 42, 0.05), 0 12px 24px rgba(15, 23, 42, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.98);
-      }
-      .layout-cards .node-card::before { width: 5px; }
-      .layout-cards .node-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08), 0 20px 32px color-mix(in srgb, var(--cat-color, var(--accent)) 14%, transparent), inset 0 1px 0 #fff;
-      }
-      .layout-cards .node-head { gap: 7px; }
-      .layout-cards .node-index { color: var(--cat-color, var(--accent)); font-size: 0.68rem; font-weight: 700; }
-      .layout-cards .node-name { font-size: 0.9rem; line-height: 1.42; }
-      .layout-cards .node-details { margin-top: 10px; }
+      .layout-cards .flow-header, .layout-cards .flow-menu-toggle, .layout-cards .process-legend { display: none !important; }
+      .layout-cards .board-body { padding: 32px 34px 42px; }
+      .layout-cards .flow-board { max-width: 1320px; margin: 0 auto; }
+      .layout-cards .flow-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important; gap: 18px 28px; }
+      .layout-cards .flow-cell { grid-column: auto !important; grid-row: auto !important; }
+      .process-card { position: relative; display: flex; flex-direction: column; align-items: stretch; width: 100%; min-height: 102px; padding: 13px 12px 12px; border: 1px solid var(--page-border-strong); border-radius: 8px; background: rgba(255,255,255,.78); color: var(--text-primary); text-align: left; box-shadow: 0 2px 6px rgba(15,23,42,.05); cursor: pointer; transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+      .process-card::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--accent); content: ''; opacity: 0; transform: scaleX(.35); transform-origin: left; transition: opacity .2s ease, transform .2s ease; }
+      .process-card:hover, .process-card:focus-visible { transform: translateY(-3px); border-color: rgba(0,113,227,.42); background: linear-gradient(145deg, rgba(234,243,255,.94), rgba(244,249,255,.8)); box-shadow: 0 10px 20px rgba(0,113,227,.1), inset 0 1px 0 rgba(255,255,255,.9); outline: 0; }
+      .process-card:hover::after, .process-card:focus-visible::after { opacity: 1; transform: scaleX(1); }
+      .process-card-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+      .process-card-index { color: var(--text-quaternary); font: 600 .7rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .06em; }
+      .process-card-stage { display: inline-flex; align-items: center; gap: 6px; color: var(--text-tertiary); font-size: .72rem; }
+      .process-card-stage i { width: 7px; height: 7px; border-radius: 50%; background: var(--stage-color); box-shadow: 0 0 0 3px color-mix(in srgb, var(--stage-color) 14%, transparent); }
+      .process-card-name { margin-top: 14px; font-size: 1rem; font-weight: 650; line-height: 1.42; letter-spacing: -.025em; word-break: keep-all; }
+      .layout-cards .flow-connectors { display: none; }
+      .layout-cards .detail-screen { padding-top: 8px; }
+      @media (max-width: 860px) { .layout-cards .board-body { padding: 24px 18px 32px; } .layout-cards .flow-grid { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)) !important; gap: 14px 22px; } }
+      @media (max-width: 560px) { .layout-cards .flow-grid { grid-template-columns: 1fr !important; } }
     `,
 
-    render: function(context) {
-      window.HandbookViews.a.render(context);
-    },
-
-    filter: function(context, activeCategory) {
-      return window.HandbookViews.a.filter(context, activeCategory);
-    },
-
-    connector: function(a, b, grid) {
-      return window.HandbookViews.a.connector(a, b, grid);
-    }
-  };
-})();
-</script>
-<script data-view-module="d">
-(function registerFabricView() {
-  'use strict';
-
-  let focusedIndex = -1;
-
-  function layoutPoint(index, total) {
-    const columns = Math.max(4, Math.min(7, Math.ceil(Math.sqrt(total * 1.5))));
-    const row = Math.floor(index / columns);
-    const rows = Math.max(1, Math.ceil(total / columns));
-    const position = index % columns;
-    const reversed = row % 2 === 1;
-    const column = reversed ? columns - position - 1 : position;
-    const x = 8 + column * (84 / Math.max(1, columns - 1));
-    const y = 14 + row * (72 / Math.max(1, rows - 1)) + ((index % 3 === 1) ? 3 : (index % 3 === 2 ? -2 : 0));
-    return { x: x, y: y };
-  }
-
-  function curve(from, to) {
-    const spread = Math.abs(to.x - from.x) * 0.42;
-    const direction = to.x >= from.x ? 1 : -1;
-    return 'M' + from.x + ',' + from.y + ' C' + (from.x + spread * direction) + ',' + from.y + ' ' + (to.x - spread * direction) + ',' + to.y + ' ' + to.x + ',' + to.y;
-  }
-
-  function updateFocus(index) {
-    focusedIndex = index;
-    const canvas = document.querySelector('.fabric-canvas');
-    if (!canvas) return;
-    canvas.classList.toggle('is-focused', index >= 0);
-    canvas.querySelectorAll('.fabric-node').forEach(function(node) {
-      const nodeIndex = Number(node.dataset.index);
-      node.classList.toggle('is-focus', nodeIndex === index);
-      node.classList.toggle('is-neighbor', nodeIndex === index - 1 || nodeIndex === index + 1);
-      node.classList.toggle('is-previous', nodeIndex === index - 1);
-      node.classList.toggle('is-next', nodeIndex === index + 1);
-    });
-    canvas.querySelectorAll('.fabric-thread').forEach(function(thread) {
-      const from = Number(thread.dataset.from);
-      const to = Number(thread.dataset.to);
-      thread.classList.toggle('is-active', from === index || to === index);
-      thread.classList.toggle('is-neighbor', from === index - 1 || to === index + 1);
-    });
-  }
-
-  window.fabricFocus = updateFocus;
-  window.fabricBlur = function() { updateFocus(-1); };
-
-  window.HandbookViews = window.HandbookViews || {};
-  window.HandbookViews.d = {
-    label: '프로세스 패브릭',
-    source: '(' + registerFabricView.toString() + ')();',
-    rerenderOnResize: true,
-    styles: `
-      .layout-fabric .flow-header, .layout-fabric .flow-menu-toggle, .layout-fabric .process-legend { display: none !important; }
-      .layout-fabric .board-body { padding: 32px 40px 44px; }
-      .layout-fabric .flow-board { max-width: 1440px; min-height: 550px; margin: 0 auto; }
-      .layout-fabric .flow-grid { display: block; min-height: 550px; }
-      .layout-fabric .flow-connectors { display: none; }
-      .fabric-canvas { position: relative; min-height: 550px; isolation: isolate; }
-      .fabric-threads { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-      .fabric-thread { fill: none; stroke: var(--thread-color); stroke-width: .28; stroke-linecap: round; opacity: .64; transition: opacity .22s ease, stroke-width .22s ease; }
-      .fabric-thread.is-secondary { opacity: .26; }
-      .fabric-node { position: absolute; z-index: 1; display: flex; align-items: baseline; gap: 7px; max-width: min(180px, 22vw); padding: 4px 5px; border: 0; background: transparent; color: var(--text-secondary); text-align: left; cursor: pointer; transform: translate(-50%, -50%); transition: color .22s ease, transform .25s ease, opacity .22s ease; }
-      .fabric-node::before { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--node-color); content: ''; }
-      .fabric-node-number { color: var(--text-quaternary); font: 600 .62rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; }
-      .fabric-node-name { overflow: hidden; font-size: .78rem; font-weight: 600; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
-      .fabric-node:hover, .fabric-node:focus-visible { color: var(--text-primary); outline: 0; transform: translate(-50%, -50%) scale(1.04); }
-      .fabric-node:focus-visible { box-shadow: 0 0 0 3px rgba(0,113,227,.15); border-radius: 5px; }
-      .fabric-canvas.is-focused .fabric-node { opacity: .2; }
-      .fabric-canvas.is-focused .fabric-node.is-focus { z-index: 3; color: var(--text-primary); opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
-      .fabric-canvas.is-focused .fabric-node.is-neighbor { z-index: 2; color: var(--text-primary); opacity: .9; transform: translate(-50%, -50%) scale(1.07); }
-      .fabric-canvas.is-focused .fabric-node.is-previous { transform: translate(calc(-50% - 10px), calc(-50% + 8px)) scale(1.07); }
-      .fabric-canvas.is-focused .fabric-node.is-next { transform: translate(calc(-50% + 10px), calc(-50% - 8px)) scale(1.07); }
-      .fabric-canvas.is-focused .fabric-thread { opacity: .08; }
-      .fabric-canvas.is-focused .fabric-thread.is-active { stroke-width: .5; opacity: 1; }
-      .fabric-canvas.is-focused .fabric-thread.is-neighbor { stroke-width: .38; opacity: .72; }
-      .layout-fabric .detail-screen { padding-top: 8px; }
-      @media (max-width: 860px) { .layout-fabric .board-body { padding: 24px 16px 32px; } .layout-fabric .flow-board, .layout-fabric .flow-grid, .fabric-canvas { min-height: 620px; } .fabric-node { max-width: 36vw; } }
-      @media (prefers-reduced-motion: reduce) { .fabric-thread, .fabric-node { transition: none; } }
-    `,
     render: function(context) {
       const { rows, grid, header, legend, helpers } = context;
-      focusedIndex = -1;
       header.innerHTML = '';
       legend.innerHTML = '';
       grid.style.gridTemplateColumns = '';
       grid.style.gridTemplateRows = '';
-      const points = rows.map(function(_, index) { return layoutPoint(index, rows.length); });
-      const threads = rows.slice(0, -1).map(function(row, index) {
-        const stage = helpers.category(row);
-        return '<path class="fabric-thread' + (index % 3 === 2 ? ' is-secondary' : '') + '" data-from="' + index + '" data-to="' + (index + 1) + '" style="--thread-color:' + helpers.color(stage) + '" d="' + curve(points[index], points[index + 1]) + '"/>';
-      }).join('');
-      const nodes = rows.map(function(row, index) {
-        const point = points[index];
-        const stage = helpers.category(row);
-        const label = helpers.escape((index + 1) + '번 ' + (row.항목명 || '항목명 없음') + ' 상세 보기');
-        return '<button class="fabric-node" type="button" data-index="' + index + '" style="left:' + point.x + '%;top:' + point.y + '%;--node-color:' + helpers.color(stage) + '" onmouseenter="fabricFocus(' + index + ')" onmouseleave="fabricBlur()" onfocus="fabricFocus(' + index + ')" onblur="fabricBlur()" onclick="openDetail(' + index + ')" aria-label="' + label + '"><span class="fabric-node-number">' + String(index + 1).padStart(2, '0') + '</span><span class="fabric-node-name">' + helpers.escape(row.항목명 || '(항목명 없음)') + '</span></button>';
-      }).join('');
-      grid.innerHTML = '<div class="fabric-canvas"><svg class="fabric-threads" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' + threads + '</svg>' + nodes + '</div>';
+      grid.innerHTML = rows.map(function(row, index) { return '<div class="flow-cell">' + cardHtml(row, index, helpers) + '</div>'; }).join('');
     },
-    filter: function(context) { return context.rows.length; },
-    connector: function() { return ''; }
-  };
-})();
-</script>
-<script data-view-module="e">
-(function registerStructureView() {
-  'use strict';
 
-  const STAGES = ['계약', '분석', '보안', '설계', '개발', '검증', '운영'];
-  let selectedIndex = -1;
-  let viewMode = 'structure';
-
-  function stageOrder(stage) {
-    const index = STAGES.indexOf(stage);
-    return index < 0 ? STAGES.length : index;
-  }
-
-  function grouped(rows, helpers) {
-    const groups = {};
-    rows.forEach(function(row, index) {
-      const stage = helpers.category(row);
-      if (!groups[stage]) groups[stage] = [];
-      groups[stage].push({ row: row, index: index });
-    });
-    return Object.keys(groups).sort(function(a, b) { return stageOrder(a) - stageOrder(b) || a.localeCompare(b, 'ko'); }).map(function(stage) {
-      return { stage: stage, items: groups[stage] };
-    });
-  }
-
-  function itemNumber(groupIndex, itemIndex) {
-    return String(groupIndex + 1).padStart(2, '0') + '.' + String(itemIndex + 1).padStart(2, '0');
-  }
-
-  function focusClass(index) {
-    if (selectedIndex < 0) return '';
-    if (index === selectedIndex) return ' is-selected';
-    if (index === selectedIndex - 1 || index === selectedIndex + 1) return ' is-related';
-    return ' is-muted';
-  }
-
-  function structureMarkup(context) {
-    const groups = grouped(context.rows, context.helpers);
-    return '<div class="structure-outline">' + groups.map(function(group, groupIndex) {
-      const color = context.helpers.color(group.stage);
-      return '<section class="wbs-stage" style="--stage-color:' + color + '"><div class="wbs-stage-heading"><span class="wbs-stage-line"></span><span class="wbs-stage-number">' + String(groupIndex + 1).padStart(2, '0') + '</span><h2>' + context.helpers.escape(group.stage) + '</h2><span class="wbs-stage-count">' + group.items.length + '</span></div><ol class="wbs-items">' + group.items.map(function(item, itemIndex) {
-        return '<li><button class="wbs-item' + focusClass(item.index) + '" type="button" onclick="structureFocus(' + item.index + ')" aria-label="' + context.helpers.escape(itemNumber(groupIndex, itemIndex) + ' ' + (item.row.항목명 || '항목명 없음') + ' 의존 관계 보기') + '"><span class="wbs-item-number">' + itemNumber(groupIndex, itemIndex) + '</span><span class="wbs-item-name">' + context.helpers.escape(item.row.항목명 || '(항목명 없음)') + '</span><span class="wbs-item-action" aria-hidden="true">관계 보기</span></button></li>';
-      }).join('') + '</ol></section>';
-    }).join('') + '</div>';
-  }
-
-  function dependencyMarkup(context) {
-    const row = context.rows[selectedIndex];
-    if (!row) return '<div class="dependency-empty"><p>업무 구조에서 업무를 선택하면 해당 업무의 관계를 표시합니다.</p></div>';
-    const previous = context.rows[selectedIndex - 1];
-    const next = context.rows[selectedIndex + 1];
-    const node = function(kind, index, item) {
-      if (!item) return '<div class="dependency-node is-empty"><span>' + kind + '</span><strong>없음</strong></div>';
-      const stage = context.helpers.category(item);
-      return '<button class="dependency-node" type="button" style="--stage-color:' + context.helpers.color(stage) + '" onclick="openDetail(' + index + ')"><span>' + kind + ' · ' + context.helpers.escape(stage) + '</span><strong>' + String(index + 1).padStart(2, '0') + '. ' + context.helpers.escape(item.항목명 || '(항목명 없음)') + '</strong></button>';
-    };
-    return '<div class="dependency-focus"><p class="dependency-caption">선택한 업무를 중심으로 입력 순서의 의존 관계만 표시합니다.</p><div class="dependency-map">' +
-      '<div class="dependency-previous">' + node('Previous', selectedIndex - 1, previous) + '</div><div class="dependency-arrow dependency-arrow-in" aria-hidden="true">→</div>' +
-      '<button class="dependency-current" type="button" style="--stage-color:' + context.helpers.color(context.helpers.category(row)) + '" onclick="openDetail(' + selectedIndex + ')" aria-label="' + context.helpers.escape((selectedIndex + 1) + '번 ' + (row.항목명 || '항목명 없음') + ' 상세 보기') + '"><span>Selected · ' + context.helpers.escape(context.helpers.category(row)) + '</span><strong>' + String(selectedIndex + 1).padStart(2, '0') + '. ' + context.helpers.escape(row.항목명 || '(항목명 없음)') + '</strong></button>' +
-      '<div class="dependency-arrow dependency-arrow-out" aria-hidden="true">→</div><div class="dependency-next">' + node('Next', selectedIndex + 1, next) + '</div>' +
-    '</div></div>';
-  }
-
-  function render(context) {
-    const { grid, header, legend } = context;
-    header.innerHTML = '';
-    legend.innerHTML = '';
-    grid.style.gridTemplateColumns = '';
-    grid.style.gridTemplateRows = '';
-    grid.innerHTML = '<div class="structure-toolbar"><div class="structure-tabs" role="tablist" aria-label="업무 구조 보기"><button type="button" role="tab" aria-selected="' + (viewMode === 'structure') + '" onclick="structureSetMode(\'structure\')">Structure</button><button type="button" role="tab" aria-selected="' + (viewMode === 'dependencies') + '" onclick="structureSetMode(\'dependencies\')">Dependencies</button></div><p>' + (viewMode === 'structure' ? '업무 체계를 먼저 확인하고, 업무를 선택해 관계를 확인하세요.' : '선택된 업무의 Previous / Next 관계입니다.') + '</p></div>' + (viewMode === 'structure' ? structureMarkup(context) : dependencyMarkup(context));
-  }
-
-  window.structureFocus = function(index) {
-    selectedIndex = index;
-    viewMode = 'dependencies';
-    if (window.HandbookViews.e && window.__structureContext) render(window.__structureContext);
-  };
-  window.structureSetMode = function(mode) {
-    viewMode = mode;
-    if (window.HandbookViews.e && window.__structureContext) render(window.__structureContext);
-  };
-
-  window.HandbookViews = window.HandbookViews || {};
-  window.HandbookViews.e = {
-    label: '업무 구조',
-    source: '(' + registerStructureView.toString() + ')();',
-    styles: `
-      .layout-structure .flow-header, .layout-structure .flow-menu-toggle, .layout-structure .process-legend { display: none !important; }
-      .layout-structure .board-body { padding: 34px 40px 48px; background: rgba(255,255,255,.28); }
-      .layout-structure .flow-board { max-width: 1060px; margin: 0 auto; }
-      .layout-structure .flow-grid { display: block; }
-      .layout-structure .flow-connectors { display: none; }
-      .structure-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 25px; border-bottom: 1px solid var(--page-border); }
-      .structure-toolbar p { color: var(--text-tertiary); font-size: .78rem; }
-      .structure-tabs { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--page-border); border-radius: 8px; background: rgba(15,23,42,.035); }
-      .structure-tabs button { min-height: 29px; padding: 4px 10px; border: 0; border-radius: 5px; background: transparent; color: var(--text-tertiary); font-size: .72rem; font-weight: 650; cursor: pointer; }
-      .structure-tabs button[aria-selected="true"] { background: #fff; color: var(--text-primary); box-shadow: 0 1px 3px rgba(15,23,42,.1); }
-      .structure-outline { padding-top: 18px; }
-      .wbs-stage { padding: 22px 0 12px; border-bottom: 1px solid var(--page-border); }
-      .wbs-stage-heading { display: flex; align-items: center; gap: 10px; min-height: 30px; }
-      .wbs-stage-line { width: 3px; height: 22px; border-radius: 2px; background: var(--stage-color); }
-      .wbs-stage-number { color: var(--text-quaternary); font: 650 .7rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
-      .wbs-stage h2 { font-size: .94rem; font-weight: 700; letter-spacing: -.02em; }
-      .wbs-stage-count { margin-left: auto; color: var(--text-quaternary); font-size: .7rem; }
-      .wbs-items { margin: 10px 0 0 23px; padding: 0; list-style: none; }
-      .wbs-item { display: grid; grid-template-columns: 56px minmax(0,1fr) auto; align-items: center; gap: 12px; width: 100%; min-height: 38px; padding: 6px 8px; border: 0; border-radius: 5px; background: transparent; color: var(--text-primary); text-align: left; cursor: pointer; }
-      .wbs-item:hover, .wbs-item:focus-visible { background: rgba(0,113,227,.055); color: var(--text-primary); outline: 0; }
-      .wbs-item-number { color: var(--text-tertiary); font: 600 .68rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
-      .wbs-item-name { overflow: hidden; color: var(--text-primary); font-size: .82rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
-      .wbs-item-action { color: var(--accent); font-size: .66rem; opacity: 0; transition: opacity .15s ease; }
-      .wbs-item:hover .wbs-item-action, .wbs-item:focus-visible .wbs-item-action { opacity: 1; }
-      .wbs-item.is-muted { opacity: .24; }
-      .wbs-item.is-related { background: rgba(0,113,227,.045); }
-      .wbs-item.is-selected { background: rgba(0,113,227,.1); color: var(--text-primary); }
-      .dependency-focus { padding: 70px 0 45px; }
-      .dependency-caption { margin-bottom: 32px; color: var(--text-tertiary); font-size: .78rem; text-align: center; }
-      .dependency-map { display: grid; grid-template-columns: minmax(0,1fr) 36px minmax(220px,1.25fr) 36px minmax(0,1fr); align-items: center; gap: 10px; }
-      .dependency-node, .dependency-current { display: flex; flex-direction: column; gap: 7px; min-height: 90px; padding: 15px; border: 1px solid var(--page-border); border-left: 3px solid var(--stage-color, transparent); border-radius: 7px; background: rgba(255,255,255,.5); color: var(--text-primary); text-align: left; }
-      .dependency-node { cursor: pointer; }
-      .dependency-node:hover { border-color: rgba(0,113,227,.26); background: #fff; }
-      .dependency-node span, .dependency-current span { color: var(--text-quaternary); font-size: .65rem; font-weight: 650; }
-      .dependency-node strong, .dependency-current strong { font-size: .8rem; font-weight: 650; line-height: 1.4; }
-      .dependency-node.is-empty { justify-content: center; border-left-color: transparent; color: var(--text-quaternary); }
-      .dependency-current { position: relative; width: 100%; cursor: pointer; border-color: color-mix(in srgb, var(--stage-color) 32%, var(--page-border)); border-left-width: 3px; background: rgba(255,255,255,.82); box-shadow: 0 8px 20px rgba(15,23,42,.06); transition: background .15s ease, border-color .15s ease, box-shadow .15s ease; }
-      .dependency-current:hover, .dependency-current:focus-visible { border-color: color-mix(in srgb, var(--stage-color) 60%, var(--page-border)); background: #fff; box-shadow: 0 10px 24px rgba(15,23,42,.09); outline: 0; }
-      .dependency-arrow { color: var(--text-quaternary); font-size: 1.2rem; text-align: center; }
-      .dependency-empty { padding: 96px 20px; color: var(--text-tertiary); font-size: .85rem; text-align: center; }
-      .layout-structure .detail-screen { padding-top: 8px; }
-      @media (max-width: 720px) { .layout-structure .board-body { padding: 24px 18px 32px; } .structure-toolbar { align-items: flex-start; flex-direction: column; gap: 12px; } .dependency-focus { padding-top: 38px; } .dependency-map { grid-template-columns: 1fr; gap: 10px; } .dependency-arrow { display: none; } .dependency-current { order: -1; } .wbs-items { margin-left: 8px; } }
-    `,
-    render: function(context) {
-      window.__structureContext = context;
-      render(context);
-    },
     filter: function(context) { return context.rows.length; },
     connector: function() { return ''; }
   };
@@ -1767,31 +1590,25 @@ function installViewStyles() {
 function loadLayoutPreference() {
   try {
     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
-    return ['a', 'b', 'c', 'd', 'e'].includes(savedLayout) ? savedLayout : 'a';
+    return ['a', 'b', 'c'].includes(savedLayout) ? savedLayout : 'a';
   } catch (e) {
     return 'a';
   }
 }
 
 function setLayout(layout) {
-  currentLayout = ['a', 'b', 'c', 'd', 'e'].includes(layout) ? layout : 'a';
+  currentLayout = ['a', 'b', 'c'].includes(layout) ? layout : 'a';
   try { localStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout); } catch (e) {}
 
   const page = document.querySelector('.page');
   const optionA = document.getElementById('layoutOptionA');
   const optionB = document.getElementById('layoutOptionB');
   const optionC = document.getElementById('layoutOptionC');
-  const optionD = document.getElementById('layoutOptionD');
-  const optionE = document.getElementById('layoutOptionE');
   if (page) page.classList.toggle('layout-process', currentLayout === 'c');
   if (page) page.classList.toggle('layout-cards', currentLayout === 'b');
-  if (page) page.classList.toggle('layout-fabric', currentLayout === 'd');
-  if (page) page.classList.toggle('layout-structure', currentLayout === 'e');
   if (optionA) optionA.setAttribute('aria-checked', String(currentLayout === 'a'));
   if (optionB) optionB.setAttribute('aria-checked', String(currentLayout === 'b'));
   if (optionC) optionC.setAttribute('aria-checked', String(currentLayout === 'c'));
-  if (optionD) optionD.setAttribute('aria-checked', String(currentLayout === 'd'));
-  if (optionE) optionE.setAttribute('aria-checked', String(currentLayout === 'e'));
   document.getElementById('viewModeLabel').textContent = currentView().label;
   closeLayoutMenu();
 
@@ -1919,12 +1736,12 @@ function headerCellHtml(cat, count, index) {
   '</div>';
 }
 
-function cardHtml(row, idx) {
+function cardHtml(row, idx, indexLabel) {
   const cat = (row.분류 || '').trim() || '미분류';
   const color = colorForCategory(cat);
   let html = '<div class="node-card is-entering" title="' + esc(cat) + '" style="--cat-color:' + color + ';--enter-delay:0" onclick="openDetail(' + idx + ')">';
   html += '<div class="node-head">';
-  html += '<span class="node-index">#' + (idx + 1) + '</span>';
+  html += '<span class="node-index">' + esc(indexLabel || '#' + (idx + 1)) + '</span>';
   html += '<span class="node-name">' + esc(row.항목명 || '(항목명 없음)') + '</span>';
   html += '</div>';
   html += row.주관팀 ? '<div class="node-details"><span class="field-value">' + esc(row.주관팀) + '</span></div>' : '';
@@ -2043,15 +1860,21 @@ function drawConnectorsInner() {
     .sort(function(a, b) { return Number(a.dataset.idx) - Number(b.dataset.idx); });
 
   let paths = '';
-  for (let i = 0; i < visibleCells.length - 1; i++) {
-    const a = visibleCells[i];
-    const b = visibleCells[i + 1];
-    if (!a || !b) continue;
+  const viewConnections = currentView().connections
+    ? currentView().connections(viewContext(), visibleCells)
+    : null;
+  const connections = viewConnections || visibleCells.slice(1).map(function(cell, index) {
+    return [visibleCells[index], cell];
+  });
+  connections.forEach(function(connection) {
+    const a = connection[0];
+    const b = connection[1];
+    if (!a || !b) return;
     const ar = a.getBoundingClientRect();
     const br = b.getBoundingClientRect();
     const d = currentView().connector(ar, br, gridRect);
     paths += '<path class="flow-connector is-visible" pathLength="1" d="' + d + '" fill="none" stroke="rgba(120, 124, 130, 0.42)" stroke-width="2" marker-end="url(#flowArrow)" />';
-  }
+  });
 
   if (!svg) {
     svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -2078,15 +1901,15 @@ function updateFilterSummary(visibleCount, totalCount) {
       filterStatus.textContent = '전체 분류를 표시 중';
       filterStatus.classList.add('is-neutral');
     }
-    if (boardCopy) boardCopy.textContent = '전체 ' + formatNumber(totalCount) + '개 항목을 입력 순서대로 보여주고 있습니다. 카드를 눌러 세부 내용을 열고, 분류 헤더를 눌러 해당 영역만 집중해서 볼 수 있습니다.';
+    if (boardCopy) boardCopy.textContent = '전체 ' + formatNumber(totalCount) + '개 항목을 입력 순서와 배치대로 보여주고 있습니다. 카드를 눌러 세부 내용을 열 수 있습니다.';
     return;
   }
 
   if (filterStatus) {
-    filterStatus.textContent = activeCategory + '만 표시 중';
+    filterStatus.textContent = activeCategory + ' 분류 ' + formatNumber(visibleCount) + '개 항목 강조 중';
     filterStatus.classList.remove('is-neutral');
   }
-  if (boardCopy) boardCopy.textContent = activeCategory + ' 분류의 ' + formatNumber(visibleCount) + '개 항목만 모아 보고 있습니다. 헤더를 다시 누르면 전체 보기로 돌아갑니다.';
+  if (boardCopy) boardCopy.textContent = activeCategory + ' 분류의 ' + formatNumber(visibleCount) + '개 항목을 강조 표시 중입니다. 나머지 항목도 순서와 배치를 유지해 함께 표시합니다.';
 }
 
 function render() {
@@ -2134,8 +1957,6 @@ function renderInner() {
 
   document.querySelector('.page').classList.toggle('layout-process', currentLayout === 'c');
   document.querySelector('.page').classList.toggle('layout-cards', currentLayout === 'b');
-  document.querySelector('.page').classList.toggle('layout-fabric', currentLayout === 'd');
-  document.querySelector('.page').classList.toggle('layout-structure', currentLayout === 'e');
   currentView().render(viewContext());
   window.setTimeout(function() {
     flowGrid.querySelectorAll('.node-card.is-entering').forEach(function(card) {

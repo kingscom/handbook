@@ -71,6 +71,9 @@ the other mode.
 각 카드는 번호, 업무명, `분류`(Stage)를 색상 점으로 보여주며, 검색과 상세 화면 이동은
 공통 데이터 및 상세 화면 로직을 그대로 사용한다.
 
+기본 보기는 `순번` 값이 중복된 입력을 병렬 분기로 배치한다. 같은 순번의 업무는 한 단계에
+나란히 표시하고, 앞뒤 순번 그룹 사이의 연결선을 표시하며, 기존 분류 필터와 상세 화면 이동을 유지한다.
+
 Development loads the separate scripts and the shared `styles/view.css` directly.
 The shared stylesheet retains all page, card, detail, animation, and responsive
 rules; mode-specific styles stay in their existing view modules.
