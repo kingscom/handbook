@@ -655,8 +655,10 @@
 
   .node-head {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 4px;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: baseline;
+    column-gap: 8px;
+    row-gap: 4px;
   }
 
   .node-index {
@@ -1055,6 +1057,11 @@
                   <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameB">카드로 보기</span><span class="layout-option-description" id="layoutDescriptionB">업무를 빠르게 탐색</span></span>
                   <span class="layout-check" aria-hidden="true">✓</span>
                 </button>
+                <button class="layout-option" id="layoutOptionD" type="button" role="menuitemradio" aria-checked="false" aria-labelledby="layoutNameD" aria-describedby="layoutDescriptionD" tabindex="-1" onclick="selectLayout('d')">
+                  <span class="layout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="M5 4v16m0-13h5m-5 5h5m-5 5h5M13 6h6m-6 6h6m-6 6h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="5" cy="4" r="1.5" fill="currentColor"/><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="5" cy="20" r="1.5" fill="currentColor"/></svg></span>
+                  <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameD">한번에 보기</span><span class="layout-option-description" id="layoutDescriptionD">단계와 상세 정보를 한 화면에</span></span>
+                  <span class="layout-check" aria-hidden="true">✓</span>
+                </button>
               </div>
             </div>
             <button class="btn btn-primary" id="saveButton" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드" hidden>저장</button>
@@ -1066,7 +1073,14 @@
       <div class="board-body" id="boardBody">
         <div class="process-legend" id="processLegend" aria-label="분류 색상 범례"></div>
         <div class="flow-board" id="flowBoard">
+          <aside class="procedure-aside" id="procedureAside" aria-label="절차 요약" hidden>
+            <div class="procedure-count"><span>WORKFLOW</span><strong id="procedureCount">00</strong><small>STEPS</small></div>
+            <div class="procedure-status"><span class="procedure-status-label">VIEW</span><p id="filterStatus">전체 절차 표시 중</p></div>
+          </aside>
           <div class="flow-grid" id="flowGrid"></div>
+          <aside class="procedure-side-detail" id="procedureSideDetail" hidden>
+            <div class="procedure-detail-content" id="procedureDetailContent" aria-live="polite"><p class="procedure-side-empty">카드를 선택하면 업무 기준과 관련 문서를 이 영역에서 확인할 수 있습니다.</p></div>
+          </aside>
         </div>
         <section class="detail-screen" id="detailScreen" aria-label="프로세스 상세정보"></section>
         <div class="empty-state" id="emptyState" style="display:none;">
@@ -1113,11 +1127,17 @@
     source: '(' + registerBasicView.toString() + ')();',
     styles: `
       .process-legend { display: none; }
-      .node-card.is-muted { opacity: .34; filter: grayscale(.55); box-shadow: none; }
-      .node-card.is-filter-match { border-color: var(--cat-color, var(--accent)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--cat-color, var(--accent)) 22%, transparent), 0 8px 20px color-mix(in srgb, var(--cat-color, var(--accent)) 16%, transparent); }
+      .page:not(.layout-process):not(.layout-cards) .node-details { display: none; }
+      .node-card.is-muted { cursor: default; filter: grayscale(1); opacity: .38; pointer-events: none; }
+      .node-card.is-filter-match { border-color: var(--cat-color, var(--accent)); box-shadow: 0 4px 12px color-mix(in srgb, var(--cat-color, var(--accent)) 18%, transparent); }
       .flow-header.is-parallel { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important; }
       .flow-grid.parallel-flow { max-width: 780px; margin: 0 auto; padding: 18px 0 30px; grid-template-columns: repeat(var(--parallel-columns), minmax(0, 1fr)) !important; }
       .flow-grid.parallel-flow .flow-cell { grid-column: var(--parallel-column) !important; grid-row: var(--parallel-row) !important; }
+      .flow-grid.is-filter-active { grid-template-rows: repeat(var(--filter-row-count), auto) !important; gap: 12px; }
+      .flow-grid.is-filter-active .flow-cell { grid-column: var(--filter-column) !important; grid-row: var(--filter-row) !important; }
+      .flow-grid.is-filter-active .flow-cell.is-filter-match .node-card { border-color: var(--cat-color, var(--accent)); box-shadow: 0 4px 12px color-mix(in srgb, var(--cat-color, var(--accent)) 18%, transparent); }
+      .flow-grid.is-filter-active .flow-connectors { display: none; }
+      @media (max-width: 860px) { .flow-grid.is-filter-active .flow-cell { grid-column: 1 !important; grid-row: var(--filter-mobile-row) !important; } }
     `,
 
     render: function(context) {
@@ -1165,17 +1185,41 @@
       const toggle = document.getElementById('flowMenuToggle');
       toggle.textContent = activeCategory || '분류 필터';
       toggle.classList.toggle('is-filtered', !!activeCategory);
+      const isParallel = context.grid.classList.contains('parallel-flow');
+      const categoryRows = {};
+      let maxFilterRows = 0;
       let count = 0;
       context.grid.querySelectorAll('.flow-cell').forEach(function(cell) {
         const matches = !activeCategory || cell.dataset.cat === activeCategory;
         const card = cell.querySelector('.node-card');
+        const row = (categoryRows[cell.dataset.cat] || 0) + 1;
+        categoryRows[cell.dataset.cat] = row;
+        maxFilterRows = Math.max(maxFilterRows, row);
         cell.classList.remove('hidden');
+        cell.classList.toggle('is-filter-match', !!activeCategory && matches);
         if (card) {
           card.classList.toggle('is-muted', !!activeCategory && !matches);
           card.classList.toggle('is-filter-match', !!activeCategory && matches);
         }
         if (matches) count++;
+        if (activeCategory && !isParallel) {
+          cell.style.setProperty('--filter-column', cell.dataset.col);
+          cell.style.setProperty('--filter-row', String(row));
+          cell.style.setProperty('--filter-mobile-row', String(Number(cell.dataset.idx) + 1));
+        } else {
+          cell.style.removeProperty('--filter-column');
+          cell.style.removeProperty('--filter-row');
+          cell.style.removeProperty('--filter-mobile-row');
+        }
       });
+      context.grid.classList.toggle('is-filter-active', !!activeCategory && !isParallel);
+      if (activeCategory && !isParallel) {
+        context.grid.style.setProperty('--filter-row-count', String(maxFilterRows));
+      } else {
+        context.grid.style.removeProperty('--filter-row-count');
+        const groups = isParallel ? parallelGroups(context.rows) : null;
+        context.grid.style.gridTemplateRows = 'repeat(' + (groups ? groups.length : context.rows.length) + ', auto)';
+      }
       return count;
     },
 
@@ -1214,115 +1258,137 @@
 </script>
 <script data-view-module="c">
 (function registerCollectedView() {
-  'use strict';
+	'use strict';
 
-  function getColumns() {
-    const board = document.getElementById('boardBody');
-    const width = board ? board.clientWidth - 64 : 960;
-    return Math.max(2, Math.floor((width + 48) / 198));
-  }
+	function getRouteColumns() {
+		const board = document.getElementById('boardBody');
+		const width = board && board.clientWidth ? board.clientWidth : window.innerWidth;
+		return width <= 640 ? 1 : (width <= 900 ? 2 : 7);
+	}
 
-  window.HandbookViews = window.HandbookViews || {};
-  window.HandbookViews.c = {
-    label: '모아 보기',
-    source: '(' + registerCollectedView.toString() + ')();',
-    rerenderOnResize: true,
-    styles: `
-      .layout-process .flow-header,
-      .layout-process .flow-menu-toggle { display: none !important; }
-      .layout-process .board-body { padding: 0 22px 16px; }
-      .layout-process .flow-board { padding: 14px 16px 8px; }
-      .layout-process .detail-screen { padding-top: 40px; }
-      .layout-process .process-legend {
-        display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px;
-        margin: 10px 0 0; padding: 10px 16px;
-        border: 1px solid var(--page-border); border-radius: 8px;
-        background: rgba(0, 113, 227, 0.08); color: var(--text-tertiary);
-        font-size: 0.76rem; font-weight: 650;
-      }
-      .process-area-label {
-        display: inline-flex; align-items: center; min-height: 18px; padding-right: 12px;
-        border-right: 1px solid var(--page-border-strong); color: var(--text-secondary);
-        font-size: 0.7rem; font-weight: 750; letter-spacing: 0.06em;
-      }
-      .process-legend-item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-      .process-legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cat-color); }
-      .layout-process .flow-grid {
-        display: grid; grid-template-columns: repeat(var(--process-columns), minmax(0, 1fr)) !important;
-        grid-auto-rows: minmax(56px, auto); column-gap: 48px; row-gap: 40px;
-        width: 100%; align-items: center;
-      }
-      .layout-process .flow-cell {
-        grid-column: var(--process-column) !important; grid-row: var(--process-row) !important;
-      }
-      .layout-process .node-card {
-        display: flex; align-items: center; gap: 8px; min-height: 56px; padding: 8px 2px;
-        overflow: visible; border: 0; border-radius: 0;
-        border-bottom: 1px solid rgba(15, 23, 42, 0.14); background: transparent; box-shadow: none;
-      }
-      .layout-process .node-card::before {
-        position: static; flex: 0 0 9px; width: 9px; height: 9px;
-        border-radius: 50%; background: var(--cat-color, var(--accent));
-      }
-      .layout-process .node-card:hover { transform: translateY(-2px); border-color: var(--cat-color, var(--accent)); box-shadow: none; }
-      .layout-process .node-head { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
-      .layout-process .node-index { flex: 0 0 auto; font-size: 0.68rem; }
-      .layout-process .node-name { font-size: 0.8rem; font-weight: 650; line-height: 1.35; }
-      .layout-process .node-details { display: none; }
-      .layout-process .node-card[title] { cursor: pointer; }
-      .layout-process .flow-connector { stroke: rgba(105, 113, 124, 0.52); stroke-width: 1.25; }
-      @media (max-width: 900px) {
-        .layout-process .flow-grid { column-gap: 24px; }
-        .layout-process .flow-connectors { display: block; }
-      }
-      @media (max-width: 860px) {
-        .layout-process .flow-board { padding: 36px 8px 56px; }
-      }
-    `,
+	window.HandbookViews = window.HandbookViews || {};
+	window.HandbookViews.c = {
+		label: '모아 보기',
+		source: '(' + registerCollectedView.toString() + ')();',
+		rerenderOnResize: true,
+		styles: `
+			.layout-process .flow-menu-toggle { display: none !important; }
+			.layout-process .flow-header, .layout-process .flow-header.is-open {
+				display: block; padding: 24px 0 0; border-top: 1px solid var(--page-border);
+				background: rgba(255,255,255,.88);
+			}
+			.layout-process .board-body { padding-top: 12px; }
+			.journey-filters {
+				display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+				align-items: stretch; gap: 10px; width: 100%; max-width: 1480px; margin: 0 auto; padding: 0 20px;
+			}
+			.journey-filters .flow-header-cell { width: 100%; }
+			.layout-process .flow-grid {
+				display: grid; grid-template-columns: repeat(var(--route-columns), minmax(0,1fr)) !important;
+				gap: 12px; width: 100%; max-width: 1480px; margin: 0 auto; padding: 12px 20px 28px;
+			}
+			.layout-process .flow-grid::before, .layout-process .journey-dot { display: none; }
+			.layout-process .flow-connectors { display: block; z-index: 1; }
+			.layout-process .flow-cell {
+				display: block; grid-column: var(--route-column) !important; grid-row: var(--route-row) !important;
+				min-height: 80px; z-index: 2;
+			}
+			.layout-process .node-card {
+				display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
+				width: 100%; max-width: none; height: 80px; min-height: 80px; padding: 9px 14px 7px 17px;
+				overflow: hidden; border: 1px solid rgba(15,23,42,.1); border-radius: 7px;
+				background: rgba(255,255,255,.95); color: var(--text-primary); text-align: left; font: inherit;
+				box-shadow: 0 3px 10px rgba(22,35,52,.08); cursor: pointer;
+			}
+			.layout-process .node-card::before { width: 4px; background: var(--cat-color, var(--accent)); }
+			.layout-process .node-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(22,35,52,.14); }
+			.layout-process .node-head { display: block; width: 100%; text-align: left; }
+			.layout-process .node-index { display: block; margin-bottom: 5px; color: var(--cat-color, var(--accent)); font-size: .72rem; font-weight: 800; line-height: 1.1; }
+			.layout-process .node-name {
+				display: -webkit-box; overflow: hidden; font-size: .94rem; line-height: 1.35;
+				line-clamp: 2; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+			}
+			.layout-process .node-details { display: none; }
+			.layout-process .node-card.is-muted { cursor: default; filter: grayscale(1); opacity: .38; pointer-events: none; }
+			.layout-process .node-card.is-filter-match {
+				border-color: var(--cat-color, var(--accent));
+				box-shadow: 0 4px 12px color-mix(in srgb, var(--cat-color, var(--accent)) 18%, transparent);
+			}
+			@media (max-width: 900px) {
+				.layout-process .flow-grid { gap: 10px; padding: 20px 20px 30px; }
+				.layout-process .node-card { padding: 10px 12px 8px 15px; }
+			}
+			@media (max-width: 640px) {
+				.layout-process .flow-header { padding: 18px 0 0; }
+				.layout-process .journey-filters { padding-right: 12px; padding-left: 12px; }
+				.layout-process .flow-grid { padding: 16px 12px 24px; gap: 8px; }
+				.layout-process .flow-cell { min-height: 80px; }
+				.layout-process .node-card { height: 80px; min-height: 80px; padding: 9px 12px 7px 15px; }
+				.layout-process .node-name { font-size: .9rem; }
+			}
+		`,
 
-    render: function(context) {
-      const { rows, columns, grid, header, legend, helpers } = context;
-      const count = getColumns();
-      grid.style.setProperty('--process-columns', count);
-      grid.style.gridTemplateColumns = '';
-      grid.style.gridTemplateRows = '';
-      header.innerHTML = '';
-      legend.innerHTML = '<span class="process-area-label">업무 흐름</span>' + columns.map(function(cat) {
-        return '<span class="process-legend-item" style="--cat-color:' + helpers.color(cat) + '"><span class="process-legend-dot"></span>' + helpers.escape(cat) + '</span>';
-      }).join('');
-      grid.innerHTML = rows.map(function(row, index) {
-        const processRow = Math.floor(index / count) + 1;
-        const position = index % count;
-        const processColumn = processRow % 2 === 1 ? position + 1 : count - position;
-        return '<div class="flow-cell" data-cat="' + helpers.escape(helpers.category(row)) + '" data-idx="' + index + '" style="--process-column:' + processColumn + ';--process-row:' + processRow + '">' + helpers.card(row, index) + '</div>';
-      }).join('');
-    },
+		render: function(context) {
+			const { rows, columns, grid, header, legend, helpers } = context;
+			const routeColumns = getRouteColumns();
+			grid.style.setProperty('--route-columns', routeColumns);
+			grid.style.gridTemplateColumns = '';
+			grid.style.gridTemplateRows = '';
+			header.style.gridTemplateColumns = '';
+			legend.innerHTML = '';
+			const filters = columns.map(function(category, index) {
+				const count = rows.filter(function(row) { return helpers.category(row) === category; }).length;
+				return helpers.headerCell(category, count, index);
+			}).join('');
+			header.innerHTML = '<div class="journey-filters">' + filters + '</div>';
+			grid.innerHTML = rows.map(function(row, index) {
+				const category = helpers.category(row);
+				const routeRow = Math.floor(index / routeColumns) + 1;
+				const routePosition = index % routeColumns;
+				const routeColumn = routeRow % 2 === 1 ? routePosition + 1 : routeColumns - routePosition;
+				const name = row.항목명 || '(항목명 없음)';
+				return '<div class="flow-cell" data-cat="' + helpers.escape(category) + '" data-col="' + routeColumn + '" data-idx="' + index + '" style="--cat-color:' + helpers.color(category) + ';--route-column:' + routeColumn + ';--route-row:' + routeRow + '">' +
+					'<button class="node-card is-entering" type="button" onclick="openDetail(' + index + ')" aria-label="' + helpers.escape((index + 1) + '번 ' + name + ' 상세 보기') + '">' +
+					'<span class="node-head"><span class="node-index">' + String(index + 1).padStart(2, '0') + '</span><span class="node-name">' + helpers.escape(name) + '</span></span></button></div>';
+			}).join('');
+		},
 
-    filter: function(context) {
-      context.grid.querySelectorAll('.flow-cell').forEach(function(cell) { cell.classList.remove('hidden'); });
-      context.grid.style.gridTemplateRows = 'repeat(' + Math.max(1, Math.ceil(context.rows.length / getColumns())) + ', minmax(56px, auto))';
-      return context.rows.length;
-    },
+		filter: function(context, activeCategory) {
+			let matchedCount = 0;
+			context.grid.querySelectorAll('.flow-cell').forEach(function(cell) {
+				const matches = !activeCategory || cell.dataset.cat === activeCategory;
+				const card = cell.querySelector('.node-card');
+				cell.classList.remove('hidden');
+				if (card) {
+					card.classList.toggle('is-muted', !!activeCategory && !matches);
+					card.classList.toggle('is-filter-match', !!activeCategory && matches);
+				}
+				if (matches) matchedCount++;
+			});
+			return matchedCount;
+		},
 
-    connector: function(a, b, grid) {
-      const aCenter = a.left + a.width / 2;
-      const bCenter = b.left + b.width / 2;
-      if (Math.abs(aCenter - bCenter) < 4) {
-        const x = aCenter - grid.left;
-        const y1 = a.bottom - grid.top;
-        const y2 = b.top - grid.top;
-        return 'M' + x + ',' + y1 + ' L' + x + ',' + y2;
-      }
-      const movesRight = bCenter > aCenter;
-      const x1 = (movesRight ? a.right : a.left) - grid.left;
-      const y1 = a.top + a.height / 2 - grid.top;
-      const x2 = (movesRight ? b.left : b.right) - grid.left;
-      const y2 = b.top + b.height / 2 - grid.top;
-      const bend = x1 + (x2 - x1) / 2;
-      return 'M' + x1 + ',' + y1 + ' C' + bend + ',' + y1 + ' ' + bend + ',' + y2 + ' ' + x2 + ',' + y2;
-    }
-  };
+		connector: function(a, b, grid) {
+			const sameRow = Math.abs(a.top - b.top) < 4;
+			if (sameRow) {
+				const movesRight = b.left > a.left;
+				const x1 = (movesRight ? a.right : a.left) - grid.left;
+				const x2 = (movesRight ? b.left : b.right) - grid.left;
+				const y = a.top + a.height / 2 - grid.top;
+				return 'M' + x1 + ',' + y + ' L' + x2 + ',' + y;
+			}
+			const x1 = a.left + a.width / 2 - grid.left;
+			const y1 = a.bottom - grid.top;
+			const x2 = b.left + b.width / 2 - grid.left;
+			const y2 = b.top - grid.top;
+			const midY = (y1 + y2) / 2;
+			return Math.abs(x1 - x2) < 4
+				? 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2
+				: 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + midY + ' ' + x2 + ',' + midY + ' ' + x2 + ',' + y2;
+		}
+	};
 })();
+
 </script>
 <script data-view-module="b">
 (function registerCardsView() {
@@ -1371,6 +1437,187 @@
     },
 
     filter: function(context) { return context.rows.length; },
+    connector: function() { return ''; }
+  };
+})();
+</script>
+<script data-view-module="d">
+(function registerProcedureView() {
+  'use strict';
+
+  const categoryIcons = { '분석': '🔍', '설계': '📐', '개발': '💻', '검증': '✅', '운영': '🚀', '계약': '📝', '보안': '🔐' };
+
+  function iconFor(category) {
+    return categoryIcons[category] || '◌';
+  }
+
+  function fieldHtml(label, value, helpers, isLink) {
+    const text = value && String(value).trim();
+    let content = text ? helpers.escape(String(value)) : '-';
+    if (text && isLink) {
+      content = String(value).split('\\').map(function(link) {
+        const trimmed = link.trim();
+        if (!trimmed) return '';
+        return /^https?:\/\//i.test(trimmed)
+          ? '<a href="' + helpers.escape(trimmed) + '" target="_blank" rel="noopener noreferrer">문서 열기</a>'
+          : helpers.escape(trimmed);
+      }).filter(Boolean).join('<br>');
+    }
+    return '<div class="procedure-side-field"><span>' + label + '</span><div>' + content + '</div></div>';
+  }
+
+  function closeDetail() {
+    const panel = document.getElementById('procedureDetailContent');
+    if (!panel) return;
+    document.querySelectorAll('.procedure-card.is-inspected').forEach(function(card) {
+      card.classList.remove('is-inspected');
+    });
+    panel.innerHTML = '<p class="procedure-side-empty">카드를 선택하면 업무 기준과 관련 문서를 이 영역에서 확인할 수 있습니다.</p>';
+  }
+
+  function registerDetailActions() {
+    window.openProcedureDetail = function(index) {
+      const context = window.HandbookProcedureContext;
+      const row = context && context.rows[index];
+      const panel = document.getElementById('procedureDetailContent');
+      if (!row || !panel) return;
+      const helpers = context.helpers;
+      const category = helpers.category(row);
+      document.querySelectorAll('.procedure-card').forEach(function(card) {
+        card.classList.toggle('is-inspected', Number(card.dataset.idx) === index);
+      });
+      panel.innerHTML = '<button type="button" class="procedure-side-close" onclick="closeProcedureDetail()" aria-label="상세 닫기">&times;</button>' +
+        '<div class="procedure-side-kicker">STEP ' + String(index + 1).padStart(2, '0') + ' · ' + helpers.escape(category) + '</div>' +
+        '<h3 class="procedure-side-title">' + helpers.escape(row.항목명 || '(항목명 없음)') + '</h3>' +
+        '<div class="procedure-side-fields">' +
+          fieldHtml('주관팀', row.주관팀, helpers) +
+          fieldHtml('개정일자', row.개정일자, helpers) +
+          fieldHtml('문서명', row.문서명, helpers) +
+          fieldHtml('문서내용', row.문서내용, helpers) +
+          fieldHtml('문서링크', row.문서링크, helpers, true) +
+        '</div>';
+    };
+    window.closeProcedureDetail = closeDetail;
+  }
+
+  window.HandbookViews = window.HandbookViews || {};
+  window.HandbookProcedureContext = null;
+  registerDetailActions();
+  window.HandbookViews.d = {
+    label: '한번에 보기',
+    source: '(' + registerProcedureView.toString() + ')();',
+    styles: `
+      .layout-procedure .board-body { padding: 20px; background: #e8edf1; }
+      .layout-procedure .flow-header { display: flex !important; flex-wrap: wrap; gap: 6px; padding: 0 0 14px; border-top: 0; }
+      .layout-procedure .flow-header-cell { min-height: 0; padding: 7px 10px; border: 1px solid #d7dfe5; border-radius: 4px; background: #fff; box-shadow: none; }
+      .layout-procedure .flow-header-cell::after, .layout-procedure .flow-header-cell::before { display: none; }
+      .layout-procedure .flow-header-cell:hover { transform: none; border-color: var(--cat-color); box-shadow: none; }
+      .layout-procedure .flow-header-cell.active { min-height: 0; padding: 7px 10px; border-color: var(--cat-color); background: var(--cat-color); box-shadow: none; }
+      .layout-procedure .flow-header-cell.active .cat-name, .layout-procedure .flow-header-cell.active .cat-count { color: #fff; }
+      .layout-procedure .flow-header-cell.active .cat-count { background: transparent; }
+      .layout-procedure .flow-board { display: grid; grid-template-columns: minmax(130px, 2fr) minmax(0, 6fr) minmax(190px, 6fr); align-items: start; gap: 16px; min-height: 100%; }
+      .layout-procedure .procedure-aside, .layout-procedure .procedure-side-detail { display: block; min-width: 0; padding: 20px 16px; border: 1px solid #d7dfe5; background: #f8fafb; }
+      .layout-procedure .procedure-aside { position: sticky; top: 0; }
+      .layout-procedure .procedure-count { display: grid; gap: 3px; padding-bottom: 16px; border-bottom: 1px solid #d7dfe5; }
+      .layout-procedure .procedure-count span, .layout-procedure .procedure-count small, .layout-procedure .procedure-status-label { color: #6d7d89; font-size: .66rem; font-weight: 800; }
+      .layout-procedure .procedure-count strong { color: #17324d; font: 800 2.1rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .layout-procedure .procedure-status { margin-top: 18px; }
+      .layout-procedure .procedure-status p { margin-top: 7px; color: #17324d; font-size: .78rem; font-weight: 700; line-height: 1.45; }
+      .layout-procedure .flow-grid { display: block; min-width: 0; width: 100%; max-width: none; margin: 0; padding: 0 16px; border-right: 1px solid #d7dfe5; border-left: 1px solid #d7dfe5; }
+      .layout-procedure .flow-connectors { display: none; }
+      .layout-procedure .procedure-step { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 10px; min-height: 72px; }
+      .layout-procedure .procedure-marker { position: relative; display: flex; justify-content: center; z-index: 1; }
+      .layout-procedure .procedure-marker::after { position: absolute; top: 34px; bottom: 0; width: 2px; background: #8ea3af; content: ''; }
+      .layout-procedure .procedure-step:last-child .procedure-marker::after { display: none; }
+      .layout-procedure .procedure-number { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 2px solid var(--cat-color); border-radius: 50%; background: #fff; color: #17324d; font: 800 .68rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .layout-procedure .procedure-card { position: relative; min-width: 0; margin-bottom: 6px; padding: 11px 12px; border: 1px solid #d7dfe5; border-left: 5px solid var(--cat-color); border-radius: 4px; background: #fff; box-shadow: 0 3px 8px rgba(24,48,70,.06); color: var(--text-primary); cursor: pointer; text-align: left; transition: transform .18s ease, box-shadow .18s ease; }
+      .layout-procedure .procedure-card::before { display: none; }
+      .layout-procedure .procedure-card:hover { transform: translateX(3px); box-shadow: 0 8px 16px rgba(24,48,70,.12); }
+      .layout-procedure .procedure-card.is-inspected { border-color: var(--cat-color); box-shadow: 0 6px 16px color-mix(in srgb, var(--cat-color) 18%, transparent); }
+      .layout-procedure .procedure-category { color: var(--cat-color); font-size: .68rem; }
+      .layout-procedure .procedure-title-row { display: flex; align-items: baseline; gap: 8px; min-width: 0; margin-top: 4px; }
+      .layout-procedure .procedure-card .node-name { display: block; min-width: 0; overflow: hidden; margin: 0; font-size: .9rem; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+      .layout-procedure .procedure-detail { flex: 0 0 auto; margin-left: auto; color: #6d7d89; font-size: .68rem; white-space: nowrap; }
+      .layout-procedure .procedure-side-detail { position: sticky; top: 0; min-height: 260px; border-top: 4px solid #17324d; }
+      .layout-procedure .procedure-detail-content { position: relative; padding-top: 14px; }
+      .layout-procedure .procedure-side-empty { color: #6d7d89; font-size: .8rem; line-height: 1.6; }
+      .layout-procedure .procedure-side-kicker { color: #6d7d89; font: 800 .66rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .layout-procedure .procedure-side-title { margin: 8px 24px 16px 0; color: #17324d; font-size: 1rem; line-height: 1.4; }
+      .layout-procedure .procedure-side-close { position: absolute; top: -4px; right: -4px; width: 28px; height: 28px; border: 0; background: transparent; color: #6d7d89; font-size: 1.25rem; cursor: pointer; }
+      .layout-procedure .procedure-side-fields { display: grid; gap: 10px; }
+      .layout-procedure .procedure-side-field { display: grid; gap: 4px; padding-top: 10px; border-top: 1px solid #dfe6ea; }
+      .layout-procedure .procedure-side-field:first-child { padding-top: 0; border-top: 0; }
+      .layout-procedure .procedure-side-field span { color: #6d7d89; font-size: .65rem; font-weight: 800; }
+      .layout-procedure .procedure-side-field div { color: #334b5d; font-size: .76rem; line-height: 1.55; overflow-wrap: anywhere; }
+      .layout-procedure .procedure-side-field a { color: #1264a3; font-weight: 700; }
+      .layout-procedure #processLegend, .layout-procedure #detailScreen { display: none !important; }
+      @media (max-width: 640px) {
+        .layout-procedure .board-body { padding: 12px; overflow-y: auto; }
+        .layout-procedure .flow-board { display: flex; flex-direction: column; gap: 12px; }
+        .layout-procedure .procedure-aside { position: static; width: 100%; padding: 14px; }
+        .layout-procedure .procedure-count { display: flex; align-items: baseline; gap: 8px; padding-bottom: 10px; }
+        .layout-procedure .procedure-count strong { font-size: 1.5rem; }
+        .layout-procedure .procedure-status { margin-top: 10px; }
+        .layout-procedure .procedure-step { grid-template-columns: 34px minmax(0, 1fr); gap: 8px; }
+        .layout-procedure .procedure-number { width: 30px; height: 30px; }
+        .layout-procedure .procedure-marker::after { top: 30px; }
+        .layout-procedure .procedure-card .node-name { white-space: normal; }
+        .layout-procedure .procedure-detail { display: none; }
+        .layout-procedure .procedure-side-detail { width: 100%; padding: 16px; }
+      }
+    `,
+
+    render: function(context) {
+      const { rows, columns, grid, header, helpers } = context;
+      const aside = document.getElementById('procedureAside');
+      const detail = document.getElementById('procedureDetailContent');
+      const count = document.getElementById('procedureCount');
+      const status = document.getElementById('filterStatus');
+      const detailAside = document.getElementById('procedureSideDetail');
+      window.HandbookProcedureContext = context;
+      if (aside) aside.hidden = false;
+      if (detailAside) detailAside.hidden = false;
+      if (detail) detail.innerHTML = '<p class="procedure-side-empty">카드를 선택하면 업무 기준과 관련 문서를 이 영역에서 확인할 수 있습니다.</p>';
+      if (count) count.textContent = String(rows.length).padStart(2, '0');
+      if (status) status.textContent = '전체 ' + rows.length + '개 절차 표시 중';
+      header.innerHTML = columns.map(function(category, index) {
+        const total = rows.filter(function(row) { return helpers.category(row) === category; }).length;
+        return helpers.headerCell(category, total, index);
+      }).join('');
+      header.classList.remove('is-parallel');
+      header.style.gridTemplateColumns = '';
+      grid.classList.remove('parallel-flow', 'is-filter-active');
+      grid.style.gridTemplateColumns = '';
+      grid.style.gridTemplateRows = '';
+      grid.innerHTML = rows.map(function(row, index) {
+        const category = helpers.category(row);
+        const step = String(index + 1).padStart(2, '0');
+        const name = row.항목명 || '(항목명 없음)';
+        return '<article class="flow-cell procedure-step" data-cat="' + helpers.escape(category) + '" data-idx="' + index + '">' +
+          '<div class="procedure-marker"><span class="procedure-number" style="--cat-color:' + helpers.color(category) + '">' + step + '</span></div>' +
+          '<button class="node-card procedure-card" type="button" data-idx="' + index + '" style="--cat-color:' + helpers.color(category) + '" onclick="openProcedureDetail(' + index + ')" aria-label="' + helpers.escape(step + '번 ' + name + ' 상세 보기') + '">' +
+            '<span class="procedure-category">' + iconFor(category) + ' ' + helpers.escape(category) + '</span>' +
+            '<span class="procedure-title-row"><span class="node-name">' + helpers.escape(name) + '</span><span class="procedure-detail">상세 보기</span></span>' +
+          '</button></article>';
+      }).join('');
+    },
+
+    filter: function(context, activeCategory) {
+      let visibleCount = 0;
+      context.grid.querySelectorAll('.procedure-step').forEach(function(step) {
+        const isVisible = !activeCategory || step.dataset.cat === activeCategory;
+        step.classList.toggle('hidden', !isVisible);
+        if (isVisible) visibleCount++;
+      });
+      const count = document.getElementById('procedureCount');
+      const status = document.getElementById('filterStatus');
+      if (count) count.textContent = String(visibleCount).padStart(2, '0');
+      if (status) status.textContent = activeCategory
+        ? activeCategory + ' ' + visibleCount + '개 절차 표시 중'
+        : '전체 ' + visibleCount + '개 절차 표시 중';
+      return visibleCount;
+    },
+
     connector: function() { return ''; }
   };
 })();
@@ -1588,27 +1835,34 @@ function installViewStyles() {
 }
 
 function loadLayoutPreference() {
+  const requestedLayout = new URLSearchParams(window.location.search).get('layout');
+  if (['a', 'b', 'c', 'd'].includes(requestedLayout)) return requestedLayout;
   try {
     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
-    return ['a', 'b', 'c'].includes(savedLayout) ? savedLayout : 'a';
+    return ['a', 'b', 'c', 'd'].includes(savedLayout) ? savedLayout : 'a';
   } catch (e) {
     return 'a';
   }
 }
 
 function setLayout(layout) {
-  currentLayout = ['a', 'b', 'c'].includes(layout) ? layout : 'a';
+  currentLayout = ['a', 'b', 'c', 'd'].includes(layout) ? layout : 'a';
   try { localStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout); } catch (e) {}
 
   const page = document.querySelector('.page');
   const optionA = document.getElementById('layoutOptionA');
   const optionB = document.getElementById('layoutOptionB');
   const optionC = document.getElementById('layoutOptionC');
+  const optionD = document.getElementById('layoutOptionD');
   if (page) page.classList.toggle('layout-process', currentLayout === 'c');
   if (page) page.classList.toggle('layout-cards', currentLayout === 'b');
+  if (page) page.classList.toggle('layout-procedure', currentLayout === 'd');
+  document.getElementById('procedureAside').hidden = currentLayout !== 'd';
+  document.getElementById('procedureSideDetail').hidden = currentLayout !== 'd';
   if (optionA) optionA.setAttribute('aria-checked', String(currentLayout === 'a'));
   if (optionB) optionB.setAttribute('aria-checked', String(currentLayout === 'b'));
   if (optionC) optionC.setAttribute('aria-checked', String(currentLayout === 'c'));
+  if (optionD) optionD.setAttribute('aria-checked', String(currentLayout === 'd'));
   document.getElementById('viewModeLabel').textContent = currentView().label;
   closeLayoutMenu();
 
@@ -1800,7 +2054,7 @@ function closeDetail() {
   document.getElementById('detailScreen').classList.remove('visible');
   document.getElementById('flowHeader').style.display = '';
   document.getElementById('processLegend').style.display = '';
-  document.getElementById('flowBoard').style.display = 'block';
+  document.getElementById('flowBoard').style.display = '';
   requestAnimationFrame(drawConnectors);
   requestAnimationFrame(function() {
     document.getElementById('boardBody').scrollTop = overviewBoardScrollTop;
@@ -1813,7 +2067,7 @@ function returnToFlow() {
   document.getElementById('detailScreen').classList.remove('visible');
   document.getElementById('flowHeader').style.display = '';
   document.getElementById('processLegend').style.display = '';
-  document.getElementById('flowBoard').style.display = 'block';
+  document.getElementById('flowBoard').style.display = '';
   activeCategory = null;
   applyCategoryFilter();
   document.getElementById('boardBody').scrollTop = 0;
@@ -1898,7 +2152,8 @@ function updateFilterSummary(visibleCount, totalCount) {
 
   if (!activeCategory) {
     if (filterStatus) {
-      filterStatus.textContent = '전체 분류를 표시 중';
+      filterStatus.textContent = '';
+      filterStatus.hidden = true;
       filterStatus.classList.add('is-neutral');
     }
     if (boardCopy) boardCopy.textContent = '전체 ' + formatNumber(totalCount) + '개 항목을 입력 순서와 배치대로 보여주고 있습니다. 카드를 눌러 세부 내용을 열 수 있습니다.';
@@ -1907,6 +2162,7 @@ function updateFilterSummary(visibleCount, totalCount) {
 
   if (filterStatus) {
     filterStatus.textContent = activeCategory + ' 분류 ' + formatNumber(visibleCount) + '개 항목 강조 중';
+    filterStatus.hidden = false;
     filterStatus.classList.remove('is-neutral');
   }
   if (boardCopy) boardCopy.textContent = activeCategory + ' 분류의 ' + formatNumber(visibleCount) + '개 항목을 강조 표시 중입니다. 나머지 항목도 순서와 배치를 유지해 함께 표시합니다.';
@@ -1946,7 +2202,7 @@ function renderInner() {
     updateFilterSummary(0, 0);
     return;
   }
-  board.style.display = 'block';
+  board.style.display = '';
   emptyState.style.display = 'none';
 
   const columns = getColumns(rows);

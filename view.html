@@ -41,6 +41,11 @@
                   <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameB">카드로 보기</span><span class="layout-option-description" id="layoutDescriptionB">업무를 빠르게 탐색</span></span>
                   <span class="layout-check" aria-hidden="true">✓</span>
                 </button>
+                <button class="layout-option" id="layoutOptionD" type="button" role="menuitemradio" aria-checked="false" aria-labelledby="layoutNameD" aria-describedby="layoutDescriptionD" tabindex="-1" onclick="selectLayout('d')">
+                  <span class="layout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="M5 4v16m0-13h5m-5 5h5m-5 5h5M13 6h6m-6 6h6m-6 6h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="5" cy="4" r="1.5" fill="currentColor"/><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="5" cy="20" r="1.5" fill="currentColor"/></svg></span>
+                  <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameD">한번에 보기</span><span class="layout-option-description" id="layoutDescriptionD">단계와 상세 정보를 한 화면에</span></span>
+                  <span class="layout-check" aria-hidden="true">✓</span>
+                </button>
               </div>
             </div>
             <button class="btn btn-primary" id="saveButton" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드" hidden>저장</button>
@@ -52,7 +57,14 @@
       <div class="board-body" id="boardBody">
         <div class="process-legend" id="processLegend" aria-label="분류 색상 범례"></div>
         <div class="flow-board" id="flowBoard">
+          <aside class="procedure-aside" id="procedureAside" aria-label="절차 요약" hidden>
+            <div class="procedure-count"><span>WORKFLOW</span><strong id="procedureCount">00</strong><small>STEPS</small></div>
+            <div class="procedure-status"><span class="procedure-status-label">VIEW</span><p id="filterStatus">전체 절차 표시 중</p></div>
+          </aside>
           <div class="flow-grid" id="flowGrid"></div>
+          <aside class="procedure-side-detail" id="procedureSideDetail" hidden>
+            <div class="procedure-detail-content" id="procedureDetailContent" aria-live="polite"><p class="procedure-side-empty">카드를 선택하면 업무 기준과 관련 문서를 이 영역에서 확인할 수 있습니다.</p></div>
+          </aside>
         </div>
         <section class="detail-screen" id="detailScreen" aria-label="프로세스 상세정보"></section>
         <div class="empty-state" id="emptyState" style="display:none;">
@@ -76,6 +88,7 @@
 <script data-view-module="a" src="views/basic.js"></script>
 <script data-view-module="c" src="views/collected.js"></script>
 <script data-view-module="b" src="views/cards.js"></script>
+<script data-view-module="d" src="views/procedure.js"></script>
 <script>
 const STORAGE_KEY = 'it_portal_data_v1';
 const LAYOUT_STORAGE_KEY = 'it_portal_layout_v1';
@@ -290,28 +303,33 @@ function installViewStyles() {
 
 function loadLayoutPreference() {
   const requestedLayout = new URLSearchParams(window.location.search).get('layout');
-  if (['a', 'b', 'c'].includes(requestedLayout)) return requestedLayout;
+  if (['a', 'b', 'c', 'd'].includes(requestedLayout)) return requestedLayout;
   try {
     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
-    return ['a', 'b', 'c'].includes(savedLayout) ? savedLayout : 'a';
+    return ['a', 'b', 'c', 'd'].includes(savedLayout) ? savedLayout : 'a';
   } catch (e) {
     return 'a';
   }
 }
 
 function setLayout(layout) {
-  currentLayout = ['a', 'b', 'c'].includes(layout) ? layout : 'a';
+  currentLayout = ['a', 'b', 'c', 'd'].includes(layout) ? layout : 'a';
   try { localStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout); } catch (e) {}
 
   const page = document.querySelector('.page');
   const optionA = document.getElementById('layoutOptionA');
   const optionB = document.getElementById('layoutOptionB');
   const optionC = document.getElementById('layoutOptionC');
+  const optionD = document.getElementById('layoutOptionD');
   if (page) page.classList.toggle('layout-process', currentLayout === 'c');
   if (page) page.classList.toggle('layout-cards', currentLayout === 'b');
+  if (page) page.classList.toggle('layout-procedure', currentLayout === 'd');
+  document.getElementById('procedureAside').hidden = currentLayout !== 'd';
+  document.getElementById('procedureSideDetail').hidden = currentLayout !== 'd';
   if (optionA) optionA.setAttribute('aria-checked', String(currentLayout === 'a'));
   if (optionB) optionB.setAttribute('aria-checked', String(currentLayout === 'b'));
   if (optionC) optionC.setAttribute('aria-checked', String(currentLayout === 'c'));
+  if (optionD) optionD.setAttribute('aria-checked', String(currentLayout === 'd'));
   document.getElementById('viewModeLabel').textContent = currentView().label;
   closeLayoutMenu();
 
@@ -503,7 +521,7 @@ function closeDetail() {
   document.getElementById('detailScreen').classList.remove('visible');
   document.getElementById('flowHeader').style.display = '';
   document.getElementById('processLegend').style.display = '';
-  document.getElementById('flowBoard').style.display = 'block';
+  document.getElementById('flowBoard').style.display = '';
   requestAnimationFrame(drawConnectors);
   requestAnimationFrame(function() {
     document.getElementById('boardBody').scrollTop = overviewBoardScrollTop;
@@ -516,7 +534,7 @@ function returnToFlow() {
   document.getElementById('detailScreen').classList.remove('visible');
   document.getElementById('flowHeader').style.display = '';
   document.getElementById('processLegend').style.display = '';
-  document.getElementById('flowBoard').style.display = 'block';
+  document.getElementById('flowBoard').style.display = '';
   activeCategory = null;
   applyCategoryFilter();
   document.getElementById('boardBody').scrollTop = 0;
@@ -651,7 +669,7 @@ function renderInner() {
     updateFilterSummary(0, 0);
     return;
   }
-  board.style.display = 'block';
+  board.style.display = '';
   emptyState.style.display = 'none';
 
   const columns = getColumns(rows);
