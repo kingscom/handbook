@@ -6,6 +6,7 @@
 		const width = board && board.clientWidth ? board.clientWidth : window.innerWidth;
 		return width <= 640 ? 1 : (width <= 900 ? 2 : 7);
 	}
+	let pinScrollAfterFilter = false;
 
 	window.HandbookViews = window.HandbookViews || {};
 	window.HandbookViews.c = {
@@ -86,6 +87,9 @@
 				return helpers.headerCell(category, count, index);
 			}).join('');
 			header.innerHTML = '<div class="journey-filters">' + filters + '</div>';
+			header.querySelectorAll('.flow-header-cell').forEach(function(cell) {
+				cell.addEventListener('click', function() { pinScrollAfterFilter = true; }, true);
+			});
 			grid.innerHTML = rows.map(function(row, index) {
 				const category = helpers.category(row);
 				const routeRow = Math.floor(index / routeColumns) + 1;
@@ -99,6 +103,11 @@
 		},
 
 		filter: function(context, activeCategory) {
+			const boardBody = document.getElementById('boardBody');
+			if (boardBody && pinScrollAfterFilter) {
+				pinScrollAfterFilter = false;
+				window.setTimeout(function() { boardBody.scrollTop = 0; }, 0);
+			}
 			const toggle = document.getElementById('flowMenuToggle');
 			if (toggle) {
 				toggle.textContent = activeCategory || '분류 필터';

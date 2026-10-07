@@ -32,6 +32,9 @@
       .flow-grid.parallel-flow .flow-cell { grid-column: var(--parallel-column) !important; grid-row: var(--parallel-row) !important; }
       .flow-grid.is-filter-active { grid-template-rows: repeat(var(--filter-row-count), auto) !important; gap: 12px; }
       .flow-grid.is-filter-active .flow-cell { grid-column: var(--filter-column) !important; grid-row: var(--filter-row) !important; }
+      .page:not(.layout-process):not(.layout-cards):not(.layout-procedure) .flow-grid.is-filter-active .flow-cell { height: 64px; }
+      .page:not(.layout-process):not(.layout-cards):not(.layout-procedure) .flow-grid.is-filter-active .node-card { display: flex; align-items: center; height: 64px; min-height: 64px; }
+      .page:not(.layout-process):not(.layout-cards):not(.layout-procedure) .flow-grid.is-filter-active .node-name { display: -webkit-box; overflow: hidden; line-clamp: 2; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
       .flow-grid.is-filter-active .flow-cell.is-filter-match .node-card { border-color: var(--cat-color, var(--accent)); box-shadow: 0 4px 12px color-mix(in srgb, var(--cat-color, var(--accent)) 18%, transparent); }
       .flow-grid.is-filter-active .flow-connectors { display: none; }
       @media (max-width: 860px) { .flow-grid.is-filter-active .flow-cell { grid-column: 1 !important; grid-row: var(--filter-mobile-row) !important; } }

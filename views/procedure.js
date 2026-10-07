@@ -15,7 +15,7 @@
         const trimmed = link.trim();
         if (!trimmed) return '';
         return /^https?:\/\//i.test(trimmed)
-          ? '<a href="' + helpers.escape(trimmed) + '" target="_blank" rel="noopener noreferrer">문서 열기</a>'
+          ? '<a href="' + helpers.escape(trimmed) + '" target="_blank" rel="noopener noreferrer">' + helpers.escape(trimmed) + '</a>'
           : helpers.escape(trimmed);
       }).filter(Boolean).join('<br>');
     }
@@ -48,7 +48,7 @@
         card.classList.toggle('is-inspected', Number(card.dataset.idx) === index);
       });
       panel.innerHTML = '<button type="button" class="procedure-side-close" onclick="closeProcedureDetail()" aria-label="상세 닫기">&times;</button>' +
-        '<div class="procedure-side-kicker">STEP ' + String(index + 1).padStart(2, '0') + ' · ' + helpers.escape(category) + '</div>' +
+        '<div class="procedure-side-kicker" style="--cat-color:' + helpers.color(category) + '">STEP ' + String(index + 1).padStart(2, '0') + ' · ' + helpers.escape(category) + '</div>' +
         '<h3 class="procedure-side-title">' + helpers.escape(row.항목명 || '(항목명 없음)') + '</h3>' +
         '<div class="procedure-side-fields">' +
           fieldHtml('주관팀', row.주관팀, helpers) +
@@ -84,10 +84,11 @@
       .layout-procedure .procedure-marker { position: relative; display: flex; justify-content: center; z-index: 1; }
       .layout-procedure .procedure-marker::after { position: absolute; top: 34px; bottom: 0; width: 2px; background: #8ea3af; content: ''; }
       .layout-procedure .procedure-step:last-child .procedure-marker::after { display: none; }
-      .layout-procedure .procedure-number { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 2px solid var(--cat-color); border-radius: 50%; background: #fff; color: #17324d; font: 800 .68rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
-      .layout-procedure .procedure-card { position: relative; min-width: 0; margin-bottom: 6px; padding: 11px 12px; border: 1px solid #d7dfe5; border-left: 5px solid var(--cat-color); border-radius: 4px; background: #fff; box-shadow: 0 3px 8px rgba(24,48,70,.06); color: var(--text-primary); cursor: pointer; text-align: left; transition: transform .18s ease, box-shadow .18s ease; }
+      .layout-procedure .procedure-number { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 2px solid var(--cat-color); border-radius: 50%; background: #fff; color: #17324d; font: 800 .68rem/1 -apple-system, BlinkMacSystemFont, sans-serif; }
+      .layout-procedure .procedure-card { position: relative; min-width: 0; margin-bottom: 6px; padding: 11px 12px; border: 1px solid #d7dfe5; border-left: 5px solid var(--cat-color); border-radius: 4px; background: #fff; box-shadow: 0 3px 8px rgba(24,48,70,.06); color: var(--text-primary); cursor: pointer; text-align: left; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
       .layout-procedure .procedure-card::before { display: none; }
-      .layout-procedure .procedure-card:hover { transform: translateX(3px); box-shadow: 0 8px 16px rgba(24,48,70,.12); }
+      .layout-procedure .procedure-card:hover, .layout-procedure .procedure-card:focus-visible { transform: translate(3px, -2px); border-color: var(--cat-color); box-shadow: 0 9px 18px color-mix(in srgb, var(--cat-color) 20%, transparent), 0 2px 5px rgba(24,48,70,.08); outline: 0; }
+      .layout-procedure .procedure-card:active { transform: translate(1px, 1px) scale(.995); box-shadow: inset 0 2px 5px color-mix(in srgb, var(--cat-color) 18%, transparent), 0 1px 3px rgba(24,48,70,.08); }
       .layout-procedure .procedure-card.is-inspected { border-color: var(--cat-color); box-shadow: 0 6px 16px color-mix(in srgb, var(--cat-color) 18%, transparent); }
       .layout-procedure .procedure-card.is-muted { cursor: default; filter: grayscale(1); opacity: .38; pointer-events: none; }
       .layout-procedure .procedure-card.is-filter-match { border-color: var(--cat-color); box-shadow: 0 4px 12px color-mix(in srgb, var(--cat-color) 18%, transparent); }
@@ -98,7 +99,7 @@
       .layout-procedure .procedure-side-detail { position: sticky; top: 0; min-height: 260px; border-top: 4px solid #17324d; }
       .layout-procedure .procedure-detail-content { position: relative; padding-top: 14px; }
       .layout-procedure .procedure-side-empty { color: #6d7d89; font-size: .8rem; line-height: 1.6; }
-      .layout-procedure .procedure-side-kicker { color: #6d7d89; font: 800 .66rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .layout-procedure .procedure-side-kicker { color: var(--cat-color, #6d7d89); font: 800 .66rem/1.4 -apple-system, BlinkMacSystemFont, sans-serif; }
       .layout-procedure .procedure-side-title { margin: 8px 24px 16px 0; color: #17324d; font-size: 1rem; line-height: 1.4; }
       .layout-procedure .procedure-side-close { position: absolute; top: -4px; right: -4px; width: 28px; height: 28px; border: 0; background: transparent; color: #6d7d89; font-size: 1.25rem; cursor: pointer; }
       .layout-procedure .procedure-side-fields { display: grid; gap: 10px; }
