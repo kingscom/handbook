@@ -46,6 +46,11 @@
                   <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameD">한번에 보기</span><span class="layout-option-description" id="layoutDescriptionD">단계와 상세 정보를 한 화면에</span></span>
                   <span class="layout-check" aria-hidden="true">✓</span>
                 </button>
+                <button class="layout-option" id="layoutOptionE" type="button" role="menuitemradio" aria-checked="false" aria-labelledby="layoutNameE" aria-describedby="layoutDescriptionE" tabindex="-1" onclick="selectLayout('e')">
+                  <span class="layout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="M4 5h16M4 10h16M4 15h16M4 20h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="2.5" cy="5" r=".8" fill="currentColor"/><circle cx="2.5" cy="10" r=".8" fill="currentColor"/><circle cx="2.5" cy="15" r=".8" fill="currentColor"/><circle cx="2.5" cy="20" r=".8" fill="currentColor"/></svg></span>
+                  <span class="layout-option-copy"><span class="layout-option-name" id="layoutNameE">자세히 보기</span><span class="layout-option-description" id="layoutDescriptionE">순서와 항목 정보를 목록으로 확인</span></span>
+                  <span class="layout-check" aria-hidden="true">✓</span>
+                </button>
               </div>
             </div>
             <button class="btn btn-primary" id="saveButton" onclick="saveAndReturn()" title="저장 후 최종 HTML로 다운로드" hidden>저장</button>
@@ -89,6 +94,7 @@
 <script data-view-module="c" src="views/collected.js"></script>
 <script data-view-module="b" src="views/cards.js"></script>
 <script data-view-module="d" src="views/procedure.js"></script>
+<script data-view-module="e" src="views/details.js"></script>
 <script>
 const STORAGE_KEY = 'it_portal_data_v1';
 const LAYOUT_STORAGE_KEY = 'it_portal_layout_v1';
@@ -303,17 +309,17 @@ function installViewStyles() {
 
 function loadLayoutPreference() {
   const requestedLayout = new URLSearchParams(window.location.search).get('layout');
-  if (['a', 'b', 'c', 'd'].includes(requestedLayout)) return requestedLayout;
+  if (['a', 'b', 'c', 'd', 'e'].includes(requestedLayout)) return requestedLayout;
   try {
     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
-    return ['a', 'b', 'c', 'd'].includes(savedLayout) ? savedLayout : 'a';
+    return ['a', 'b', 'c', 'd', 'e'].includes(savedLayout) ? savedLayout : 'a';
   } catch (e) {
     return 'a';
   }
 }
 
 function setLayout(layout) {
-  currentLayout = ['a', 'b', 'c', 'd'].includes(layout) ? layout : 'a';
+  currentLayout = ['a', 'b', 'c', 'd', 'e'].includes(layout) ? layout : 'a';
   try { localStorage.setItem(LAYOUT_STORAGE_KEY, currentLayout); } catch (e) {}
 
   const page = document.querySelector('.page');
@@ -321,15 +327,18 @@ function setLayout(layout) {
   const optionB = document.getElementById('layoutOptionB');
   const optionC = document.getElementById('layoutOptionC');
   const optionD = document.getElementById('layoutOptionD');
+  const optionE = document.getElementById('layoutOptionE');
   if (page) page.classList.toggle('layout-process', currentLayout === 'c');
   if (page) page.classList.toggle('layout-cards', currentLayout === 'b');
   if (page) page.classList.toggle('layout-procedure', currentLayout === 'd');
+  if (page) page.classList.toggle('layout-details', currentLayout === 'e');
   document.getElementById('procedureAside').hidden = currentLayout !== 'd';
   document.getElementById('procedureSideDetail').hidden = currentLayout !== 'd';
   if (optionA) optionA.setAttribute('aria-checked', String(currentLayout === 'a'));
   if (optionB) optionB.setAttribute('aria-checked', String(currentLayout === 'b'));
   if (optionC) optionC.setAttribute('aria-checked', String(currentLayout === 'c'));
   if (optionD) optionD.setAttribute('aria-checked', String(currentLayout === 'd'));
+  if (optionE) optionE.setAttribute('aria-checked', String(currentLayout === 'e'));
   document.getElementById('viewModeLabel').textContent = currentView().label;
   closeLayoutMenu();
 
@@ -680,6 +689,8 @@ function renderInner() {
 
   document.querySelector('.page').classList.toggle('layout-process', currentLayout === 'c');
   document.querySelector('.page').classList.toggle('layout-cards', currentLayout === 'b');
+  document.querySelector('.page').classList.toggle('layout-procedure', currentLayout === 'd');
+  document.querySelector('.page').classList.toggle('layout-details', currentLayout === 'e');
   currentView().render(viewContext());
   window.setTimeout(function() {
     flowGrid.querySelectorAll('.node-card.is-entering').forEach(function(card) {

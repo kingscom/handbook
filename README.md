@@ -16,6 +16,7 @@ This repository serves as a lightweight team handbook and documentation workspac
 - `views/basic.js`: 기본 보기 — category columns and filtering; duplicate 순번 values are arranged as parallel branches with step connectors.
 - `views/collected.js`: 모아 보기 — compact process map, responsive placement, and horizontal connectors.
 - `views/cards.js`: 카드로 보기 — 동일 Process 데이터의 검색 가능한 타이포그래피 중심 카드 탐색.
+- `views/details.js`: 자세히 보기 — 순서, 분류, 항목명, 주관팀을 행으로 나열하고 선택 시 상세 화면으로 이동.
 - `scripts/build-view.js`: embeds shared CSS and both view modules into `dist/view.html` for standalone distribution.
 - `DESIGN.md`: product and engineering design overview for the handbook.
 - `.github/copilot-instructions.md`: instructions for GitHub Copilot in this repository.
